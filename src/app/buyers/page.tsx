@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import BuyerCard from "@/components/buyer-card";
 import { api } from "@/lib/api";
 import { Plus } from "lucide-react";
 import Link from "next/link";
@@ -13,64 +13,29 @@ export default function BuyersPage(){
     useEffect(() => {
       api.get("/buyers")
         .then(res => setBuyers(res.data));
-        
+
     }, [])
-    
+
     return (
         <div className="space-y-6">
 
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
 
-                <h1 className="text-4xl font-bold mb-6">
+                <h1 className="text-2xl sm:text-3xl font-bold">
                     Buyers
                 </h1>
                 <Link href={"/buyers/new"}>
-                    <Button className="bg-green-500 text-black font- hover:bg-green-600 rounded-full">
-                        <Plus />
+                    <Button className="bg-green-500 text-black hover:bg-green-600 rounded-full w-full sm:w-auto">
+                        <Plus className="w-4 h-4 mr-2" />
                         Add Buyer
                     </Button>
                 </Link>
             </div>
 
-            <div className="bg-white rounded shadow">
-                <Table className="border border-solid border-black">
-                    <TableHeader className="bg-gray-300">
-                        <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Phone</TableHead>
-                            <TableHead>Address</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-
-                    <TableBody>
-                        {buyers.map((buyer:any)=>(
-                            <TableRow key={buyer.id}>
-                                <TableCell className="font-medium">
-                                    {buyer.name}
-                                </TableCell>
-
-                                <TableCell className="font-medium">
-                                    {buyer.phone}
-                                </TableCell>
-                                <TableCell className="font-medium">
-                                    {buyer.address}
-                                </TableCell>
-
-                                <TableCell className="text-right">
-                                    <Link href={`/buyers/${buyer.id}`}>
-                                        <Button className="bg-blue-600 cursor-pointer hover:bg-blue-700" variant={"outline"} size={"sm"}>
-                                            More info
-                                        </Button>
-                                    </Link>
-                                </TableCell>
-                                
-                            </TableRow>
-                        ))}
-
-                    </TableBody>
-                </Table>
-
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                {buyers.map((buyer:any)=>(
+                    <BuyerCard key={buyer.id} buyer={buyer} />
+                ))}
             </div>
         </div>
     )
