@@ -1,50 +1,55 @@
 "use client"
-import { api } from "@/lib/api";
+import { MetricCard } from "@/components/metric-card";
+import { SalesChart } from "@/components/sales-chart";
+import SalesFilter from "@/components/sales-filter";
+import { useDashboard } from "@/hooks/useDashboard";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import { useEffect, useState } from "react";
+import TopBuyers from "@/components/top-buyers";
 
 
 export default function DashboardPage() {
-    const [summary, setSummary] = useState<any>(null)
+    const [period, setPeriod] = useState<string>("30d")
+    const { data, isLoading, error } = useDashboard(period);
+    const { analytics } = useAnalytics(period);
+    
+    if (isLoading) {
+        return <div>Loading...</div>
+    }
 
+    if (error) {
+        return <div>Error: {error.message}</div>
+    }
 
-    useEffect(() => {
-      api.get("/sales/summary")
-        .then(res => setSummary(res.data));
-
-    }, []);
-
-    if(!summary) return <p>Loading...</p>;
-
+    const { summary, monthly, topBuyers } = data || {};
     return (
         <div className="space-y-8">
             <h1 className="text-2xl font-bold">
-                Welcome!
+                Dashboard
             </h1>
             
-            <h1 className="text-xl font-bold">Dashboard</h1>
+           <SalesFilter period={period} setPeriod={setPeriod} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <MetricCard title="Revenue" value={summary?.totalRevenues || 0} />
+                <MetricCard title="Paid" value={summary?.totalPaid || 0} />
+                <MetricCard title="Debt" value={summary?.totalDebts || 0} />
+            </div>
+            
+            <SalesChart data={ analytics } period={period} />
+            <h2 className="text-xl font-semibold">Monthly Revenue</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 
-            <div className="grid grid-cols-3 gap-6">
+                {monthly?.map((m: any) => (
+                    <div key={m.month} className="bg-white p-4 rounded-xl shadow">
+                    <p className="text-sm text-gray-500">{m.month} Revenues</p>
+                    <p className="text-sm text-gray-500"></p>
+                    <p className="font-bold">${m.revenue}</p>
+                    </div>
+                ))}
+            </div>
 
-                <div className="p-6 bg-white rounded shadow">
-                    <p className="text-sm text-gray-500">Total Sales</p>
-                    <p className="text-2xl font-bold">
-                    {summary.totalSales}
-                    </p>
-                </div>
-
-                <div className="p-6 bg-white rounded shadow">
-                    <p className="text-sm text-gray-500">Revenue</p>
-                    <p className="text-2xl font-bold">
-                    {summary.totalRevenues}
-                    </p>
-                </div>
-
-                <div className="border p-4">
-                    <p className="text-sm text-gray-500">Total Debt</p>
-                    <p className="text-2xl font-bold">
-                    {summary.totalDebts}
-                    </p>
-                </div>
+            <div className="space-y-4">
+                <TopBuyers topBuyers={topBuyers} />
             </div>
         </div>
     );
