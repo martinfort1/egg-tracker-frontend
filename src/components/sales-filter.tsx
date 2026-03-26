@@ -18,7 +18,7 @@ export default function SalesFilter({ period, setPeriod }: any){
                     key={option.value}
                     onClick={() => setPeriod(option.value)}
                     className={`px-3 py-1 rounded-full border transition
-                    ${period === option.value ? "bg-blue-950 text-white scale-105": "hover:bg-gray-700"}
+                    ${period === option.value ? "bg-linear-to-r from-yellow-400 to-orange-500 text-white scale-110": "bg-slate-800/95  hover:bg-gray-700 cursor-pointer"}
                     `}
                     >
                         {option.label}

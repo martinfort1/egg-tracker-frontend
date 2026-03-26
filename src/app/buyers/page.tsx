@@ -17,7 +17,7 @@ export default function BuyersPage(){
     }, [])
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 p-4 md:p-6 bg-linear-to-bl from-orange-500/30 via-yellow-900/20 to-indigo-900/30 rounded-2xl border border-white/10 shadow-xl">
 
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
 
@@ -25,8 +25,8 @@ export default function BuyersPage(){
                     Buyers
                 </h1>
                 <Link href={"/buyers/new"}>
-                    <Button className="bg-green-500 text-black hover:bg-green-600 rounded-full w-full sm:w-auto">
-                        <Plus className="w-4 h-4 mr-2" />
+                    <Button className="bg-linear-to-r from-green-400/80 to-green-600/60 text-indigo-100 hover:bg-green-600 rounded-full w-full sm:w-auto cursor-pointer">
+                        <Plus className="text-indigo-100 w-4 h-4 mr-2" />
                         Add Buyer
                     </Button>
                 </Link>

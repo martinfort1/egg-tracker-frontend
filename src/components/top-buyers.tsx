@@ -1,7 +1,7 @@
 
 export default function TopBuyers ( {topBuyers}: any ) {
     return (
-        <div className="bg-white p-6 rounded-xl shadow">
+        <div className="bg-white p-6 rounded-xl shadow border border-slate-950/90">
             <h2 className="text-xl font-semibold mb-4">
                 Top Buyers
             </h2>
@@ -9,7 +9,7 @@ export default function TopBuyers ( {topBuyers}: any ) {
             <div className="space-y-3">
                 {topBuyers?.map((buyer: any) => (
                 <div
-                    key={buyer.id}
+                    key={buyer.buyerId}
                     className="flex justify-between items-center border-b pb-2"
                 >
                     <span>{buyer.name}</span>

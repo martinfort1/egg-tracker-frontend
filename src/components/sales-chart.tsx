@@ -12,9 +12,9 @@ import {
 export function SalesChart({data, period}: any) {
 
     return(
-        <div className="flex flex-col gap-4 bg-white p-6 rounded-xl shadow">
-            <div className=" flex flex-col items-center text-center gap-2 bg-gray-200">
-                <BarChart2 className="text-blue-900 mt-4"/>
+        <div className="flex flex-col gap-4 bg-white p-6 rounded-xl shadow-2xl">
+            <div className=" flex flex-col items-center text-center gap-2 bg-linear-to-b from-slate-800 to-slate-700  text-white">
+                <BarChart2 className="bg-linear-to-b from-yellow-400 to-orange-500 text-white-500 mt-4"/>
                 <h2 className="mb-4 font-semibold">
                     { period === "7d" || period === "30d" ? "Weekly": "Monthly"} Margins Chart 
                 </h2>

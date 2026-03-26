@@ -35,26 +35,26 @@ export default function PaymentModal ({ sale, onSuccess}: any) {
     return(
         <Dialog>
             <DialogTrigger asChild>
-                <Button className="hover:bg-gray-800 transition active:scale-95" size="sm">
+                <Button className="bg-linear-to-r from-green-500/35 to-green-950/40 hover:bg-gray-800 transition active:scale-95 cursor-pointer" size="sm">
                     Add Payment
                 </Button>
             </DialogTrigger>
 
-            <DialogContent className="rounded-2xl animate-in fade-in zoom-in-95">
+            <DialogContent className="rounded-2xl animate-in fade-in zoom-in-95 border border-white/20 bg-slate-900/90 backdrop-blur-xl text-white">
 
                 <DialogHeader>
-                    <DialogTitle>
+                    <DialogTitle className="text-lg font-bold text-white">
                         Add Payment
                     </DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-4">
 
-                    <div className="text-sm text-gray-500">
-                        Buyer: {sale.buyer.name}
+                    <div className="text-sm text-slate-200">
+                        Buyer: <span className="font-semibold text-white">{sale.buyer.name}</span>
                     </div>
-                    <div>
-                        Debt: {sale.remainingAmount}
+                    <div className="text-sm text-red-400 font-semibold">
+                        Debt: ${sale.remainingAmount}
                     </div>
 
                     <Input
@@ -65,7 +65,7 @@ export default function PaymentModal ({ sale, onSuccess}: any) {
                     onChange={(e) => setAmount(Number(e.target.value))}
                     />
                     <Button 
-                        className="w-full"
+                        className="w-full hover:bg-gray-700 cursor-pointer"
                         onClick={handleSubmit}
                         >
                         Confirm Payment

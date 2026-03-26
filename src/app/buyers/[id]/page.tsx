@@ -25,20 +25,20 @@ export default function BuyerPage(){
     const { buyer, stats, sales } = data;
 
     return (
-        <div className="space-y-8">
-            <div className="bg-white p-6 rounded-xl shadow">
-                <h1 className="text-2xl font-bold">{buyer.name}</h1>
+        <div className="space-y-8 bg-linear-to-br from-slate-900/30 via-slate-900/20 to-slate-900/30 p-4 md:p-6 rounded-2xl border border-white/10 shadow-xl">
+            <div className="bg-linear-to-br from-indigo-900/30 via-violet-900/25 to-slate-900/40 p-6 rounded-2xl border border-white/20 shadow-lg">
+                <h1 className="text-2xl font-bold text-white">{buyer.name}</h1>
 
-                <div className="text-sm font-semibold mt-2 space-y-1">
+                <div className="text-sm font-semibold mt-2 space-y-1 text-indigo-100">
                 <div className="flex items-center gap-2 text-sm sm:text-base">
-                    <Phone className="w-4 h-4" />
-                    <span>{buyer.phone}</span>
+                    <Phone className="w-4 h-4 text-indigo-100" />
+                    <span className="text-white">{buyer.phone}</span>
                 </div>
                 <div className="flex items-start gap-2 text-sm sm:text-base">
-                    <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
-                    <span>{buyer.address}</span>
+                    <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-indigo-100" />
+                    <span className="text-white">{buyer.address}</span>
                 </div>
-                <p className="text-sm text-gray-600">{buyer.notes}</p>
+                <p className="text-sm text-indigo-200">{buyer.notes}</p>
                 </div>
             </div>
 

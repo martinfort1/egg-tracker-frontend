@@ -5,16 +5,16 @@ export function MetricCard({ title, value}: any){
         <motion.div
             initial={{ opacity: 0, y: 20}}
             animate={{ opacity: 1, y: 0}}
-            className="bg-white p-6 rounded-xl shadow"
+            className="bg-linear-to-br from-yellow-600/50 via-violet-600/40 to-green-900/35 border border-white/20 backdrop-blur-xl p-6 rounded-2xl shadow-2xl text-white"
         >
-            <p className="text-sm text-gray-500">
+            <p className="text-xl text-slate-900/90 tracking-wide">
                 {title}
             </p>
             <motion.h2
                 key={value}
                 initial={{ scale: 1.2 }}
                 animate={{ scale: 1 }}
-                className="text-2xl font-bold"
+                className="text-3xl md:text-4xl font-extrabold text-black"
             >
                 ${value}
             </motion.h2>

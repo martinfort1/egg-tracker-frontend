@@ -17,16 +17,16 @@ export default function SalesPage(){
     const { sales, refresh } = useSales(period)
     
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 p-4 md:p-6 bg-linear-to-br from-yellow-500/25 via-slate-500/30 to-yellow-900/30 rounded-2xl border border-slate/40 shadow-2xl">
 
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
 
-                <h1 className="flex justify-center text-2xl sm:text-3xl font-bold">
+                <h1 className="flex justify-center text-2xl sm:text-3xl font-semibold">
                     Sales
                 </h1>
                 <Link href={"/sales/new"}>
-                    <Button className="bg-green-500 text-black hover:bg-green-600 rounded-full w-full sm:w-auto">
-                        <Plus className="w-4 h-4 mr-2" />
+                    <Button className="bg-linear-to-r from-green-400/80 to-green-600/60 text-indigo-100 hover:bg-green-600 rounded-full w-full sm:w-auto">
+                        <Plus className="text-indigo-100 w-4 h-4 mr-1" />
                         Add New Sale
                     </Button>
                 </Link>
