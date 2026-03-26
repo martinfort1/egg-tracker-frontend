@@ -3,7 +3,7 @@ export const saveToken = (token: string) => {
 };
 
 export const getToken = () => {
-    localStorage.getItem("token");
+    return localStorage.getItem("token");
 };
 
 export const logout = () => {

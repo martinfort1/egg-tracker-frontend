@@ -21,7 +21,7 @@ export default function SalesPage(){
 
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
 
-                <h1 className="text-2xl sm:text-3xl font-bold">
+                <h1 className="flex justify-center text-2xl sm:text-3xl font-bold">
                     Sales
                 </h1>
                 <Link href={"/sales/new"}>

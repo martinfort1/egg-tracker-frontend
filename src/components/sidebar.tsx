@@ -14,7 +14,7 @@ export default function Sidebar() {
     useEffect(() => {
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
-            console.log(currentScrollY);
+
             if (currentScrollY < 10) {
                 // Always show hamburger at the top of the page
                 setShowHamburger(true);
