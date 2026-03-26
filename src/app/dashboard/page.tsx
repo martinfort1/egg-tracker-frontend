@@ -6,25 +6,16 @@ import { useDashboard } from "@/hooks/useDashboard";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useEffect, useState } from "react";
 import TopBuyers from "@/components/top-buyers";
-import { getToken } from "@/lib/auth";
-import { useRouter } from "next/navigation";
+import LoadSpin from "@/components/load-spin";
 
 
 export default function DashboardPage() {
-    const router = useRouter();
     const [period, setPeriod] = useState<string>("30d")
     const { data, isLoading, error } = useDashboard(period);
     const { analytics } = useAnalytics(period);
 
-    useEffect(() => {
-        const token = getToken();
-        if (!token) {
-            router.push("/login");
-        }
-    }, [router]);
-
     if (isLoading) {
-        return <div>Loading...</div>
+        return <LoadSpin />
     }
 
     if (error) {

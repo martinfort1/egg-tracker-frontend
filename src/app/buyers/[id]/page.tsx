@@ -1,5 +1,6 @@
 "use client"
 
+import LoadSpin from "@/components/load-spin";
 import SaleCard from "@/components/sale-card";
 import { api } from "@/lib/api";
 import { MapPin, Phone } from "lucide-react";
@@ -19,7 +20,7 @@ export default function BuyerPage(){
         fetchData()
     }, [id]);
 
-    if(!data) return <p>Loading...</p>
+    if(!data) return <LoadSpin /> 
 
     const { buyer, stats, sales } = data;
 

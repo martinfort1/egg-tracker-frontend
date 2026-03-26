@@ -51,7 +51,7 @@ export default function LandingPage() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="mb-6"
         >
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full shadow-2xl mb-4">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-linear-to-br from-yellow-400 to-orange-500 rounded-full shadow-2xl mb-4">
             <Egg className="w-10 h-10 text-white" />
           </div>
         </motion.div>
@@ -61,7 +61,7 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-5xl md:text-7xl font-black mb-6 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent"
+          className="text-5xl md:text-7xl font-black mb-6 bg-linear-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent"
         >
           Egg Tracker
         </motion.h1>
@@ -104,19 +104,20 @@ export default function LandingPage() {
           transition={{ duration: 0.8, delay: 0.8 }}
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
-          <Link
-            href="/dashboard"
-            className="group bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 px-8 py-4 rounded-full font-semibold text-lg shadow-2xl hover:shadow-yellow-500/25 transition-all duration-300 transform hover:scale-105"
-          >
-            Get Started
-            <span className="inline-block ml-2 transform group-hover:translate-x-1 transition-transform">→</span>
-          </Link>
 
           <Link
             href="/register"
             className="bg-white/10 backdrop-blur-sm border-2 border-white/30 hover:bg-white/20 px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover:border-white/50"
           >
             Create Account
+          </Link>
+          <Link
+
+            href="/dashboard"
+            className="group bg-linear-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 px-8 py-4 rounded-full font-semibold text-lg shadow-2xl hover:shadow-yellow-500/25 transition-all duration-300 transform hover:scale-105"
+          >
+            Get Started
+            <span className="inline-block ml-2 transform group-hover:translate-x-1 transition-transform">→</span>
           </Link>
         </motion.div>
 

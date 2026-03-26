@@ -3,7 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Home, Users, BarChart3 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+const navItems = [
+    { href: "/dashboard", label: "Dashboard", icon: Home },
+    { href: "/buyers", label: "Buyers", icon: Users },
+    { href: "/sales", label: "Sales", icon: BarChart3 },
+];
 
 export default function Sidebar() {
     const pathname = usePathname();
@@ -12,21 +19,26 @@ export default function Sidebar() {
     const [lastScrollY, setLastScrollY] = useState(0);
 
     useEffect(() => {
+        let ticking = false;
+
         const handleScroll = () => {
-            const currentScrollY = window.scrollY;
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    const currentScrollY = window.scrollY;
 
-            if (currentScrollY < 10) {
-                // Always show hamburger at the top of the page
-                setShowHamburger(true);
-            } else if (currentScrollY > lastScrollY) {
-                // Scrolling down - hide hamburger
-                setShowHamburger(false);
-            } else {
-                // Scrolling up - show hamburger
-                setShowHamburger(true);
+                    if (currentScrollY < 10) {
+                        setShowHamburger(true);
+                    } else if (currentScrollY > lastScrollY) {
+                        setShowHamburger(false);
+                    } else {
+                        setShowHamburger(true);
+                    }
+
+                    setLastScrollY(currentScrollY);
+                    ticking = false;
+                });
+                ticking = true;
             }
-
-            setLastScrollY(currentScrollY);
         };
 
         window.addEventListener('scroll', handleScroll, { passive: true });
@@ -36,71 +48,67 @@ export default function Sidebar() {
         };
     }, [lastScrollY]);
 
-    const linkClass = (path: string) => 
-        `flex items-center gap-2 px-4 py-2 rounded-lg transition
-    ${
-        pathname === path 
-        ? 'bg-blue-500 text-white shadow font-bold' 
-        : 'text-gray-600 hover:bg-gray-100'
-    }`;
-    
+    const linkClass = (path: string) =>
+        `flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+            pathname === path
+                ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg"
+                : "text-white/80 hover:text-white hover:bg-white/10"
+        }`;
+
     return (
         <>
-            {/* Mobile menu button */}
-            <button
+            {/* Hamburger */}
+            <motion.button
+                initial={false}
+                animate={showHamburger ? { y: 0, opacity: 1 } : { y: -72, opacity: 0 }}
+                transition={{ duration: 0.25 }}
                 onClick={() => setOpen(!open)}
-                className={`md:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg border transition-transform duration-300 ${
-                    showHamburger ? 'translate-y-0' : '-translate-y-full'
-                }`}
+                className="md:hidden fixed top-4 left-4 z-50 p-2 bg-linear-to-b from-slate-900/95 via-slate-900/90 to-slate-900/95 backdrop-blur-sm rounded-xl shadow-xl border border-white/10 text-white"
             >
                 {open ? <X size={24} /> : <Menu size={24} />}
-            </button>
+            </motion.button>
 
-            {/* Overlay for mobile */}
-            {open && (
-                <div
-                    className="md:hidden fixed inset-0 backdrop-blur-sm z-40"
-                    onClick={() => setOpen(false)}
-                />
-            )}
+            <AnimatePresence>
+                {open && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="md:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+                        onClick={() => setOpen(false)}
+                    />
+                )}
+            </AnimatePresence>
 
-            {/* Sidebar */}
-            <div className={`
-                w-64 h-screen border-r p-4 space-y-2 bg-white
-                fixed md:relative z-50 md:z-auto
-                transform ${open ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0
-                transition-transform duration-300 ease-in-out
-            `}>
-                <h1 className="text-3xl font-bold mb-6">Egg Tracker</h1>
+            <motion.aside
+                initial={{ x: -280 }}
+                animate={{ x: 0 }}
+                exit={{ x: -280 }}
+                transition={{ duration: 0.3 }}
+                className={`fixed z-50 top-0 left-0 h-screen w-72 p-6 md:w-64 bg-linear-to-b from-slate-900/95 via-slate-900/90 to-slate-900/95 border-r border-white/10 shadow-xl ${
+                    open ? "" : "-translate-x-full md:translate-x-0"
+                }`}
+            >
+                <div className="mb-8">
+                    <h1 className="text-2xl font-black text-white tracking-tight">Egg Tracker</h1>
+                    <p className="text-xs text-white/60">Your farm assistant</p>
+                </div>
 
-                <Link href={'/dashboard'} className={linkClass("/dashboard")} onClick={() => setOpen(false)}>
-                    Dashboard
-                </Link>
+                <nav className="flex flex-col gap-2">
+                    {navItems.map(({ href, label, icon: Icon }) => (
+                        <Link
+                            key={href}
+                            href={href}
+                            className={linkClass(href)}
+                            onClick={() => setOpen(false)}
+                        >
+                            <Icon className="w-4 h-4" />
+                            {label}
+                        </Link>
+                    ))}
+                </nav>
 
-                <Link href={'/buyers'} className={linkClass("/buyers")} onClick={() => setOpen(false)}>
-                    Buyers
-                </Link>
-
-                <Link href={'/sales'} className={linkClass("/sales")} onClick={() => setOpen(false)}>
-                    Sales
-                </Link>
-
-                {/* <Link href={'/sales'} className={linkClass("/employees")} >
-                    Employees
-                </Link>
-
-                <Link href={'/sales'} className={linkClass("/feed")} >
-                    Feed supply
-                </Link>
-                
-                <Link href={'/sales'} className={linkClass("/egglaying")} >
-                    Egg laying
-                </Link>
-                <Link href={'/sales'} className={linkClass("/carton")} >
-                    Carton packets
-                </Link> */}
-            </div>
+            </motion.aside>
         </>
-    )
-
+    );
 }
