@@ -1,11 +1,14 @@
 "use client"
 
 import LoadSpin from "@/components/load-spin";
+import { MetricCard } from "@/components/metric-card";
 import SaleCard from "@/components/sale-card";
 import { api } from "@/lib/api";
-import { MapPin, Phone } from "lucide-react";
+import { MapPin, Phone, Edit } from "lucide-react";
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function BuyerPage(){
     const { id } = useParams();
@@ -27,7 +30,15 @@ export default function BuyerPage(){
     return (
         <div className="space-y-8 bg-linear-to-br from-slate-900/30 via-slate-900/20 to-slate-900/30 p-4 md:p-6 rounded-2xl border border-white/10 shadow-xl">
             <div className="bg-linear-to-br from-indigo-900/30 via-violet-900/25 to-slate-900/40 p-6 rounded-2xl border border-white/20 shadow-lg">
-                <h1 className="text-2xl font-bold text-white">{buyer.name}</h1>
+                <div className="flex justify-between items-start mb-4">
+                    <h1 className="text-2xl font-bold text-white">{buyer.name}</h1>
+                    <Link href={`/buyers/${id}/edit`}>
+                        <Button className="bg-linear-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 transition active:scale-95 flex items-center gap-2">
+                            <Edit size={16} />
+                            Edit
+                        </Button>
+                    </Link>
+                </div>
 
                 <div className="text-sm font-semibold mt-2 space-y-1 text-indigo-100">
                 <div className="flex items-center gap-2 text-sm sm:text-base">
@@ -42,29 +53,12 @@ export default function BuyerPage(){
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-                <div className="p-6 bg-white rounded-xl shadow">
-                <p className="text-sm text-gray-500">Total Sales</p>
-                <p className="text-xl font-bold">{stats.totalSales}</p>
-                </div>
+                <MetricCard title="Total Spent" value={stats.totalSpent} />
+                <MetricCard title="Total Paid" value={stats.totalPaid} />
+                <MetricCard title="Debt" value={stats.totalDebt} />
 
-                <div className="p-6 bg-white rounded-xl shadow">
-                <p className="text-sm text-gray-500">Total Spent</p>
-                <p className="text-xl font-bold">${stats.totalSpent}</p>
-                </div>
-
-                <div className="p-6 bg-white rounded-xl shadow">
-                <p className="text-sm text-gray-500">Paid</p>
-                <p className="text-xl font-bold">${stats.totalPaid}</p>
-                </div>
-
-                <div className="p-6 bg-white rounded-xl shadow">
-                <p className="text-sm text-gray-500">Debt</p>
-                <p className="text-xl font-bold text-red-600">
-                    ${stats.totalDebt}
-                </p>
-                </div>
             </div>
                 <div className="space-y-4">
                 <h2 className="text-xl font-semibold">

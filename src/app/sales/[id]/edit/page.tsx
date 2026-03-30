@@ -7,19 +7,21 @@ import { saleSchema } from "@/lib/schemas/sales.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation"
-import { useEffect, useEffectEvent, useState } from "react";
+import { useRouter, useParams } from "next/navigation"
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import LoadSpin from "@/components/load-spin";
 
-export default function NewSalePage() {
-
+export default function EditSalePage() {
     const router = useRouter();
-    
+    const params = useParams();
+    const { id } = params;
     const [buyers, setBuyers] = useState<any[]>([])
     const [total, setTotal] = useState(0);
+    const [loading, setLoading] = useState(true);
 
-    const { register, handleSubmit, watch, formState: { errors } } = useForm({
+    const { register, handleSubmit, watch, formState: { errors }, setValue } = useForm({
         resolver: zodResolver(saleSchema),
         defaultValues: {
             Extra: 0,
@@ -36,64 +38,81 @@ export default function NewSalePage() {
         }
     });
 
-    useEffect( () => {
-        const fetchBuyers = async ()  => {
+    useEffect(() => {
+        const fetchData = async () => {
             try {
-                const res = await api.get("/buyers");
-                setBuyers(res.data);
-            } catch(err){
-                console.error(err);
-                toast.error("Fetching buyers failed")
+                // Fetch buyers
+                const buyersRes = await api.get("/buyers");
+                setBuyers(buyersRes.data);
+
+                // Fetch sale data
+                const saleRes = await api.get(`/sales/${id}`);
+                const sale = saleRes.data.sale || saleRes.data;
+
+                // Set form values
+                setValue("buyerId", sale.buyerId || sale.buyer?.id);
+                setValue("Extra", sale.Extra || 0);
+                setValue("N1", sale.N1 || 0);
+                setValue("N2", sale.N2 || 0);
+                setValue("N3", sale.N3 || 0);
+                setValue("N4", sale.N4 || 0);
+                setValue("ExtraPrice", sale.ExtraPrice || 0);
+                setValue("N1Price", sale.N1Price || 0);
+                setValue("N2Price", sale.N2Price || 0);
+                setValue("N3Price", sale.N3Price || 0);
+                setValue("N4Price", sale.N4Price || 0);
+                setValue("amountPaid", sale.amountPaid || 0);
+
+                setLoading(false);
+            } catch (error) {
+                toast.error("Failed to load sale data");
+                router.push("/sales");
             }
         };
 
-        fetchBuyers();
-    }, [])
+        fetchData();
+    }, [id, setValue, router]);
 
-    const values = watch()
+    const values = watch();
 
     useEffect(() => {
-        const totalCalculation = 
+        const totalCalculation =
         values.Extra * values.ExtraPrice +
         values.N1 * values.N1Price +
         values.N2 * values.N2Price +
         values.N3 * values.N3Price +
         values.N4 * values.N4Price;
 
-        setTotal( totalCalculation || 0 );
+        setTotal(totalCalculation || 0);
     }, [values]);
 
-    const onSubmit = async( data: any) => {
-
-        try{
-            await api.post("/sales", data)
-                .then(res => {
-                    data.id = res.data.id;
-                });
-            toast.success('Sale created succesfully')
-            router.push(`/sales/${data.id}`);
-
-        } catch (err){
-            console.error(err)
-            toast.error('Faled to create sale');
+    const onSubmit = async (data: any) => {
+        try {
+            await api.patch(`/sales/${id}`, data);
+            toast.success('Sale updated successfully');
+            router.push(`/sales/${id}`);
+        } catch (err) {
+            console.error(err);
+            toast.error('Failed to update sale');
         }
+    };
 
-    }
+    if (loading) return <LoadSpin />;
 
     return (
         <div className="min-h-screen bg-linear-to-br from-slate-900/50 via-slate-900/30 to-slate-900/50 p-4 md:p-6">
             <div className="w-full max-w-2xl mx-auto space-y-6 bg-linear-to-br from-slate-900/80 via-indigo-900/60 to-slate-900/90 border border-white/20 backdrop-blur-xl p-8 rounded-2xl shadow-2xl">
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl md:text-4xl font-black text-white mb-2">New Sale</h1>
-                    <p className="text-indigo-200">Create a new sale record</p>
+                    <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Edit Sale</h1>
+                    <p className="text-indigo-200">Update sale information</p>
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     {/* Client Selection */}
                     <div className="space-y-2">
                         <label className="text-sm font-semibold text-white">Client</label>
-                        <select 
-                            {...register("buyerId")} 
+                        <select
+                            {...register("buyerId")}
                             className="w-full bg-white/20 border border-white/30 text-white rounded-xl p-3 focus:border-indigo-400 focus:ring-indigo-400/20 focus:outline-none transition [&>option]:bg-slate-900 [&>option]:text-white"
                         >
                             <option value="" className="bg-slate-900 text-white">Select buyer</option>
@@ -122,18 +141,18 @@ export default function NewSalePage() {
                             <h3 className="text-sm font-bold text-white">Extra</h3>
                             <div>
                                 <label className="text-xs font-semibold text-indigo-200 mb-1 block">Quantity</label>
-                                <Input 
-                                    placeholder="0" 
-                                    type="number" 
+                                <Input
+                                    placeholder="0"
+                                    type="number"
                                     {...register("Extra", {valueAsNumber: true})}
                                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                                 />
                             </div>
                             <div>
                                 <label className="text-xs font-semibold text-indigo-200 mb-1 block">Price per Unit</label>
-                                <Input 
-                                    placeholder="0" 
-                                    type="number" 
+                                <Input
+                                    placeholder="0"
+                                    type="number"
                                     {...register("ExtraPrice", {valueAsNumber: true})}
                                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                                 />
@@ -145,18 +164,18 @@ export default function NewSalePage() {
                             <h3 className="text-sm font-bold text-white">N1</h3>
                             <div>
                                 <label className="text-xs font-semibold text-indigo-200 mb-1 block">Quantity</label>
-                                <Input 
-                                    placeholder="0" 
-                                    type="number" 
+                                <Input
+                                    placeholder="0"
+                                    type="number"
                                     {...register("N1", {valueAsNumber: true})}
                                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                                 />
                             </div>
                             <div>
                                 <label className="text-xs font-semibold text-indigo-200 mb-1 block">Price per Unit</label>
-                                <Input 
-                                    placeholder="0" 
-                                    type="number" 
+                                <Input
+                                    placeholder="0"
+                                    type="number"
                                     {...register("N1Price", {valueAsNumber: true})}
                                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                                 />
@@ -168,18 +187,18 @@ export default function NewSalePage() {
                             <h3 className="text-sm font-bold text-white">N2</h3>
                             <div>
                                 <label className="text-xs font-semibold text-indigo-200 mb-1 block">Quantity</label>
-                                <Input 
-                                    placeholder="0" 
-                                    type="number" 
+                                <Input
+                                    placeholder="0"
+                                    type="number"
                                     {...register("N2", {valueAsNumber: true})}
                                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                                 />
                             </div>
                             <div>
                                 <label className="text-xs font-semibold text-indigo-200 mb-1 block">Price per Unit</label>
-                                <Input 
-                                    placeholder="0" 
-                                    type="number" 
+                                <Input
+                                    placeholder="0"
+                                    type="number"
                                     {...register("N2Price", {valueAsNumber: true})}
                                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                                 />
@@ -191,18 +210,18 @@ export default function NewSalePage() {
                             <h3 className="text-sm font-bold text-white">N3</h3>
                             <div>
                                 <label className="text-xs font-semibold text-indigo-200 mb-1 block">Quantity</label>
-                                <Input 
-                                    placeholder="0" 
-                                    type="number" 
+                                <Input
+                                    placeholder="0"
+                                    type="number"
                                     {...register("N3", {valueAsNumber: true})}
                                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                                 />
                             </div>
                             <div>
                                 <label className="text-xs font-semibold text-indigo-200 mb-1 block">Price per Unit</label>
-                                <Input 
-                                    placeholder="0" 
-                                    type="number" 
+                                <Input
+                                    placeholder="0"
+                                    type="number"
                                     {...register("N3Price", {valueAsNumber: true})}
                                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                                 />
@@ -214,18 +233,18 @@ export default function NewSalePage() {
                             <h3 className="text-sm font-bold text-white">N4</h3>
                             <div>
                                 <label className="text-xs font-semibold text-indigo-200 mb-1 block">Quantity</label>
-                                <Input 
-                                    placeholder="0" 
-                                    type="number" 
+                                <Input
+                                    placeholder="0"
+                                    type="number"
                                     {...register("N4", {valueAsNumber: true})}
                                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                                 />
                             </div>
                             <div>
                                 <label className="text-xs font-semibold text-indigo-200 mb-1 block">Price per Unit</label>
-                                <Input 
-                                    placeholder="0" 
-                                    type="number" 
+                                <Input
+                                    placeholder="0"
+                                    type="number"
                                     {...register("N4Price", {valueAsNumber: true})}
                                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                                 />
@@ -262,16 +281,24 @@ export default function NewSalePage() {
                         </div>
                     </div>
 
-                    {/* Submit Button */}
-                    <Button 
-                        type="submit"
-                        className="w-full bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl py-6 text-lg cursor-pointer"
-                    >
-                        Create Sale
-                    </Button>
+                    {/* Submit Buttons */}
+                    <div className="flex gap-3">
+                        <Button
+                            type="button"
+                            onClick={() => router.back()}
+                            className="flex-1 bg-gray-600 text-white hover:bg-gray-700 transition active:scale-95 rounded-xl cursor-pointer"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                            className="flex-1 bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl py-6 text-lg cursor-pointer"
+                        >
+                            Update Sale
+                        </Button>
+                    </div>
                 </form>
             </div>
         </div>
     )
-
 }

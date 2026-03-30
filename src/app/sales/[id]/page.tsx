@@ -4,10 +4,11 @@ import LoadSpin from "@/components/load-spin";
 import { Button } from "@/components/ui/button";
 import PaymentModal from "@/components/payment-modal";
 import { api } from "@/lib/api";
-import { Copy, SendIcon, Trash2 } from "lucide-react";
+import { Copy, Trash2, Edit, Send } from "lucide-react";
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import Link from "next/link";
 
 export default function SalePage(){
     const { id } = useParams();
@@ -123,11 +124,17 @@ Muchas gracias!`;
             
             {/* Header */}
             <div className="bg-linear-to-br from-indigo-900/30 via-violet-900/25 to-slate-900/40 p-6 rounded-2xl border border-white/20 shadow-lg">
-                <div className="grid grid-cols-1 text-center items-start mb-4">
+                <div className="flex justify-between items-start mb-4">
                     <div>
                         <h1 className="text-3xl font-black text-white mb-1">Sale Details</h1>
                         <p className="text-indigo-200 text-sm">ID: {sale.id}</p>
                     </div>
+                    <Link href={`/sales/${id}/edit`}>
+                        <Button className="bg-linear-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 transition active:scale-95 flex items-center gap-2">
+                            <Edit size={16} />
+                            Edit
+                        </Button>
+                    </Link>
                 </div>
                 <div className="grid grid-cols-1 text-center">
                     <p className="text-indigo-100 text-lg font-semibold">Buyer: {buyer.name}</p>
@@ -249,7 +256,7 @@ Muchas gracias!`;
                     size={"sm"}
                     className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 text-white cursor-pointer"
                     >
-                        <SendIcon /> Send WhatsApp
+                        <Send size={18} /> Send WhatsApp
                     </Button>
                     <Button
                         onClick={handleCopyToClipboard}
