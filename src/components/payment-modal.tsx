@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+import { Plus } from "lucide-react";
 
 export default function PaymentModal ({ sale, onSuccess}: any) {
     const [amount, setAmount] = useState<number>(0);
@@ -35,8 +36,8 @@ export default function PaymentModal ({ sale, onSuccess}: any) {
     return(
         <Dialog>
             <DialogTrigger asChild>
-                <Button className="bg-linear-to-r from-green-500/35 to-green-950/40 hover:bg-gray-800 transition active:scale-95 cursor-pointer" size="sm">
-                    Add Payment
+                <Button className="bg-linear-to-r from-green-500/35 to-green-950/40 hover:bg-gray-800 transition active:scale-95 gap-2 cursor-pointer" size="sm">
+                    <Plus size={18} /> Add Payment
                 </Button>
             </DialogTrigger>
 

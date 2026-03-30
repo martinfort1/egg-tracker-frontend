@@ -25,7 +25,7 @@ export default function SalesPage(){
                     Sales
                 </h1>
                 <Link href={"/sales/new"}>
-                    <Button className="bg-linear-to-r from-green-400/80 to-green-600/60 text-indigo-100 hover:bg-green-600 rounded-full w-full sm:w-auto">
+                    <Button className="bg-linear-to-br from-green-400/80 to-green-600/60 text-indigo-100 hover:bg-green-600 rounded-full w-full sm:w-auto">
                         <Plus className="text-indigo-100 w-4 h-4 mr-1" />
                         Add New Sale
                     </Button>
