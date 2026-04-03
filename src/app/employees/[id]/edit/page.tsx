@@ -13,7 +13,6 @@ interface Employee {
     name: string;
     phone: string;
     salary: number;
-    paidThisMonth: boolean;
     amountOwed: number;
 }
 
@@ -30,7 +29,6 @@ export default function EditEmployeePage({ params }: { params: { id: string } })
                 setValue("name", employee.name);
                 setValue("phone", employee.phone);
                 setValue("salary", employee.salary);
-                setValue("paidThisMonth", employee.paidThisMonth);
                 setValue("amountOwed", employee.amountOwed);
             } catch (error) {
                 toast.error("Failed to fetch employee");
@@ -98,18 +96,6 @@ export default function EditEmployeePage({ params }: { params: { id: string } })
                             {...register("amountOwed", { valueAsNumber: true })}
                             className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                         />
-                    </div>
-
-                    <div className="flex items-center space-x-3">
-                        <input
-                            type="checkbox"
-                            id="paidThisMonth"
-                            {...register("paidThisMonth")}
-                            className="w-4 h-4 text-indigo-600 bg-white/20 border-white/30 rounded focus:ring-indigo-500"
-                        />
-                        <label htmlFor="paidThisMonth" className="text-sm font-semibold text-white">
-                            Paid this month
-                        </label>
                     </div>
 
                     <div className="flex gap-3">

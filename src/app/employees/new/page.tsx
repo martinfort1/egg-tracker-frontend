@@ -15,7 +15,6 @@ export default function NewEmployeePage() {
             name: "",
             phone: "",
             salary: 0,
-            paidThisMonth: false,
             amountOwed: 0
         }
     });
@@ -78,18 +77,6 @@ export default function NewEmployeePage() {
                             {...register("amountOwed", { valueAsNumber: true })}
                             className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                         />
-                    </div>
-
-                    <div className="flex items-center space-x-3">
-                        <input
-                            type="checkbox"
-                            id="paidThisMonth"
-                            {...register("paidThisMonth")}
-                            className="w-4 h-4 text-indigo-600 bg-white/20 border-white/30 rounded focus:ring-indigo-500"
-                        />
-                        <label htmlFor="paidThisMonth" className="text-sm font-semibold text-white">
-                            Paid this month
-                        </label>
                     </div>
 
                     <Button

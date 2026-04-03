@@ -14,7 +14,7 @@ const navItems = [
     { href: "/feed-bags", label: "Feed Bags", icon: Package },
     { href: "/cartons", label: "Cartons", icon: Box },
     { href: "/vaccines", label: "Vaccines", icon: Syringe },
-    { href: "/expenses", label: "Extra Expenses", icon: DollarSign },
+    { href: "/expenses", label: "Other Expenses", icon: DollarSign },
     { href: "/eggs", label: "Egg Laying", icon: Egg },
     { href: "/chickens", label: "Chickens", icon: Bird },
 ];

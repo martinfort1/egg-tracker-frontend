@@ -37,7 +37,7 @@ export default function CartonsPage() {
                     Cartons
                 </h1>
                 <Link href="/cartons/new">
-                    <Button className="bg-linear-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 rounded-full w-full sm:w-auto flex items-center gap-2 cursor-pointer">
+                    <Button className="bg-linear-to-br from-green-400/80 to-green-600/60 text-indigo-100 hover:bg-green-600 rounded-full w-full sm:w-auto flex items-center gap-2 cursor-pointer">
                         <Plus size={18} />
                         Add Carton Purchase
                     </Button>
