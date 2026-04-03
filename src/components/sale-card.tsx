@@ -63,7 +63,7 @@ export default function SaleCard({ sale, refresh }: any) {
                     <PaymentModal 
                     className="w-full rounded-2xl shadow-xl hover:bg-gray-600"
                     sale={sale} 
-                    onSucess={refresh} >
+                    onSuccess={refresh} >
                         <span className="w-full block text-center">
                             Add payment
                         </span>

@@ -8,8 +8,9 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Plus } from "lucide-react";
 
-export default function PaymentModal ({ sale, onSuccess}: any) {
+export default function PaymentModal ({ sale, onSuccess, endpoint = 'sales', className, children }: any) {
     const [amount, setAmount] = useState<number>(0);
+    const [open, setOpen] = useState(false);
 
     const handleSubmit = async ()=>{
         if (amount <= 0) {
@@ -19,7 +20,7 @@ export default function PaymentModal ({ sale, onSuccess}: any) {
 
         try {
             await toast.promise(
-                api.patch(`sales/${sale.id}/payment`, { amount }),
+                api.patch(`${endpoint}/${sale.id}/payment`, { amount }),
                 {
                     success: "Payment added",
                     loading: "Adding payment",
@@ -27,6 +28,8 @@ export default function PaymentModal ({ sale, onSuccess}: any) {
                 }
             );
             onSuccess?.();
+            setOpen(false); // Close the dialog after success
+            setAmount(0); // Reset amount
         } catch (err) {
             console.error(err);
             toast.error("Failed to add payment");
@@ -34,11 +37,17 @@ export default function PaymentModal ({ sale, onSuccess}: any) {
     }
 
     return(
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-linear-to-r from-green-500/35 to-green-950/40 hover:bg-gray-800 transition active:scale-95 gap-2 cursor-pointer" size="sm">
-                    <Plus size={18} /> Add Payment
-                </Button>
+                {children ? (
+                    <Button className={'bg-linear-to-r from-green-500/35 to-green-950/40 hover:bg-gray-800 transition active:scale-95 gap-2 cursor-pointer'} size="sm">
+                        {children}
+                    </Button>
+                ) : (
+                    <Button className={'bg-linear-to-r from-green-500/35 to-green-950/40 hover:bg-gray-800 transition active:scale-95 gap-2 cursor-pointer'} size="sm">
+                        <Plus size={18} /> Add Payment
+                    </Button>
+                )}
             </DialogTrigger>
 
             <DialogContent className="rounded-2xl animate-in fade-in zoom-in-95 border border-white/20 bg-slate-900/90 backdrop-blur-xl text-white">
@@ -51,9 +60,15 @@ export default function PaymentModal ({ sale, onSuccess}: any) {
 
                 <div className="space-y-4">
 
-                    <div className="text-sm text-slate-200">
-                        Buyer: <span className="font-semibold text-white">{sale.buyer.name}</span>
-                    </div>
+                    {sale?.buyer?.name ? (
+                        <div className="text-sm text-slate-200">
+                            Buyer: <span className="font-semibold text-white">{sale.buyer.name}</span>
+                        </div>
+                    ) : (
+                        <div className="text-sm text-slate-200">
+                            ID: <span className="font-semibold text-white">{sale.id}</span>
+                        </div>
+                    )}
                     <div className="text-sm text-red-400 font-semibold">
                         Debt: ${sale.remainingAmount}
                     </div>

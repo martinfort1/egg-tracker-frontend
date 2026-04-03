@@ -3,13 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react";
-import { Menu, X, Home, Users, BarChart3 } from "lucide-react";
+import { Menu, X, Home, Users, BarChart3, UserCheck, Package, Box, Syringe, DollarSign, Egg, Bird } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: Home },
     { href: "/buyers", label: "Buyers", icon: Users },
     { href: "/sales", label: "Sales", icon: BarChart3 },
+    { href: "/employees", label: "Employees", icon: UserCheck },
+    { href: "/feed-bags", label: "Feed Bags", icon: Package },
+    { href: "/cartons", label: "Cartons", icon: Box },
+    { href: "/vaccines", label: "Vaccines", icon: Syringe },
+    { href: "/expenses", label: "Extra Expenses", icon: DollarSign },
+    { href: "/eggs", label: "Egg Laying", icon: Egg },
+    { href: "/chickens", label: "Chickens", icon: Bird },
 ];
 
 export default function Sidebar() {
