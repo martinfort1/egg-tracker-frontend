@@ -18,7 +18,7 @@ export default function EmployeeCard({ employee, refresh }: any) {
 
   const paymentInfo = getEmployeePaymentStatus(employee);
   const statusColorMap: any = {
-    'Payment Due': 'bg-orange-100 text-orange-700 border-orange-700',
+    'Payment Due': 'bg-red-100 text-red-700 border-red-700',
     'Partially Paid': 'bg-yellow-100 text-yellow-700 border-yellow-700',
     'Paid': 'bg-green-100 text-green-700 border-green-700',
     'Advanced': 'bg-cyan-100 text-cyan-700 border-cyan-700',
@@ -65,7 +65,7 @@ export default function EmployeeCard({ employee, refresh }: any) {
 
       <div className="grid grid-cols-1 gap-2 pt-2">
         <Link href={`/employees/${employee.id}`}>
-          <Button size="sm" className="w-full">View Details</Button>
+          <Button size="sm" className="w-full  hover:bg-slate-700 cursor-pointer">View Details</Button>
         </Link>
 
         {paymentInfo.owed > 0 && (
@@ -82,7 +82,7 @@ export default function EmployeeCard({ employee, refresh }: any) {
         <Button
           size="sm"
           onClick={handleDelete}
-          className="w-full bg-linear-to-r from-red-500/95 to-red-900/95 text-white hover:bg-red-600"
+          className="w-full bg-linear-to-r from-red-500/95 to-red-900/95 text-white hover:bg-red-400 cursor-pointer"
         >
           Delete
         </Button>

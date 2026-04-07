@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -15,15 +15,16 @@ interface Employee {
     salary: number;
 }
 
-export default function EditEmployeePage({ params }: { params: { id: string } }) {
+export default function EditEmployeePage() {
     const router = useRouter();
+    const { id } = useParams();
 
     const { register, handleSubmit, setValue, formState: { errors } } = useForm<Employee>();
 
     useEffect(() => {
         const fetchEmployee = async () => {
             try {
-                const response = await api.get(`/employees/${params.id}`);
+                const response = await api.get(`/employees/${id}`);
                 const employee = response.data;
                 setValue("name", employee.name);
                 setValue("phone", employee.phone);
@@ -34,13 +35,13 @@ export default function EditEmployeePage({ params }: { params: { id: string } })
         };
 
         fetchEmployee();
-    }, [params.id, setValue]);
+    }, [id, setValue]);
 
     const onSubmit = async (data: Employee) => {
         try {
-            await api.put(`/employees/${params.id}`, data);
+            await api.put(`/employees/${id}`, data);
             toast.success("Employee updated successfully");
-            router.push(`/employees/${params.id}`);
+            router.push(`/employees/${id}`);
         } catch (error) {
             toast.error("Failed to update employee");
         }

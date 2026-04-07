@@ -1,26 +1,31 @@
 export const getEmployeePaymentStatus = (employee: any) => {
-  const now = new Date();
+    const now = new Date();
+    const month = now.getMonth();
+    const year = now.getFullYear();
 
-  const start = new Date(now.getFullYear(), now.getMonth(), 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const currentPeriod = employee.salaryPeriods?.find(
+    (payment: any) => payment.month === month && payment.year === year
+    );
 
-  const paymentsThisMonth = employee.payments?.filter((p: any) => {
-    const d = new Date(p.date);
-    return d >= start && d < end;
-  }) || [];
+    const salary = currentPeriod?.salary ?? employee.salary;
+  
+    const paymentsThisMonth = employee.payments?.filter((p: any) => {
+        const date = new Date(p.date);
+        return date.getMonth() === month && date.getFullYear() === year;
+    }) || [];
 
-  const paid = paymentsThisMonth.reduce(
-    (sum: number, p: any) => sum + p.amount,
-    0
-  );
+    const paid = paymentsThisMonth.reduce(
+        (sum: number, payment: any) => sum + payment.amount,
+        0
+    );
 
-  const owed = employee.salary - paid;
+  const owed = salary - paid;
 
   if (paid === 0) {
     return {
       status: "Payment Due",
-      color: "text-red-400",
-      text: `Owes $${new Intl.NumberFormat("es-AR").format(owed)}`,
+      color: "text-red-600",
+      text: `Owed $${new Intl.NumberFormat("es-AR").format(owed)}`,
       paid,
       owed,
     };
