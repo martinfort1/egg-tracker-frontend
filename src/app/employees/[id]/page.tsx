@@ -4,6 +4,7 @@ import LoadSpin from "@/components/load-spin";
 import PaymentModal from "@/components/payment-modal";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
+import { getEmployeePaymentStatus } from "@/lib/employee-payment-helpers";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -15,6 +16,7 @@ interface Employee {
     salary: number;
     totalPaid: number;
     amountOwed: number;
+    lastPaidDate: string | null;
     payments?: any[];
     createdAt: string;
     updatedAt: string;
@@ -54,6 +56,8 @@ export default function EmployeeDetailPage() {
         }
     };
 
+    const paymentInfo = employee ? getEmployeePaymentStatus(employee) : null;
+
     if (loading) {
         return (
             <div className="min-h-screen bg-linear-to-br from-slate-900/50 via-slate-900/30 to-slate-900/50 p-4 md:p-6 flex items-center justify-center">
@@ -80,7 +84,7 @@ export default function EmployeeDetailPage() {
                             <p className="text-indigo-200">Employee Details</p>
                         </div>
                         <div className="flex gap-3 flex-wrap">
-                            {employee.amountOwed > 0 && (
+                            {(!employee.amountOwed || employee.amountOwed <= 0) && (
                                 <PaymentModal
                                     sale={employee}
                                     endpoint="employees"
@@ -130,7 +134,7 @@ export default function EmployeeDetailPage() {
                                     </div>
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Total Paid</label>
-                                        <p className="text-green-300 font-medium">${employee.totalPaid.toLocaleString()}</p>
+                                        <p className="text-green-300 font-medium">${(employee.totalPaid || 0).toLocaleString()}</p>
                                     </div>
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Amount Owed</label>
@@ -138,6 +142,23 @@ export default function EmployeeDetailPage() {
                                             ${employee.amountOwed.toLocaleString()}
                                         </p>
                                     </div>
+                                    {paymentInfo && (
+                                        <div>
+                                            <label className="text-sm font-semibold text-indigo-200">Payment Status</label>
+                                            <p className={`font-medium ${paymentInfo.color}`}>
+                                                {paymentInfo.status}
+                                            </p>
+                                            <p className="text-sm text-slate-400">{paymentInfo.text}</p>
+                                        </div>
+                                    )}
+                                    {employee.lastPaidDate && (
+                                        <div>
+                                            <label className="text-sm font-semibold text-indigo-200">Last Paid Date</label>
+                                            <p className="text-white font-medium">
+                                                {new Date(employee.lastPaidDate).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

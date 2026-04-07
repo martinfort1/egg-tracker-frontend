@@ -10,6 +10,7 @@ import { Plus } from "lucide-react";
 
 export default function PaymentModal ({ sale, onSuccess, endpoint = 'sales', className, children }: any) {
     const [amount, setAmount] = useState<number>(0);
+    const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
     const [open, setOpen] = useState(false);
 
     const handleSubmit = async ()=>{
@@ -20,7 +21,7 @@ export default function PaymentModal ({ sale, onSuccess, endpoint = 'sales', cla
 
         try {
             await toast.promise(
-                api.patch(`${endpoint}/${sale.id}/payment`, { amount }),
+                api.patch(`${endpoint}/${sale.id}/payment`, { amount, date }),
                 {
                     success: "Payment added",
                     loading: "Adding payment",
@@ -30,6 +31,7 @@ export default function PaymentModal ({ sale, onSuccess, endpoint = 'sales', cla
             onSuccess?.();
             setOpen(false); // Close the dialog after success
             setAmount(0); // Reset amount
+            setDate(new Date().toISOString().split('T')[0]); // Reset date
         } catch (err) {
             console.error(err);
             toast.error("Failed to add payment");
@@ -70,7 +72,9 @@ export default function PaymentModal ({ sale, onSuccess, endpoint = 'sales', cla
                         </div>
                     )}
                     <div className="text-sm text-red-400 font-semibold">
-                        Debt: ${sale.remainingAmount}
+                        {
+                         (sale.remainingAmount > 0) ? `Debt: $${sale.remainingAmount}` : 'Add payment amount'
+                        }    
                     </div>
 
                     <Input
@@ -79,6 +83,12 @@ export default function PaymentModal ({ sale, onSuccess, endpoint = 'sales', cla
                     placeholder="Enter amount"
                     value={amount}
                     onChange={(e) => setAmount(Number(e.target.value))}
+                    />
+                    <Input
+                    className="text-lg" 
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
                     />
                     <Button 
                         className="w-full hover:bg-gray-700 cursor-pointer"

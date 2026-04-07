@@ -16,7 +16,7 @@ export function MetricCard({ title, value}: any){
                 animate={{ scale: 1 }}
                 className="text-3xl md:text-4xl font-extrabold text-black"
             >
-                ${value}
+                ${new Intl.NumberFormat("es-AR").format(value)}
             </motion.h2>
         </motion.div>
     )

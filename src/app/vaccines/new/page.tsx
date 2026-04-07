@@ -13,10 +13,7 @@ export default function NewVaccinePage() {
     const { register, handleSubmit, formState: { errors } } = useForm({
         defaultValues: {
             name: "",
-            dateApplied: "",
-            nextApplicationDate: "",
-            vaccineCost: 0,
-            labourCost: 0,
+            durationDays: 30,
             notes: "",
         }
     });
@@ -24,9 +21,9 @@ export default function NewVaccinePage() {
     const onSubmit = async (data: any) => {
         try {
             const payload = {
-                ...data,
-                vaccineCost: parseFloat(data.vaccineCost) || 0,
-                labourCost: parseFloat(data.labourCost) || 0,
+                name: data.name,
+                durationDays: parseInt(data.durationDays) || 30,
+                notes: data.notes,
             };
             await api.post("/vaccines", payload);
             toast.success("Vaccine added successfully!");
@@ -53,50 +50,20 @@ export default function NewVaccinePage() {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold text-indigo-200">Date Applied *</label>
+                            <label className="text-sm font-semibold text-indigo-200">Duration Between Applications (Days) *</label>
                             <Input
-                                type="date"
-                                {...register("dateApplied", { required: "Date applied is required" })}
+                                type="number"
+                                placeholder="60"
+                                min="1"
+                                {...register("durationDays", { valueAsNumber: true, required: "Duration is required", min: { value: 1, message: "Duration must be at least 1 day" } })}
                             />
-                            {errors.dateApplied && <p className="text-red-300 text-xs">{String(errors.dateApplied?.message)}</p>}
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="text-sm font-semibold text-indigo-200">Next Application Date</label>
-                            <Input
-                                type="date"
-                                {...register("nextApplicationDate")}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <label className="text-sm font-semibold text-indigo-200">Vaccine Cost *</label>
-                                <Input
-                                    type="number"
-                                    step="0.01"
-                                    placeholder="0.00"
-                                    {...register("vaccineCost", { valueAsNumber: true, required: "Vaccine cost is required" })}
-                                />
-                                {errors.vaccineCost && <p className="text-red-300 text-xs">{String(errors.vaccineCost?.message)}</p>}
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-semibold text-indigo-200">Labour Cost *</label>
-                                <Input
-                                    type="number"
-                                    step="0.01"
-                                    placeholder="0.00"
-                                    {...register("labourCost", { valueAsNumber: true, required: "Labour cost is required" })}
-                                />
-                                {errors.labourCost && <p className="text-red-300 text-xs">{String(errors.labourCost?.message)}</p>}
-                            </div>
+                            {errors.durationDays && <p className="text-red-300 text-xs">{String(errors.durationDays?.message)}</p>}
                         </div>
 
                         <div className="space-y-2">
                             <label className="text-sm font-semibold text-indigo-200">Notes</label>
                             <textarea
-                                placeholder="Add any additional notes..."
+                                placeholder="General notes about this vaccine..."
                                 className="w-full px-4 py-2 bg-slate-900/50 border border-white/20 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500"
                                 rows={4}
                                 {...register("notes")}

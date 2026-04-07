@@ -22,7 +22,7 @@ export default function DashboardPage() {
         return <div>Error: {error.message}</div>
     }
 
-    const { summary, monthly, topBuyers } = data || {};
+    const { summary, monthly, topBuyers, expenses } = data || {};
     return (
         <div className="space-y-8">
             <h1 className="flex justify-center text-2xl font-bold">
@@ -34,6 +34,49 @@ export default function DashboardPage() {
                 <MetricCard title="Revenue" value={summary?.totalRevenues || 0} />
                 <MetricCard title="Paid" value={summary?.totalPaid || 0} />
                 <MetricCard title="Debt" value={summary?.totalDebts || 0} />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <MetricCard title="Employee Payments" value={expenses?.employeePayments || 0} />
+                <MetricCard title="Vaccine Costs" value={expenses?.vaccineCosts || 0} />
+                <MetricCard title="Total Expenses" value={expenses?.totalExpenses || 0} />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white p-6 rounded-xl shadow">
+                    <h3 className="text-lg font-semibold mb-4">Profit Summary</h3>
+                    <div className="space-y-2">
+                        <div className="flex justify-between">
+                            <span>Total Revenue:</span>
+                            <span className="font-medium text-green-600">${(summary?.totalRevenues || 0).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span>Total Expenses:</span>
+                            <span className="font-medium text-red-600">${(expenses?.totalExpenses || 0).toLocaleString()}</span>
+                        </div>
+                        <hr className="my-2" />
+                        <div className="flex justify-between text-lg font-bold">
+                            <span>Net Profit:</span>
+                            <span className={`${((summary?.totalRevenues || 0) - (expenses?.totalExpenses || 0)) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                ${((summary?.totalRevenues || 0) - (expenses?.totalExpenses || 0)).toLocaleString()}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-xl shadow">
+                    <h3 className="text-lg font-semibold mb-4">Expense Breakdown</h3>
+                    <div className="space-y-2">
+                        <div className="flex justify-between">
+                            <span>Employee Salaries:</span>
+                            <span className="font-medium">${(expenses?.employeePayments || 0).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span>Vaccine Costs:</span>
+                            <span className="font-medium">${(expenses?.vaccineCosts || 0).toLocaleString()}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <SalesChart data={ analytics } period={period} />

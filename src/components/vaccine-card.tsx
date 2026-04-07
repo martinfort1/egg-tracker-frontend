@@ -5,11 +5,21 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useVaccineStatus } from "@/hooks/useVaccineStatus";
 
-const statusColor: any = {
-  urgent: "bg-red-100 text-red-700 border-red-700",
-  upcoming: "bg-yellow-100 text-yellow-700 border-yellow-700",
-  completed: "bg-green-100 text-green-700 border-green-700",
+const statusConfig: any = {
+  urgent: {
+    color: "bg-red-100 text-red-700 border-red-700",
+    emoji: "🚨 Overdue",
+  },
+  upcoming: {
+    color: "bg-yellow-100 text-yellow-700 border-yellow-700",
+    emoji: "⏰ Upcoming",
+  },
+  completed: {
+    color: "bg-green-100 text-green-700 border-green-700",
+    emoji: "✅ Covered",
+  },
 };
 
 export default function VaccineCard({ vaccine, refresh }: any) {
@@ -22,18 +32,7 @@ export default function VaccineCard({ vaccine, refresh }: any) {
     refresh?.();
   };
 
-  const getStatus = () => {
-    const now = new Date();
-    if (vaccine.nextApplicationDate) {
-      const nextDate = new Date(vaccine.nextApplicationDate);
-      const daysUntil = Math.ceil((nextDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-      if (daysUntil < 0) return "urgent";
-      if (daysUntil <= 30) return "upcoming";
-    }
-    return "completed";
-  };
-
-  const status = getStatus();
+  const {status, daysLeft, lastApplied, nextDueDate  } = useVaccineStatus(vaccine);
 
   return (
     <motion.div
@@ -44,19 +43,28 @@ export default function VaccineCard({ vaccine, refresh }: any) {
     >
       <div className="flex justify-between items-start">
         <h2 className="text-lg font-bold text-white">{vaccine.name}</h2>
-        <span className={`px-2 py-1 rounded text-sm ${statusColor[status]}`}>
-          {status === "urgent" ? "🚨 Overdue" : status === "upcoming" ? "⏰ Upcoming" : "✅ Covered"}
+        <span className={`px-2 py-1 rounded text-sm ${statusConfig[status].color}`}>
+          {statusConfig[status].emoji}
         </span>
       </div>
 
-      <p className="text-sm text-indigo-100">Applied: {new Date(vaccine.dateApplied).toLocaleDateString()}</p>
+      <p className="text-sm text-indigo-100">
+        {vaccine.applications?.length || 0} application{vaccine.applications?.length !== 1 ? 's' : ''}
+      </p>
 
       <div className="space-y-1 text-indigo-100">
-        <p>Vaccine Cost: <span className="font-medium text-white">${vaccine.vaccineCost}</span></p>
-        <p>Labour Cost: <span className="font-medium text-white">${vaccine.labourCost}</span></p>
-        <p>Total: <span className="font-medium text-green-200">${vaccine.totalCost}</span></p>
-        {vaccine.nextApplicationDate && (
-          <p>Next Due: <span className="font-medium text-orange-200">{new Date(vaccine.nextApplicationDate).toLocaleDateString()}</span></p>
+        <p>Duration: <span className="font-medium text-white">{vaccine.durationDays} days</span></p>
+        <p>Days left: <span className="font-medium text-white">{daysLeft || 0}</span></p>
+        <p>Total Applications: <span className="font-medium text-white">{vaccine.applications?.length || 0}</span></p>
+        {vaccine.applications && vaccine.applications.length > 0 && (
+          <p>Total Cost: <span className="font-medium text-green-200">
+            ${vaccine.applications.reduce((total: number, app: any) => total + app.totalCost, 0).toLocaleString()}
+          </span></p>
+        )}
+        {vaccine.applications && vaccine.applications.length > 0 && (
+          <p>Last Applied: <span className="font-medium text-green-200">
+            {lastApplied ? new Date(lastApplied).toLocaleDateString() : 'N/A'}
+          </span></p>
         )}
       </div>
 

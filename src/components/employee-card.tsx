@@ -1,14 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
+import { getEmployeePaymentStatus } from "@/lib/employee-payment-helpers";
 import { toast } from "sonner";
 import Link from "next/link";
 import PaymentModal from "./payment-modal";
 import { motion } from "framer-motion";
-
-const statusColor: any = {
-  paid: "bg-green-100 text-green-700 border-green-700",
-  pending: "bg-red-100 text-red-700 border-red-700",
-};
 
 export default function EmployeeCard({ employee, refresh }: any) {
   const handleDelete = async () => {
@@ -20,7 +16,13 @@ export default function EmployeeCard({ employee, refresh }: any) {
     refresh?.();
   };
 
-  const status = employee.amountOwed > 0 ? "pending" : "paid";
+  const paymentInfo = getEmployeePaymentStatus(employee);
+  const statusColorMap: any = {
+    'Payment Due': 'bg-orange-100 text-orange-700 border-orange-700',
+    'Partially Paid': 'bg-yellow-100 text-yellow-700 border-yellow-700',
+    'Paid': 'bg-green-100 text-green-700 border-green-700',
+    'Advanced': 'bg-cyan-100 text-cyan-700 border-cyan-700',
+  };
 
   return (
     <motion.div
@@ -31,18 +33,33 @@ export default function EmployeeCard({ employee, refresh }: any) {
     >
       <div className="flex justify-between items-start">
         <h2 className="text-lg font-bold text-white">{employee.name}</h2>
-        <span className={`px-2 py-1 rounded text-sm ${statusColor[status]}`}>
-          {status === "pending" ? "⏳ Owes" : "✅ Settled"}
+        <span className={`px-2 py-1 rounded text-sm ${statusColorMap[paymentInfo.status]}`}>
+          {paymentInfo.status === 'Payment Due'
+            ? '🔴 Due'
+            : paymentInfo.status === 'Partially Paid'
+              ? '🟡 Partial'
+              : paymentInfo.status === 'Paid'
+                ? '🟢 Paid'
+                : '🔵 Advanced'}
         </span>
       </div>
 
       <p className="text-sm text-indigo-100">📞 {employee.phone}</p>
 
       <div className="space-y-1 text-indigo-100">
-        <p>Monthly Salary: <span className="font-medium text-white">${employee.salary}</span></p>
-        <p>Total Paid: <span className="font-medium text-green-200">${employee.totalPaid}</span></p>
-        {employee.amountOwed > 0 && (
-          <p>Amount Owed: <span className="font-medium text-orange-200">${employee.amountOwed}</span></p>
+        <p>Monthly Salary: <span className="font-medium text-white">${new Intl.NumberFormat("es-AR").format(employee.salary)}</span></p>
+        <p>
+          Paid this month:{" "}
+          <span className="text-green-300">
+            ${new Intl.NumberFormat("es-AR").format(paymentInfo.paid)}
+          </span>
+        </p>
+
+        <p className={`text-sm ${paymentInfo.color}`}>{paymentInfo.text}</p>
+        {employee.lastPaidDate && (
+          <p>Last Paid: <span className="font-medium text-blue-200">
+            {new Date(employee.lastPaidDate).toLocaleDateString()}
+          </span></p>
         )}
       </div>
 
@@ -51,7 +68,7 @@ export default function EmployeeCard({ employee, refresh }: any) {
           <Button size="sm" className="w-full">View Details</Button>
         </Link>
 
-        {employee.amountOwed > 0 && (
+        {paymentInfo.owed > 0 && (
           <PaymentModal 
             sale={employee} 
             endpoint="employees" 

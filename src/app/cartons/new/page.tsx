@@ -36,11 +36,9 @@ export default function NewCartonPage() {
     const onSubmit = async (data: any) => {
         try {
             await api.post("/cartons", data);
-            console.log( "Carton purchase created:", data);
             toast.success("Carton purchase created successfully");
             router.push("/cartons");
         } catch (error) {
-            console.log(error)
             toast.error("Failed to create carton purchase");
         }
     };

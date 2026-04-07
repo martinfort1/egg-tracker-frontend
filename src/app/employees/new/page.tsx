@@ -14,8 +14,7 @@ export default function NewEmployeePage() {
         defaultValues: {
             name: "",
             phone: "",
-            salary: 0,
-            amountOwed: 0
+            salary: 0
         }
     });
 
@@ -67,16 +66,6 @@ export default function NewEmployeePage() {
                             className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                         />
                         {errors.salary && <p className="text-red-300 text-xs">{String(errors.salary?.message)}</p>}
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Amount Owed</label>
-                        <Input
-                            type="number"
-                            placeholder="Current amount owed"
-                            {...register("amountOwed", { valueAsNumber: true })}
-                            className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
-                        />
                     </div>
 
                     <Button
