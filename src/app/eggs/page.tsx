@@ -90,11 +90,13 @@ export default function EggLayingPage() {
         try {
             // Find the ID by fetching and matching the date
             const data = await api.get(`/egg-laying`);
-            const item = data.data.find((e: any) => new Date(e.date).toLocaleDateString() === date);
+            const item = data.data.find((e: any) => e.date === date);
             if (item) {
                 await api.delete(`/egg-laying/${item.id}`);
                 toast.success("Entry deleted");
                 fetchEggData();
+            } else {
+                toast.error("Entry not found");
             }
         } catch (error) {
             toast.error("Failed to delete entry");

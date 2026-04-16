@@ -92,7 +92,8 @@ export default function Sidebar() {
                 animate={{ x: 0 }}
                 exit={{ x: -280 }}
                 transition={{ duration: 0.3 }}
-                className={`fixed z-50 top-0 left-0 h-screen w-72 p-6 md:w-64 bg-linear-to-b from-slate-900/95 via-slate-900/90 to-slate-900/95 border-r border-white/10 shadow-xl ${
+                style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' }}
+                className={`fixed z-50 top-0 left-0 bottom-0 w-72 p-6 md:w-64 overflow-y-auto overscroll-contain max-h-screen bg-linear-to-b from-slate-900/95 via-slate-900/90 to-slate-900/95 border-r border-white/10 shadow-xl ${
                     open ? "" : "-translate-x-full md:translate-x-0"
                 }`}
             >
