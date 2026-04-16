@@ -1,10 +1,11 @@
 "use client"
 
 import Link from "next/link";
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useState, useEffect } from "react";
-import { Menu, X, Home, Users, BarChart3, UserCheck, Package, Box, Syringe, DollarSign, Egg, Bird } from "lucide-react";
+import { Menu, X, Home, Users, BarChart3, UserCheck, Package, Box, Syringe, DollarSign, Egg, Bird, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { logout } from "@/lib/auth";
 
 const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: Home },
@@ -55,6 +56,13 @@ export default function Sidebar() {
         };
     }, [lastScrollY]);
 
+    const router = useRouter();
+
+    const handleLogout = () => {
+        logout();
+        router.push('/login');
+    };
+
     const linkClass = (path: string) =>
         `flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
             pathname === path
@@ -97,9 +105,19 @@ export default function Sidebar() {
                     open ? "" : "-translate-x-full md:translate-x-0"
                 }`}
             >
-                <div className="mb-8">
-                    <h1 className="text-2xl font-black text-white tracking-tight">Egg Tracker</h1>
-                    <p className="text-xs text-white/60">Your farm assistant</p>
+                <div className="flex justify-between items-start mb-8">
+                    <div className="flex flex-col">
+                        <h1 className="text-2xl font-black text-white tracking-tight">Egg Tracker</h1>
+                        <p className="text-xs text-white/60">Your farm assistant</p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="flex flex-col items-center gap-1 px-2 py-1 rounded-md text-center text-red-300 hover:text-white hover:bg-red-500/10 transition self-start cursor-pointer"
+                    >
+                        <LogOut className="w-4 h-4" />
+                        Log out
+                    </button>
                 </div>
 
                 <nav className="flex flex-col gap-2">
@@ -115,6 +133,8 @@ export default function Sidebar() {
                         </Link>
                     ))}
                 </nav>
+
+
 
             </motion.aside>
         </>
