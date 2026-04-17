@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { api } from "@/lib/api"
 import { saveToken } from "@/lib/auth"
 import { toast } from "sonner"
+import { useAuth } from "@/contexts/auth-context"
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email is required").email("Please enter a valid email"),
@@ -24,6 +25,7 @@ type LoginFormValues = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
   const router = useRouter()
+  const { refreshAuth } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -43,6 +45,7 @@ export default function LoginPage() {
     try {
       const res = await api.post("/auth/login", data)
       saveToken(res.data.access_token)
+      refreshAuth()
       toast.success("Welcome back! 🎉")
       router.push("/dashboard")
     } catch (error) {

@@ -8,6 +8,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   token: string | null;
+  refreshAuth: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -16,20 +17,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
+  const [authCheckTrigger, setAuthCheckTrigger] = useState(0);
+
+  const checkAuth = () => {
+    const storedToken = getToken();
+    setToken(storedToken);
+    setIsAuthenticated(!!storedToken);
+    setIsLoading(false);
+  };
+
+  const refreshAuth = () => {
+    setAuthCheckTrigger(prev => prev + 1);
+  };
 
   useEffect(() => {
-    const checkAuth = () => {
-      const storedToken = getToken();
-      setToken(storedToken);
-      setIsAuthenticated(!!storedToken);
-      setIsLoading(false);
+    checkAuth();
+  }, [authCheckTrigger]);
+
+  // Also listen for storage changes (works across tabs)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'token') {
+        checkAuth();
+      }
     };
 
-    checkAuth();
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, token }}>
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, token, refreshAuth }}>
       {children}
     </AuthContext.Provider>
   );

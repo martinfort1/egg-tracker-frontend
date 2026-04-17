@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { api } from "@/lib/api"
 import { saveToken } from "@/lib/auth"
 import { toast } from "sonner"
+import { useAuth } from "@/contexts/auth-context"
 
 const registerSchema = z.object({
   name: z.string().min(1, "Name is required").max(50, "Name must be less than 50 characters"),
@@ -25,6 +26,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>
 
 export default function RegisterPage() {
   const router = useRouter()
+  const { refreshAuth } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -44,6 +46,7 @@ export default function RegisterPage() {
     try {
       const res = await api.post("/auth/register", data)
       saveToken(res.data.access_token)
+      refreshAuth()
       toast.success("Account created successfully! 🎉")
       router.push("/dashboard")
     } catch (error) {
