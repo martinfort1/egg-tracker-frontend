@@ -3,17 +3,13 @@
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { AddChickenDeathForm } from "@/components/add-chicken-death-form";
+import { formatUtcDate } from "@/lib/utils";
 
 interface ChickenCardProps {
     chicken: any;
     onDelete: (id: string) => void;
     onRefresh: () => void;
 }
-
-const formatUtcDate = (value: string | Date) => {
-    const date = typeof value === 'string' ? new Date(value) : value;
-    return `${String(date.getUTCDate()).padStart(2, '0')}/${String(date.getUTCMonth() + 1).padStart(2, '0')}/${date.getUTCFullYear()}`;
-};
 
 export function ChickenPurchaseCard({ chicken, onDelete, onRefresh }: ChickenCardProps) {
     const totalDeaths = chicken.deaths.reduce((sum: number, d: any) => sum + d.amount, 0);

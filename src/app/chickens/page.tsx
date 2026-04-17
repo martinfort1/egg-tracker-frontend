@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import LoadSpin from "@/components/load-spin";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { formatUtcDate } from "@/lib/utils";
 import { Bird, Diff } from "lucide-react";
 
 export default function ChickensPage() {
@@ -24,11 +25,6 @@ export default function ChickensPage() {
     const [laying, setLaying] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedChickenId, setSelectedChickenId] = useState<string | null>(null);
-
-    const formatApiDate = (value: string | Date) => {
-        const date = typeof value === 'string' ? new Date(value) : value;
-        return `${String(date.getUTCDate()).padStart(2, '0')}/${String(date.getUTCMonth() + 1).padStart(2, '0')}/${date.getUTCFullYear()}`;
-    };
 
     const fetchData = async () => {
         setIsLoading(true);
@@ -124,7 +120,7 @@ export default function ChickensPage() {
                     <p className="text-xl text-slate-900/90 tracking-wide">Laying Percentage</p>
                     <p className="text-3xl md:text-4xl font-extrabold text-black mt-3">{laying.toFixed(2)}%</p>
                     {layingHistory.length > 0 && (
-                        <p className="text-xs text-slate-700 mt-2">As of {formatApiDate(layingHistory[layingHistory.length - 1].date)}</p>
+                        <p className="text-xs text-slate-700 mt-2">As of {formatUtcDate(layingHistory[layingHistory.length - 1].date)}</p>
                     )}
                 </div>
                 <MetricCard title="Total Invested" value={chickens.reduce((sum, c) => sum + c.totalCost, 0)} />
@@ -164,7 +160,7 @@ export default function ChickensPage() {
                                     <option value="">Select a purchase</option>
                                     {chickens.map((chicken) => (
                                         <option key={chicken.id} value={chicken.id}>
-                                            {formatApiDate(chicken.date)} - {chicken.amount} chickens
+                                            {formatUtcDate(chicken.date)} - {chicken.amount} chickens
                                         </option>
                                     ))}
                                 </select>

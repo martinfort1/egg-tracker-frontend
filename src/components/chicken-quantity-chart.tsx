@@ -2,11 +2,7 @@
 
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { TrendingDown } from "lucide-react";
-
-const formatUtcDate = (value: string | Date) => {
-    const date = typeof value === 'string' ? new Date(value) : value;
-    return `${String(date.getUTCDate()).padStart(2, '0')}/${String(date.getUTCMonth() + 1).padStart(2, '0')}/${date.getUTCFullYear()}`;
-};
+import { formatUtcDate } from "@/lib/utils";
 
 export function ChickenQuantityChart({ data }: { data: any[] }) {
     if (!data || data.length === 0) {
