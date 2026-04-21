@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { formatCurrency, formatUtcDate } from "@/lib/utils";
 
 interface Vaccine {
     id: string;
@@ -139,19 +140,19 @@ export default function VaccineDetailPage() {
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Total Vaccine Cost</label>
                                         <p className="text-white font-medium">
-                                            ${vaccine.applications?.reduce((total: number, app: any) => total + app.vaccineCost, 0).toLocaleString() || 0}
+                                            {formatCurrency(vaccine.applications?.reduce((total: number, app: any) => total + app.vaccineCost, 0) || 0)}
                                         </p>
                                     </div>
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Total Labour Cost</label>
                                         <p className="text-white font-medium">
-                                            ${vaccine.applications?.reduce((total: number, app: any) => total + app.labourCost, 0).toLocaleString() || 0}
+                                            {formatCurrency(vaccine.applications?.reduce((total: number, app: any) => total + app.labourCost, 0) || 0)}
                                         </p>
                                     </div>
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Total Cost</label>
                                         <p className="text-green-300 font-medium">
-                                            ${vaccine.applications?.reduce((total: number, app: any) => total + app.totalCost, 0).toLocaleString() || 0}
+                                            {formatCurrency(vaccine.applications?.reduce((total: number, app: any) => total + app.totalCost, 0) || 0)}
                                         </p>
                                     </div>
                                 </div>
@@ -176,17 +177,17 @@ export default function VaccineDetailPage() {
                                             <div key={application.id} className="bg-white/5 p-3 rounded-lg border border-white/10">
                                                 <div className="flex justify-between items-start">
                                                     <div>
-                                                        <p className="text-white font-medium">Applied: {new Date(application.dateApplied).toLocaleDateString()}</p>
-                                                        <p className="text-green-300 text-sm">Vaccine Cost: ${application.vaccineCost}</p>
-                                                        <p className="text-blue-300 text-sm">Labour Cost: ${application.labourCost}</p>
-                                                        <p className="text-yellow-300 text-sm font-medium">Total: ${application.totalCost}</p>
+                                                        <p className="text-white font-medium">Applied: {formatUtcDate(application.dateApplied)}</p>
+                                                        <p className="text-green-300 text-sm">Vaccine Cost: {formatCurrency(application.vaccineCost)}</p>
+                                                        <p className="text-blue-300 text-sm">Labour Cost: {formatCurrency(application.labourCost)}</p>
+                                                        <p className="text-yellow-300 text-sm font-medium">Total: {formatCurrency(application.totalCost)}</p>
                                                         {application.notes && (
                                                             <p className="text-indigo-300 text-sm">{application.notes}</p>
                                                         )}
                                                     </div>
                                                     {application.nextApplicationDate && (
                                                         <p className="text-orange-300 text-sm">
-                                                            Next: {new Date(application.nextApplicationDate).toLocaleDateString()}
+                                                            Next: {formatUtcDate(application.nextApplicationDate)}
                                                         </p>
                                                     )}
                                                 </div>
@@ -202,13 +203,13 @@ export default function VaccineDetailPage() {
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Created</label>
                                         <p className="text-white font-medium">
-                                            {new Date(vaccine.createdAt).toLocaleDateString()}
+                                            {formatUtcDate(vaccine.createdAt)}
                                         </p>
                                     </div>
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Last Updated</label>
                                         <p className="text-white font-medium">
-                                            {new Date(vaccine.updatedAt).toLocaleDateString()}
+                                            {formatUtcDate(vaccine.updatedAt)}
                                         </p>
                                     </div>
                                 </div>

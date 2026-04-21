@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import PaymentModal from "./payment-modal";
 import { motion } from "framer-motion";
+import { formatCurrency, formatUtcDate } from "@/lib/utils";
 
 const statusColor: any = {
   PAID: "bg-green-100 text-green-700 border-green-700 shadow shadow-green-700",
@@ -29,7 +30,7 @@ export default function FeedBagCard({ feedBag, refresh }: any) {
       className="bg-linear-to-br from-slate-900/50 via-cyan-800/70 to-slate-900/50 border border-white/20 backdrop-blur-xl p-6 md:p-7 rounded-2xl shadow-2xl space-y-4 hover:-translate-y-1 hover:shadow-2xl transition-transform duration-300"
     >
       <div className="flex justify-between items-start">
-        <h2 className="text-lg font-bold text-white">{new Date(feedBag.date).toLocaleDateString()}</h2>
+        <h2 className="text-lg font-bold text-white">{formatUtcDate(feedBag.date)}</h2>
         <span className={`px-2 py-1 rounded text-sm ${statusColor[feedBag.status]}`}>
           {feedBag.status}
         </span>
@@ -39,10 +40,10 @@ export default function FeedBagCard({ feedBag, refresh }: any) {
       <div className="space-y-1 text-indigo-100">
         <h2 className="text-xl font-semibold">Amount: <span className="font-medium text-white">{feedBag.amount} bags</span></h2>
       <p className="text-sm text-indigo-100">Phase {feedBag.phase}</p>
-        <p>Price: <span className="font-medium text-white">${feedBag.price}</span></p>
-        <p>Total: <span className="font-medium text-white">${feedBag.totalAmount}</span></p>
-        <p>Paid: <span className="font-medium text-green-200">${feedBag.amountPaid}</span></p>
-        <p>Remaining: <span className="font-medium text-orange-200">${feedBag.remainingAmount}</span></p>
+        <p>Price: <span className="font-medium text-white">{formatCurrency(feedBag.price)}</span></p>
+        <p>Total: <span className="font-medium text-white">{formatCurrency(feedBag.totalAmount)}</span></p>
+        <p>Paid: <span className="font-medium text-green-200">{formatCurrency(feedBag.amountPaid)}</span></p>
+        <p>Remaining: <span className="font-medium text-orange-200">{formatCurrency(feedBag.remainingAmount)}</span></p>
       </div>
 
       <div className="grid grid-cols-1 gap-2 pt-2">

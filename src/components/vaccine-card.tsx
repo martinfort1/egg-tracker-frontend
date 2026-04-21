@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useVaccineStatus } from "@/hooks/useVaccineStatus";
+import { formatCurrency, formatUtcDate } from "@/lib/utils";
 
 const statusConfig: any = {
   urgent: {
@@ -58,24 +59,24 @@ export default function VaccineCard({ vaccine, refresh }: any) {
         <p>Total Applications: <span className="font-medium text-white">{vaccine.applications?.length || 0}</span></p>
         {vaccine.applications && vaccine.applications.length > 0 && (
           <p>Total Cost: <span className="font-medium text-green-200">
-            ${vaccine.applications.reduce((total: number, app: any) => total + app.totalCost, 0).toLocaleString()}
+            {formatCurrency(vaccine.applications.reduce((total: number, app: any) => total + app.totalCost, 0))}
           </span></p>
         )}
         {vaccine.applications && vaccine.applications.length > 0 && (
           <p>Last Applied: <span className="font-medium text-green-200">
-            {lastApplied ? new Date(lastApplied).toLocaleDateString() : 'N/A'}
+            {lastApplied ? formatUtcDate(lastApplied) : 'N/A'}
           </span></p>
         )}
       </div>
 
       <div className="grid grid-cols-1 gap-2 pt-2">
         <Link href={`/vaccines/${vaccine.id}`}>
-          <Button size="sm" className="w-full">View Details</Button>
+          <Button size="sm" className="w-full hover:scale-105 cursor-pointer">View Details</Button>
         </Link>
         <Button
           size="sm"
           onClick={handleDelete}
-          className="w-full bg-linear-to-r from-red-500/95 to-red-900/95 text-white hover:bg-red-600"
+          className="w-full bg-linear-to-r from-red-500/95 to-red-900/95 text-white hover:bg-red-600 hover:scale-105 cursor-pointer"
         >
           Delete
         </Button>

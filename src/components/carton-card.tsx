@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import PaymentModal from "./payment-modal";
 import { motion } from "framer-motion";
+import { formatCurrency, formatUtcDate } from "@/lib/utils";
 
 const statusColor: any = {
   PAID: "bg-green-100 text-green-700 border-green-700 shadow shadow-green-700",
@@ -35,16 +36,16 @@ export default function CartonCard({ carton, refresh }: any) {
         </span>
       </div>
 
-      <p className="text-sm text-indigo-100">{new Date(carton.date).toLocaleDateString()}</p>
+      <p className="text-sm text-indigo-100">{formatUtcDate(carton.date)}</p>
 
       <div className="space-y-1 text-indigo-100">
-        <p>Price: <span className="font-medium text-white">${carton.price}</span></p>
-        <p>Total: <span className="font-medium text-white">${carton.totalAmount}</span></p>
-        <p>Paid: <span className="font-medium text-green-200">${carton.amountPaid}</span></p>
-        <p>Remaining: <span className="font-medium text-orange-200">${carton.remainingAmount}</span></p>
+        <p>Price: <span className="font-medium text-white">{formatCurrency(carton.price)}</span></p>
+        <p>Total: <span className="font-medium text-white">{formatCurrency(carton.totalAmount)}</span></p>
+        <p>Paid: <span className="font-medium text-green-200">{formatCurrency(carton.amountPaid)}</span></p>
+        <p>Remaining: <span className="font-medium text-orange-200">{formatCurrency(carton.remainingAmount)}</span></p>
       </div>
 
-      <div className="grid grid-cols-1 gap-2 pt-2 ">
+      <div className="grid grid-cols-1 gap-2 pt-2 ">  
         <Link href={`/cartons/${carton.id}`}>
           <Button size="sm" className="w-full hover:bg-slate-600 cursor-pointer">View Details</Button>
         </Link>

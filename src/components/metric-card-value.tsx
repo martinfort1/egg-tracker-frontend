@@ -1,4 +1,5 @@
 import { motion } from "framer-motion"
+import { formatNumber, formatCurrency } from "@/lib/utils"
 
 export function MetricCardValue({ title, value, unit = "", isCurrency = false }: any) {
     return (
@@ -16,7 +17,7 @@ export function MetricCardValue({ title, value, unit = "", isCurrency = false }:
                 animate={{ scale: 1 }}
                 className="text-3xl md:text-4xl font-extrabold text-black"
             >
-                {isCurrency ? '$' : ''}{new Intl.NumberFormat("es-AR").format(value)}{unit}
+                {isCurrency ? formatCurrency(value) : formatNumber(value) + unit}
             </motion.h2>
         </motion.div>
     )

@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import LoadSpin from "@/components/load-spin";
 import PaymentModal from "@/components/payment-modal";
+import { formatCurrency, formatUtcDate } from "@/lib/utils";
 
 interface Carton {
     id: string;
@@ -87,7 +88,7 @@ export default function CartonDetailPage() {
                     <div className="flex items-center justify-between mb-8">
                         <div>
                             <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Carton Purchase Details</h1>
-                            <p className="text-indigo-200">{carton.quantity} cartons • {new Date(carton.date).toLocaleDateString()}</p>
+                            <p className="text-indigo-200">{carton.quantity} cartons • {formatUtcDate(carton.date)}</p>
                         </div>
                         <div className="flex gap-3">
                             {carton.status !== 'PAID' && (
@@ -121,7 +122,7 @@ export default function CartonDetailPage() {
                                 <div className="space-y-3">
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Purchase Date</label>
-                                        <p className="text-white font-medium">{new Date(carton.date).toLocaleDateString()}</p>
+                                        <p className="text-white font-medium">{formatUtcDate(carton.date)}</p>
                                     </div>
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Quantity</label>
@@ -129,7 +130,7 @@ export default function CartonDetailPage() {
                                     </div>
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Price per carton</label>
-                                        <p className="text-white font-medium">${carton.price}</p>
+                                        <p className="text-white font-medium">{formatCurrency(carton.price)}</p>
                                     </div>
                                 </div>
                             </div>
@@ -139,15 +140,15 @@ export default function CartonDetailPage() {
                                 <div className="space-y-3">
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Total Amount</label>
-                                        <p className="text-white font-medium">${carton.totalAmount.toLocaleString()}</p>
+                                        <p className="text-white font-medium">{formatCurrency(carton.totalAmount)}</p>
                                     </div>
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Amount Paid</label>
-                                        <p className="text-green-300 font-medium">${carton.amountPaid.toLocaleString()}</p>
+                                        <p className="text-green-300 font-medium">{formatCurrency(carton.amountPaid)}</p>
                                     </div>
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Remaining Amount</label>
-                                        <p className="text-orange-300 font-medium">${carton.remainingAmount.toLocaleString()}</p>
+                                        <p className="text-orange-300 font-medium">{formatCurrency(carton.remainingAmount)}</p>
                                     </div>
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Payment Status</label>

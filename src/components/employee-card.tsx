@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import PaymentModal from "./payment-modal";
 import { motion } from "framer-motion";
+import { formatCurrency, formatUtcDate } from "@/lib/utils";
 
 export default function EmployeeCard({ employee, refresh }: any) {
   const handleDelete = async () => {
@@ -47,18 +48,18 @@ export default function EmployeeCard({ employee, refresh }: any) {
       <p className="text-sm text-indigo-100">📞 {employee.phone}</p>
 
       <div className="space-y-1 text-indigo-100">
-        <p>Monthly Salary: <span className="font-medium text-white">${new Intl.NumberFormat("es-AR").format(employee.salary)}</span></p>
+        <p>Monthly Salary: <span className="font-medium text-white">{formatCurrency(employee.salary)}</span></p>
         <p>
           Paid this month:{" "}
           <span className="text-green-300">
-            ${new Intl.NumberFormat("es-AR").format(paymentInfo.paid)}
+            {formatCurrency(paymentInfo.paid)}
           </span>
         </p>
 
         <p className={`text-sm ${paymentInfo.color}`}>{paymentInfo.text}</p>
         {employee.lastPaidDate && (
           <p>Last Paid: <span className="font-medium text-blue-200">
-            {new Date(employee.lastPaidDate).toLocaleDateString()}
+            {formatUtcDate(employee.lastPaidDate)}
           </span></p>
         )}
       </div>

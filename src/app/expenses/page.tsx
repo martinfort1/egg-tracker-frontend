@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ShoppingBasket } from "lucide-react";
+import { formatCurrency, formatUtcDate } from "@/lib/utils";
 
 export default function ExpensesPage() {
     const router = useRouter();
@@ -137,14 +138,14 @@ export default function ExpensesPage() {
                                     <p className="text-xs text-slate-700">{expense.category?.name}</p>
                                 </div>
                                 <span className="text-xs text-slate-800">
-                                    {new Date(expense.date).toLocaleDateString()}
+                                    {formatUtcDate(expense.date)}
                                 </span>
                             </div>
 
                             <div className="space-y-1 text-sm text-slate-900 mb-3">
                                 <p>Quantity: {expense.quantity}</p>
-                                <p>Price: ${expense.price.toLocaleString()}</p>
-                                <p className="text-green-500 font-semibold">Total: ${expense.totalAmount.toLocaleString()}</p>
+                                <p>Price: {formatCurrency(expense.price)}</p>
+                                <p className="text-green-700 font-extrabold">Total: {formatCurrency(expense.totalAmount)}</p>
                                 {expense.description && (
                                     <p className="text-xs text-slate-700 italic">{expense.description}</p>
                                 )}
@@ -153,7 +154,7 @@ export default function ExpensesPage() {
                             <div className="flex gap-2">
                                 <Button
                                     onClick={() => handleDelete(expense.id)}
-                                    className="flex-1 bg-red-600 hover:bg-red-800 text-red-300 text-xs h-8 hover:scale-105 cursor-pointer"
+                                    className="flex-1 bg-red-600 hover:bg-red-800 text-white text-xs h-8 hover:scale-105 cursor-pointer"
                                 >
                                     Delete
                                 </Button>

@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { InboxIcon, Layers } from "lucide-react";
+import { formatUtcDate } from "@/lib/utils";
 
 export default function EggLayingPage() {
     const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -166,21 +167,27 @@ return (
 
                         const dateStr = formatDate(date);
                         const hasData = eggData[dateStr];
+                        const today = isToday(date);
+
+                        let bgClass = '';
+                        if (today) {
+                            bgClass = 'bg-linear-to-br from-orange-500/90 to-yellow-500/90';
+                        } else if (hasData) {
+                            bgClass = 'bg-linear-to-bl from-green-500 via-green-700 to-green-500 text-white hover:bg-green-700';
+                        } else {
+                            bgClass = 'bg-white/10 text-slate-300 hover:bg-white/20 border-orange-500/35 border-2';
+                        }
+
+                        let textClass = hasData ? 'text-slate-800 font-semibold underline' : (today ? 'text-slate-800 font-semibold' : 'text-slate-300');
 
                         return (
                             <Dialog key={index} open={open && editingDate === formatDate(date)} onOpenChange={setOpen}>
                                 <DialogTrigger asChild>
                                     <button
                                         onClick={() => openEditDialog(date)}
-                                        className={`p-2 rounded text-sm font-medium transition ${
-                                            hasData
-                                                ? 'bg-green-600 text-white hover:bg-green-700'
-                                                : 'bg-white/10 text-slate-300 hover:bg-white/20 border-orange-500/35 border-2'
-                                        }
-                                        ${isToday(date) ? ' bg-linear-to-br from-orange-500/90 to-yellow-500/90' : ''}        
-                                        `}
+                                        className={`p-2 rounded text-sm font-medium transition cursor-pointer ${bgClass}`}
                                     >
-                                        <div>{date.getDate()}</div>
+                                        <div className={hasData ? 'text-slate-800 font-semibold underline' : (today ? 'text-slate-800 font-semibold' : 'text-slate-300')}>{date.getDate()}</div>
                                         {hasData && (
                                             <div className="text-xs mt-3">
                                                 <Layers className="w-4 h-4 inline md:mr-1 text-yellow-500"/> {hasData.boxes}
@@ -195,7 +202,7 @@ return (
                                     <DialogContent className="bg-slate-900 border border-white/20">
                                         <DialogHeader>
                                             <DialogTitle className="text-white">
-                                                Egg Collection - {dateStr}
+                                                Egg Collection - {formatUtcDate(dateStr)}
                                             </DialogTitle>
                                         </DialogHeader>
 

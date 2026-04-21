@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { AddChickenDeathForm } from "@/components/add-chicken-death-form";
-import { formatUtcDate } from "@/lib/utils";
+import { formatCurrency, formatNumber, formatUtcDate } from "@/lib/utils";
 
 interface ChickenCardProps {
     chicken: any;
@@ -40,19 +40,19 @@ export function ChickenPurchaseCard({ chicken, onDelete, onRefresh }: ChickenCar
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-auto">
                 <div className="bg-blue-50 p-4 rounded-lg">
                     <p className="text-xs font-semibold text-gray-600 uppercase">Purchased</p>
-                    <p className="text-2xl font-bold text-blue-600 mt-1">{chicken.amount}</p>
+                    <p className="text-2xl font-bold text-blue-600 mt-1">{formatNumber(chicken.amount)}</p>
                 </div>
                 <div className="bg-red-50 p-4 rounded-lg">
                     <p className="text-xs font-semibold text-gray-600 uppercase">Deaths</p>
-                    <p className="text-2xl font-bold text-red-600 mt-1">{totalDeaths}</p>
+                    <p className="text-2xl font-bold text-red-600 mt-1">{formatNumber(totalDeaths)}</p>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg">
                     <p className="text-xs font-semibold text-gray-600 uppercase">Remaining</p>
-                    <p className="text-2xl font-bold text-green-600 mt-1">{remaining}</p>
+                    <p className="text-2xl font-bold text-green-600 mt-1">{formatNumber(remaining)}</p>
                 </div>
                 <div className="bg-purple-100 p-4 rounded-lg w-fit">
                     <p className="text-xs font-semibold text-gray-600 uppercase">Total Cost</p>
-                    <p className="text-2xl font-bold text-purple-700">${chicken.totalCost.toFixed(0)}</p>
+                    <p className="text-2xl font-bold text-purple-700">{formatCurrency(chicken.totalCost.toFixed(0))}</p>
                 </div>
             </div>
             
@@ -60,11 +60,11 @@ export function ChickenPurchaseCard({ chicken, onDelete, onRefresh }: ChickenCar
             <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4 border-t border-gray-200">
                 <div>
                     <p className="text-xs text-gray-500">Price per Unit</p>
-                    <p className="text-sm font-semibold text-gray-900">${chicken.pricePerChicken}</p>
+                    <p className="text-sm font-semibold text-gray-900">{formatCurrency(chicken.pricePerChicken)}</p>
                 </div>
                 <div>
                     <p className="text-xs text-gray-500">Shipping Cost</p>
-                    <p className="text-sm font-semibold text-gray-900">${chicken.shippingCost}</p>
+                    <p className="text-sm font-semibold text-gray-900">{formatCurrency(chicken.shippingCost)}</p>
                 </div>
                 <div>
                     <p className="text-xs text-gray-500">Survival Rate</p>
@@ -81,7 +81,7 @@ export function ChickenPurchaseCard({ chicken, onDelete, onRefresh }: ChickenCar
                         {chicken.deaths.map((death: any) => (
                             <div key={death.id} className="bg-red-50 p-2 rounded text-sm">
                                 <div className="flex justify-between">
-                                    <span className="font-medium text-red-700">{death.amount} deaths</span>
+                                    <span className="font-medium text-red-700">{formatNumber(death.amount)} deaths</span>
                                     <span className="text-gray-500">{formatUtcDate(death.date)}</span>
                                 </div>
                                 {death.notes && <p className="text-gray-600 text-xs mt-1">{death.notes}</p>}

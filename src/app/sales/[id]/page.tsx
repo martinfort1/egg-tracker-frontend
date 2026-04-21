@@ -9,6 +9,7 @@ import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { formatCurrency, formatUtcDate } from "@/lib/utils";
 
 export default function SalePage(){
     const { id } = useParams();
@@ -148,22 +149,22 @@ Muchas gracias!`;
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-linear-to-br from-cyan-600/30 via-cyan-700/20 to-slate-900/40 border border-cyan-400/30 p-4 rounded-2xl">
                     <p className="text-cyan-100 text-sm mb-1">Date</p>
-                    <p className="text-white font-bold">{new Date(sale.date).toLocaleDateString()}</p>
+                    <p className="text-white font-bold">{formatUtcDate(sale.date)}</p>
                 </div>
 
                 <div className="bg-linear-to-br from-orange-600/30 via-orange-700/20 to-slate-900/40 border border-orange-400/30 p-4 rounded-2xl">
                     <p className="text-orange-100 text-sm mb-1">Total</p>
-                    <p className="text-white font-bold">${sale.totalAmount}</p>
+                    <p className="text-white font-bold">{formatCurrency(sale.totalAmount)}</p>
                 </div>
 
                 <div className="bg-linear-to-br from-green-600/30 via-green-700/20 to-slate-900/40 border border-green-400/30 p-4 rounded-2xl">
                     <p className="text-green-100 text-sm mb-1">Paid</p>
-                    <p className="text-white font-bold">${sale.amountPaid}</p>
+                    <p className="text-white font-bold">{formatCurrency(sale.amountPaid)}</p>
                 </div>
 
                 <div className="bg-linear-to-br from-red-600/30 via-red-700/20 to-slate-900/40 border border-red-400/30 p-4 rounded-2xl">
                     <p className="text-red-100 text-sm mb-1">Debt</p>
-                    <p className="text-white font-bold">${sale.remainingAmount}</p>
+                    <p className="text-white font-bold">{formatCurrency(sale.remainingAmount)}</p>
                 </div>
             </div>
 
@@ -176,9 +177,9 @@ Muchas gracias!`;
                             <span className="grid text-indigo-100">Extra:</span>
                             <div className="grid-cols-1">
                                 <span className="grid text-indigo-100">{sale.Extra} units</span>
-                                <span className="grid text-indigo-100 text-xs">${sale.ExtraPrice}</span>
+                                <span className="grid text-indigo-100 text-xs">{formatCurrency(sale.ExtraPrice)}</span>
                             </div>
-                            <span className="text-white font-bold">${sale.Extra * sale.ExtraPrice}</span>
+                            <span className="text-white font-bold">{formatCurrency(sale.Extra * sale.ExtraPrice)}</span>
                         </div>
                     )}
                     {sale.N1 > 0 && (
@@ -186,9 +187,9 @@ Muchas gracias!`;
                             <span className="grid text-indigo-100">N1:</span>
                             <div className="grid-cols-1">
                                 <span className="grid text-indigo-100">{sale.N1} units</span>
-                                <span className="grid text-indigo-100 text-xs">${sale.N1Price}</span>
+                                <span className="grid text-indigo-100 text-xs">{formatCurrency(sale.N1Price)}</span>
                             </div>
-                            <span className="text-white font-bold">${sale.N1 * sale.N1Price}</span>
+                            <span className="text-white font-bold">{formatCurrency(sale.N1 * sale.N1Price)}</span>
                         </div>
                     )}
                     {sale.N2 > 0 && (
@@ -196,9 +197,9 @@ Muchas gracias!`;
                             <span className="grid text-indigo-100">N2:</span>
                             <div className="grid-cols-1">
                                 <span className="grid text-indigo-100">{sale.N2} units</span>
-                                <span className="grid text-indigo-100 text-xs">${sale.N2Price}</span>
+                                <span className="grid text-indigo-100 text-xs">{formatCurrency(sale.N2Price)}</span>
                             </div>
-                                <span className="text-white font-bold">${sale.N2 * sale.N2Price}</span>
+                            <span className="text-white font-bold">{formatCurrency(sale.N2 * sale.N2Price)}</span>
                         </div>
                     )}
                     {sale.N3 > 0 && (
@@ -206,9 +207,9 @@ Muchas gracias!`;
                             <span className="grid text-indigo-100">N3:</span>
                             <div className="grid-cols-1">
                                 <span className="grid text-indigo-100">{sale.N3} units</span>
-                                <span className="grid text-indigo-100 text-xs">${sale.N3Price}</span>
+                                <span className="grid text-indigo-100 text-xs">{formatCurrency(sale.N3Price)}</span>
                             </div>
-                            <span className="text-white font-bold">${sale.N3 * sale.N3Price}</span>
+                            <span className="text-white font-bold">{formatCurrency(sale.N3 * sale.N3Price)}</span>
                         </div>
                     )}
                     {sale.N4 > 0 && (
@@ -216,14 +217,14 @@ Muchas gracias!`;
                             <span className="grid text-indigo-100">N4:</span>
                             <div className="grid-cols-1">
                                 <span className="grid text-indigo-100">{sale.N4} units</span>
-                                <span className="grid text-indigo-100 text-xs">${sale.N4Price}</span>
+                                <span className="grid text-indigo-100 text-xs">{formatCurrency(sale.N4Price)}</span>
                             </div>
-                            <span className="text-white font-bold">${sale.N4 * sale.N4Price}</span>
+                            <span className="text-white font-bold">{formatCurrency(sale.N4 * sale.N4Price)}</span>
                         </div>
                     )}
                     <div className="flex justify-between bg-linear-to-br from-orange-600/30 via-orange-700/20 to-slate-900/40 border border-orange-400/30 p-4 rounded-2xl">
                         <p className="flex text-orange-100 text-xl mb-1 font-bold">Total:</p>
-                        <p className="flex text-white font-bold text-2xl">${sale.totalAmount}</p>
+                        <p className="flex text-white font-bold text-2xl">{formatCurrency(sale.totalAmount)}</p>
                     </div>
                 </div>
             </div>

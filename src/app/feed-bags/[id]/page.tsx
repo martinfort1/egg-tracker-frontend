@@ -4,6 +4,7 @@ import LoadSpin from "@/components/load-spin";
 import PaymentModal from "@/components/payment-modal";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
+import { formatCurrency, formatUtcDate } from "@/lib/utils";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -88,7 +89,7 @@ export default function FeedBagDetailPage() {
                     <div className="flex items-center justify-between mb-8">
                         <div>
                             <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Feed Purchase Details</h1>
-                            <p className="text-indigo-200">Phase {feedBag.phase} • {new Date(feedBag.date).toLocaleDateString()}</p>
+                            <p className="text-indigo-200">Phase {feedBag.phase} • {formatUtcDate(feedBag.date)}</p>
                         </div>
                         <div className="flex gap-3">
                             {feedBag.status !== 'PAID' && (
@@ -102,12 +103,14 @@ export default function FeedBagDetailPage() {
                             )}
                             <Button
                                 onClick={() => router.push(`/feed-bags/${feedBag.id}/edit`)}
+                                size="sm"
                                 className="bg-linear-to-r from-blue-600 to-cyan-600 text-white font-bold hover:from-blue-700 hover:to-cyan-700 transition active:scale-95 rounded-xl cursor-pointer"
                             >
                                 Edit
                             </Button>
                             <Button
                                 onClick={handleDelete}
+                                size="sm"
                                 className="bg-linear-to-r from-red-600 to-pink-600 text-white font-bold hover:from-red-700 hover:to-pink-700 transition active:scale-95 rounded-xl cursor-pointer"
                             >
                                 Delete
@@ -122,7 +125,7 @@ export default function FeedBagDetailPage() {
                                 <div className="space-y-3">
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Purchase Date</label>
-                                        <p className="text-white font-medium">{new Date(feedBag.date).toLocaleDateString()}</p>
+                                        <p className="text-white font-medium">{formatUtcDate(feedBag.date)}</p>
                                     </div>
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Feed Phase</label>
@@ -134,7 +137,7 @@ export default function FeedBagDetailPage() {
                                     </div>
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Price per bag</label>
-                                        <p className="text-white font-medium">${feedBag.price}</p>
+                                        <p className="text-white font-medium">{formatCurrency(feedBag.price)}</p>
                                     </div>
                                 </div>
                             </div>
@@ -144,18 +147,18 @@ export default function FeedBagDetailPage() {
                                 <div className="space-y-3">
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Total Amount</label>
-                                        <p className="text-white font-medium">${feedBag.totalAmount.toLocaleString()}</p>
+                                        <p className="text-white font-medium">{formatCurrency(feedBag.totalAmount)}</p>
                                     </div>
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Amount Paid</label>
-                                        <p className="text-green-300 font-medium">${feedBag.amountPaid.toLocaleString()}</p>
+                                        <p className="text-green-300 font-medium">{formatCurrency(feedBag.amountPaid)}</p>
                                     </div>
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Remaining Amount</label>
-                                        <p className="text-orange-300 font-medium">${feedBag.remainingAmount.toLocaleString()}</p>
+                                        <p className="text-orange-300 font-medium">{formatCurrency(feedBag.remainingAmount)}</p>
                                     </div>
                                     <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Payment Status</label>
+                                        <label className="text-sm font-semibold text-indigo-200">Payment Status: </label>
                                         <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(feedBag.status)}`}>
                                             {feedBag.status}
                                         </span>
@@ -171,13 +174,13 @@ export default function FeedBagDetailPage() {
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Created</label>
                                         <p className="text-white font-medium">
-                                            {new Date(feedBag.createdAt).toLocaleDateString()}
+                                            {formatUtcDate(feedBag.createdAt)}
                                         </p>
                                     </div>
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Last Updated</label>
                                         <p className="text-white font-medium">
-                                            {new Date(feedBag.updatedAt).toLocaleDateString()}
+                                            {formatUtcDate(feedBag.updatedAt)}
                                         </p>
                                     </div>
                                 </div>

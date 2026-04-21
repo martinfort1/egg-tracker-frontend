@@ -42,11 +42,11 @@ export default function PaymentModal ({ sale, onSuccess, endpoint = 'sales', cla
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 {children ? (
-                    <Button className={'bg-linear-to-r from-green-500/35 to-green-950/40 hover:bg-gray-800 transition active:scale-95 gap-2 cursor-pointer'} size="sm">
+                    <Button className={'bg-linear-to-r from-green-500/35 to-green-950/40 hover:bg-gray-800 hover:scale-105 transition active:scale-95 gap-2 cursor-pointer'} size="sm">
                         {children}
                     </Button>
                 ) : (
-                    <Button className={'bg-linear-to-r from-green-500/35 to-green-950/40 hover:bg-gray-800 transition active:scale-95 gap-2 cursor-pointer'} size="sm">
+                    <Button className={'bg-linear-to-r from-green-500/35 to-green-950/40 hover:bg-gray-800 hover:scale-105 transition active:scale-95 gap-2 cursor-pointer'} size="sm">
                         <Plus size={18} /> Add Payment
                     </Button>
                 )}

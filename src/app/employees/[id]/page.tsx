@@ -5,6 +5,7 @@ import PaymentModal from "@/components/payment-modal";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { getEmployeePaymentStatus } from "@/lib/employee-payment-helpers";
+import { formatCurrency, formatUtcDate } from "@/lib/utils";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -184,14 +185,14 @@ export default function EmployeeDetailPage() {
                                         <div className="space-y-3">
                                             <div>
                                                 <label className="text-sm font-semibold text-indigo-200">Monthly Salary</label>
-                                                <p className="text-white font-medium">${employee.salary.toLocaleString()}</p>
+                                                <p className="text-white font-medium">{formatCurrency(employee.salary)}</p>
                                             </div>
 
                                             {employee.lastPaidDate && (
                                                 <div>
                                                     <label className="text-sm font-semibold text-indigo-200">Last Paid Date</label>
                                                     <p className="text-white font-medium">
-                                                        {new Date(employee.lastPaidDate).toLocaleDateString()}
+                                                        {formatUtcDate(employee.lastPaidDate)}
                                                     </p>
                                                 </div>
                                             )}
@@ -206,13 +207,13 @@ export default function EmployeeDetailPage() {
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Created</label>
                                         <p className="text-white font-medium">
-                                            {new Date(employee.createdAt).toLocaleDateString()}
+                                            {formatUtcDate(employee.createdAt)}
                                         </p>
                                     </div>
                                     <div>
                                         <label className="text-sm font-semibold text-indigo-200">Last Updated</label>
                                         <p className="text-white font-medium">
-                                            {new Date(employee.updatedAt).toLocaleDateString()}
+                                            {formatUtcDate(employee.updatedAt)}
                                         </p>
                                     </div>
                                 </div>
@@ -228,10 +229,10 @@ export default function EmployeeDetailPage() {
                                             <div key={payment.id} className="bg-white/5 p-3 rounded-lg border border-white/10">
                                                 <div className="flex justify-between items-start">
                                                     <div>
-                                                        <p className="text-white font-medium">${payment.amount}</p>
+                                                        <p className="text-white font-medium">{formatCurrency(payment.amount)}</p>
                                                         <p className="text-xs text-indigo-300">{payment.description}</p>
                                                     </div>
-                                                    <p className="text-xs text-slate-400">{new Date(payment.date).toLocaleDateString()}</p>
+                                                    <p className="text-xs text-slate-400">{formatUtcDate(payment.date)}</p>
                                                 </div>
                                             </div>
                                         ))}
@@ -257,8 +258,8 @@ export default function EmployeeDetailPage() {
                                                     </span>
                                                 </div>
                                                 <div className="text-sm text-slate-300 space-y-1">
-                                                    <p>Salary: ${monthData.salary.toLocaleString()}</p>
-                                                    <p>Paid: ${monthData.totalPaid.toLocaleString()}</p>
+                                                    <p>Salary: {formatCurrency(monthData.salary)}</p>
+                                                    <p>Paid: {formatCurrency(monthData.totalPaid)}</p>
                                                     <p className={monthData.color}>{monthData.text}</p>
                                                 </div>
                                             </div>

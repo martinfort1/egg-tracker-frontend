@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import Link from "next/link";
 import PaymentModal from "./payment-modal";
 import { motion } from "framer-motion"
+import { formatCurrency, formatUtcDate } from "@/lib/utils";
 
 
 export default function SaleCard({ sale, refresh }: any) {
@@ -42,26 +43,26 @@ export default function SaleCard({ sale, refresh }: any) {
             </div>
 
             <div className="text-sm text-slate-950">
-                {new Date(sale.date).toLocaleDateString()}
+                {formatUtcDate(sale.date)}
             </div>
 
             <div className="space-y-1 text-indigo-100">
-                <p>Total: <span className="font-medium text-white">${sale.totalAmount}</span></p>
-                <p>Paid: <span className="font-medium text-white">${sale.amountPaid}</span></p>
+                <p>Total: <span className="font-medium text-white">{formatCurrency(sale.totalAmount)}</span></p>
+                <p>Paid: <span className="font-medium text-white">{formatCurrency(sale.amountPaid)}</span></p>
                 <p className="font-semibold text-orange-100">
-                    Debt: <span className="font-bold text-orange-200">${sale.remainingAmount}</span>
+                    Debt: <span className="font-bold text-orange-200">{formatCurrency(sale.remainingAmount)}</span>
                 </p>
             </div>
 
             <div className="grid grid-cols-1 gap-2 pt-2">
                     <Link href={`/sales/${sale.id}`}>
-                        <Button className="w-full transition active:scale-95 cursor-pointer" size="sm">
+                        <Button className="w-full transition active:scale-95 hover:scale-105 cursor-pointer" size="sm">
                             Sale Details
                         </Button>
                     </Link>
                 {sale.status !== "PAID" &&(
                     <PaymentModal 
-                    className="w-full rounded-2xl shadow-xl hover:bg-gray-600"
+                    className="w-full rounded-2xl shadow-xl hover:bg-gray-600 hover:scale-105 transition cursor-pointer"
                     sale={sale} 
                     onSuccess={refresh} >
                         <span className="w-full block text-center">
@@ -69,7 +70,7 @@ export default function SaleCard({ sale, refresh }: any) {
                         </span>
                     </PaymentModal>
                 )}
-                    <Button className="w-full bg-linear-to-r from-red-500/95 to-red-900/95 text-white hover:bg-red-500 transition active:scale-95 cursor-pointer" onClick={handleDelete} variant="outline" size="sm">
+                    <Button className="w-full bg-linear-to-r from-red-500/95 to-red-900/95 text-white hover:bg-red-500 hover:scale-105 transition active:scale-95 cursor-pointer" onClick={handleDelete} variant="outline" size="sm">
                         Delete
                     </Button>
 

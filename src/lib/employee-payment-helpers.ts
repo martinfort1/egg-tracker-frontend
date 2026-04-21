@@ -1,3 +1,5 @@
+import { formatCurrency } from "./utils";
+
 export const getEmployeePaymentStatus = (employee: any) => {
     const now = new Date();
     const month = now.getMonth();
@@ -25,7 +27,7 @@ export const getEmployeePaymentStatus = (employee: any) => {
     return {
       status: "Payment Due",
       color: "text-red-600",
-      text: `Owed $${new Intl.NumberFormat("es-AR").format(owed)}`,
+      text: `Owed ${formatCurrency(owed)}`,
       paid,
       owed,
     };
@@ -35,7 +37,7 @@ export const getEmployeePaymentStatus = (employee: any) => {
     return {
       status: "Partially Paid",
       color: "text-yellow-400",
-      text: `Remaining $${new Intl.NumberFormat("es-AR").format(owed)}`,
+      text: `Remaining ${formatCurrency(owed)}`,
       paid,
       owed,
     };
@@ -54,7 +56,7 @@ export const getEmployeePaymentStatus = (employee: any) => {
   return {
     status: "Advanced",
     color: "text-cyan-400",
-    text: `Advance $${new Intl.NumberFormat("es-AR").format(Math.abs(owed))}`,
+    text: `Advance ${formatCurrency(Math.abs(owed))}`,
     paid,
     owed,
   };
