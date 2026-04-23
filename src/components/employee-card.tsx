@@ -69,17 +69,15 @@ export default function EmployeeCard({ employee, refresh }: any) {
           <Button size="sm" className="w-full  hover:bg-slate-700 cursor-pointer">View Details</Button>
         </Link>
 
-        {paymentInfo.owed > 0 && (
-          <PaymentModal 
-            sale={employee} 
-            owed={paymentInfo.owed}
-            endpoint="employees" 
-            onSuccess={refresh}
-            className="w-full rounded-2xl shadow-xl hover:bg-gray-600"
-          >
-            <span className="w-full block text-center">Add Payment</span>
-          </PaymentModal>
-        )}
+        <PaymentModal 
+          sale={employee} 
+          owed={paymentInfo.owed}
+          endpoint="employees" 
+          onSuccess={refresh}
+          className="w-full rounded-2xl shadow-xl hover:bg-gray-600"
+        >
+          <span className="w-full block text-center">{paymentInfo.owed > 0 ? 'Add Payment' : 'Advance Pay'}</span>
+        </PaymentModal>
 
         <Button
           size="sm"
