@@ -142,9 +142,10 @@ export default function EmployeeDetailPage() {
                             <p className="text-indigo-200">Employee Details</p>
                         </div>
                         <div className="flex gap-3 flex-wrap">
-                            {(!employee.amountOwed || employee.amountOwed <= 0) && (
+                            {(paymentInfo?.owed ?? 0) > 0 && (
                                 <PaymentModal
                                     sale={employee}
+                                    owed={paymentInfo?.owed}
                                     endpoint="employees"
                                     onSuccess={fetchEmployee}
                                     className="bg-linear-to-r from-green-500/35 to-green-950/40 hover:bg-gray-800 transition active:scale-95 gap-2 cursor-pointer"

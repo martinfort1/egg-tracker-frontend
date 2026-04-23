@@ -72,6 +72,7 @@ export default function EmployeeCard({ employee, refresh }: any) {
         {paymentInfo.owed > 0 && (
           <PaymentModal 
             sale={employee} 
+            owed={paymentInfo.owed}
             endpoint="employees" 
             onSuccess={refresh}
             className="w-full rounded-2xl shadow-xl hover:bg-gray-600"
