@@ -1,7 +1,7 @@
 "use client"
 
 import SaleCard from "@/components/sale-card";
-import SalesFilter from "@/components/sales-filter";
+import SalesFilter from "@/components/time-filter";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useSales } from "@/hooks/useSales";

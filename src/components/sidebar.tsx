@@ -64,7 +64,7 @@ export default function Sidebar() {
     };
 
     const linkClass = (path: string) =>
-        `flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+        `flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 border border-white/10 ${
             pathname === path
                 ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg"
                 : "text-white/80 hover:text-white hover:bg-white/10"

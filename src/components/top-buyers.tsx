@@ -1,7 +1,8 @@
+import { formatCurrency } from "@/lib/utils";
 
 export default function TopBuyers ( {topBuyers}: any ) {
     return (
-        <div className="bg-white p-6 rounded-xl shadow border border-slate-950/90">
+        <div className="bg-white p-6 rounded-xl shadow-2xl border border-slate-300">
             <h2 className="text-xl font-semibold mb-4">
                 Top Buyers
             </h2>
@@ -14,7 +15,7 @@ export default function TopBuyers ( {topBuyers}: any ) {
                 >
                     <span>{buyer.name}</span>
                     <span className="font-semibold">
-                    ${buyer.totalRevenue}
+                        {formatCurrency(buyer.totalRevenue)}
                     </span>
                 </div>
                 ))}
