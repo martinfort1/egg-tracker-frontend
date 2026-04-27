@@ -2,8 +2,19 @@ import { Button } from "./ui/button";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Phone, MapPin } from "lucide-react";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
 
-export default function BuyerCard({ buyer }: any) {
+export default function BuyerCard({ buyer, refresh }: any) {
+    const handleDelete = async () => {
+        await toast.promise(api.delete(`/buyers/${buyer.id}`), {
+            loading: "Deleting buyer...",
+            success: "Buyer deleted successfully",
+            error: "Error deleting buyer",
+        });
+        refresh?.();
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -28,13 +39,19 @@ export default function BuyerCard({ buyer }: any) {
                 </div>
             </div>
 
-            <div className="pt-2">
+            <div className="grid grid-cols-1 gap-2 pt-2">
                 <Link href={`/buyers/${buyer.id}`}>
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700 transition active:scale-95" size="sm">
-                        More info
-                    </Button>
+                    <Button size="sm" className="w-full hover:bg-slate-700 cursor-pointer">View Details</Button>
                 </Link>
+
+                <Button
+                    size="sm"
+                    onClick={handleDelete}
+                    className="w-full bg-linear-to-r from-red-500/95 to-red-900/95 text-white hover:bg-red-400 cursor-pointer"
+                >
+                    Delete
+                </Button>
             </div>
         </motion.div>
-    );
+    )
 }

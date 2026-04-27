@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ShoppingBasket } from "lucide-react";
 import { formatCurrency, formatUtcDate } from "@/lib/utils";
+import LoadSpin from "@/components/load-spin";
 
 export default function ExpensesPage() {
     const router = useRouter();
@@ -78,7 +79,7 @@ export default function ExpensesPage() {
                     Expenses
                 </h1>
                 <Link href="/expenses/new">
-                    <Button className="bg-linear-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 rounded-full w-full sm:w-auto flex items-center gap-2 cursor-pointer">
+                    <Button className="bg-linear-to-r from-green-400/80 to-green-600/60 text-white hover:from-green-600 hover:to-green-700 rounded-full w-full sm:w-auto flex items-center gap-2 cursor-pointer">
                         + Add Expense
                     </Button>
                 </Link>
@@ -118,8 +119,8 @@ export default function ExpensesPage() {
 
             {/* Expenses List */}
             {loading ? (
-                <div className="text-center py-12 text-slate-400">Loading...</div>
-            ) : filteredExpenses.length === 0 ? (
+                <LoadSpin />
+                ) : filteredExpenses.length === 0 ? (
                     <div className="col-span-full text-center py-12">
                         <ShoppingBasket className="w-16 h-16 text-slate-400 mx-auto mb-4" />
                         <p className="text-slate-400 text-lg">No extra expenses recorded yet</p>
@@ -130,7 +131,7 @@ export default function ExpensesPage() {
                     {filteredExpenses.map((expense: any) => (
                         <div
                             key={expense.id}
-                            className="bg-linear-to-br from-rose-600/55  to-yellow-500/55 border border-white/10 p-4 rounded-lg hover:bg-white/10 transition"
+                            className="bg-linear-to-br from-rose-600/75 via-orange-400/55 to-yellow-500/55 border border-white/10 p-4 rounded-lg hover:bg-white/10 transition"
                         >
                             <div className="flex justify-between items-start mb-3">
                                 <div>

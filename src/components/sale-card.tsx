@@ -31,7 +31,7 @@ export default function SaleCard({ sale, refresh }: any) {
         initial={{ opacity: 0, y: 20}}
         animate={{ opacity: 1, y: 0}}
         transition={{ duration: 0.4 }}
-        className="bg-linear-to-br from-slate-900/50 via-cyan-800/70 to-slate-900/50 border border-white/20 backdrop-blur-xl p-6 md:p-7 rounded-2xl shadow-2xl space-y-4 hover:-translate-y-1 hover:shadow-2xl transition-transform duration-300">
+        className="bg-linear-to-br from-slate-900/50 via-green-800/70 to-slate-900/50 border border-white/20 backdrop-blur-xl p-6 md:p-7 rounded-2xl shadow-2xl space-y-4 hover:-translate-y-1 hover:shadow-2xl transition-transform duration-300">
             <div className="flex justify-between items-start">
                 <h2 className="text-lg font-bold text-white">
                     {sale.buyer.name}

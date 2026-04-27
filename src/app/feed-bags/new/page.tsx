@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { formatCurrency } from "@/lib/utils";
 
 export default function NewFeedBagPage() {
     const router = useRouter();
@@ -26,13 +27,21 @@ export default function NewFeedBagPage() {
     const amount = watch("amount");
     const price = watch("price");
     const amountPaid = watch("amountPaid");
+    const [fullyPaid, setFullyPaid] = useState(false);
 
     // Auto-calculate total amount and remaining amount
     useEffect(() => {
         const total = amount * price;
         setValue("totalAmount", total);
-        setValue("remainingAmount", total - amountPaid);
-    }, [amount, price, amountPaid, setValue]);
+        setValue("remainingAmount", total - (fullyPaid ? total : amountPaid));
+    }, [amount, price, amountPaid, fullyPaid, setValue]);
+
+    // Set amountPaid when fullyPaid changes
+    useEffect(() => {
+        if (fullyPaid) {
+            setValue("amountPaid", amount * price);
+        }
+    }, [fullyPaid, amount, price, setValue]);
 
     const onSubmit = async (data: any) => {
         try {
@@ -98,16 +107,58 @@ export default function NewFeedBagPage() {
                         />
                     </div>
 
+                    {/* Fully Paid Toggle */}
                     <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Amount Paid</label>
-                        <Input
-                            type="number"
-                            step="0.01"
-                            placeholder="Amount already paid"
-                            {...register("amountPaid", { valueAsNumber: true, min: 0 })}
-                            className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
-                        />
+                        <label className="text-sm font-semibold text-white">Pay Full Amount?</label>
+                        <div className="flex gap-2">
+                            <Button
+                                type="button"
+                                onClick={() => setFullyPaid(false)}
+                                className={`flex-1 transition ${
+                                    !fullyPaid
+                                        ? 'bg-linear-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-700 text-white'
+                                        : 'bg-white/10 text-slate-300 hover:bg-white/20 cursor-pointer'
+                                }`}
+                            >
+                                No
+                            </Button>
+                            <Button
+                                type="button"
+                                onClick={() => setFullyPaid(true)}
+                                className={`flex-1 transition ${
+                                    fullyPaid
+                                        ? 'bg-linear-to-r from-green-500 via-green-700 to-green-900 hover:from-green-700 hover:to-green-800 text-white'
+                                        : 'bg-white/10 text-slate-300 hover:bg-white/20 cursor-pointer'
+                                }`}
+                            >
+                                Yes
+                            </Button>
+                        </div>
                     </div>
+
+                    {/* Amount Paid */}
+                    {!fullyPaid && (
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold text-white">Amount Paid</label>
+                            <Input
+                                type="number"
+                                step="0.01"
+                                placeholder="Amount already paid"
+                                {...register("amountPaid", { valueAsNumber: true, min: 0 })}
+                                className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
+                            />
+                        </div>
+                    )}
+
+                    {/* Payment Summary */}
+                    {fullyPaid && (
+                        <div className="animate-in fade-in duration-300 bg-linear-to-r from-green-500/20 to-green-600/20 border border-green-400/30 rounded-lg p-3">
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm font-semibold text-white">Payment Amount:</span>
+                                <span className="text-lg font-bold text-green-300">{formatCurrency(amount * price)}</span>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="space-y-2">
                         <label className="text-sm font-semibold text-white">Remaining Amount</label>

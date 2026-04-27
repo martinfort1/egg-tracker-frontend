@@ -10,10 +10,13 @@ import { useEffect, useState } from "react"
 export default function BuyersPage(){
     const [buyers, setBuyers] = useState([]);
 
-    useEffect(() => {
-      api.get("/buyers")
-        .then(res => setBuyers(res.data));
+    const fetchBuyers = async () => {
+        const res = await api.get("/buyers");
+        setBuyers(res.data);
+    };
 
+    useEffect(() => {
+        fetchBuyers();
     }, [])
 
     return (
@@ -34,7 +37,7 @@ export default function BuyersPage(){
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                 {buyers.map((buyer:any)=>(
-                    <BuyerCard key={buyer.id} buyer={buyer} />
+                    <BuyerCard key={buyer.id} buyer={buyer} refresh={fetchBuyers} />
                 ))}
             </div>
         </div>

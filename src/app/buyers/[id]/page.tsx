@@ -4,19 +4,31 @@ import LoadSpin from "@/components/load-spin";
 import { MetricCard } from "@/components/metric-card";
 import SaleCard from "@/components/sale-card";
 import { api } from "@/lib/api";
-import { MapPin, Phone, Edit } from "lucide-react";
+import { MapPin, Phone, Edit, Trash2 } from "lucide-react";
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function BuyerPage(){
     const { id } = useParams();
+    const router = useRouter();
     const [data, setData] = useState<any>(null);
 
     const fetchData = async () => {
         const res = await api.get(`/buyers/${id}/history`);
         setData(res.data);
+    };
+
+    const handleDelete = async () => {
+        await toast.promise(api.delete(`/buyers/${id}`), {
+            loading: "Deleting buyer...",
+            success: "Buyer deleted successfully",
+            error: "Error deleting buyer",
+        });
+        router.push("/buyers");
     };
 
     useEffect(() =>{
@@ -32,12 +44,21 @@ export default function BuyerPage(){
             <div className="bg-linear-to-br from-indigo-900/30 via-violet-900/25 to-slate-900/40 p-6 rounded-2xl border border-white/20 shadow-lg">
                 <div className="flex justify-between items-start mb-4">
                     <h1 className="text-2xl font-bold text-white">{buyer.name}</h1>
-                    <Link href={`/buyers/${id}/edit`}>
-                        <Button className="bg-linear-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 transition active:scale-95 flex items-center gap-2">
-                            <Edit size={16} />
-                            Edit
+                    <div className="flex gap-2">
+                        <Link href={`/buyers/${id}/edit`}>
+                            <Button className="bg-linear-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 transition active:scale-95 flex items-center gap-2">
+                                <Edit size={16} />
+                                Edit
+                            </Button>
+                        </Link>
+                        <Button
+                            onClick={handleDelete}
+                            className="bg-linear-to-r from-red-500/95 to-red-900/95 text-white hover:bg-red-400 transition active:scale-95 flex items-center gap-2 cursor-pointer"
+                        >
+                            <Trash2 size={16} />
+                            Delete
                         </Button>
-                    </Link>
+                    </div>
                 </div>
 
                 <div className="text-sm font-semibold mt-2 space-y-1 text-indigo-100">

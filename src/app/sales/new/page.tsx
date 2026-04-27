@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { saleSchema } from "@/lib/schemas/sales.schema";
+import { formatCurrency } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import Link from "next/link";
@@ -18,8 +19,9 @@ export default function NewSalePage() {
     
     const [buyers, setBuyers] = useState<any[]>([])
     const [total, setTotal] = useState(0);
+    const [fullyPaid, setFullyPaid] = useState(false);
 
-    const { register, handleSubmit, watch, formState: { errors } } = useForm({
+    const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
         resolver: zodResolver(saleSchema),
         defaultValues: {
             Extra: 0,
@@ -63,6 +65,13 @@ export default function NewSalePage() {
         setTotal( totalCalculation || 0 );
     }, [values]);
 
+    // Set amountPaid when fullyPaid changes
+    useEffect(() => {
+        if (fullyPaid) {
+            setValue("amountPaid", total);
+        }
+    }, [fullyPaid, total, setValue]);
+
     const onSubmit = async( data: any) => {
 
         try{
@@ -94,7 +103,7 @@ export default function NewSalePage() {
                         <label className="text-sm font-semibold text-white">Client</label>
                         <select 
                             {...register("buyerId")} 
-                            className="w-full bg-white/20 border border-white/30 text-white rounded-xl p-3 focus:border-indigo-400 focus:ring-indigo-400/20 focus:outline-none transition [&>option]:bg-slate-900 [&>option]:text-white"
+                            className="w-full bg-white/20 border border-white/30 text-white rounded-xl p-3 focus:border-indigo-400 focus:ring-indigo-400/20 focus:outline-none transition [&>option]:bg-white [&>option]:text-slate-900"
                         >
                             <option value="" className="bg-slate-900 text-white">Select buyer</option>
                             {buyers.map((buyer) => (
@@ -233,32 +242,73 @@ export default function NewSalePage() {
                         </div>
                     </div>
 
-                    {/* Amount Paid */}
+                    {/* Fully Paid Toggle */}
                     <div className="space-y-2 pt-4 border-t border-white/10">
-                        <label className="text-sm font-semibold text-white">Amount Paid</label>
-                        <Input
-                            placeholder="0"
-                            type="number"
-                            {...register("amountPaid", {valueAsNumber: true})}
-                            className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
-                        />
+                        <label className="text-sm font-semibold text-white">Pay Full Amount?</label>
+                        <div className="flex gap-2">
+                            <Button
+                                type="button"
+                                onClick={() => setFullyPaid(false)}
+                                className={`flex-1 transition ${
+                                    !fullyPaid
+                                        ? 'bg-linear-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-700 text-white'
+                                        : 'bg-white/10 text-slate-300 hover:bg-white/20 cursor-pointer'
+                                }`}
+                            >
+                                No
+                            </Button>
+                            <Button
+                                type="button"
+                                onClick={() => setFullyPaid(true)}
+                                className={`flex-1 transition ${
+                                    fullyPaid
+                                        ? 'bg-linear-to-r from-green-500 via-green-700 to-green-900 hover:from-green-700 hover:to-green-800 text-white'
+                                        : 'bg-white/10 text-slate-300 hover:bg-white/20 cursor-pointer'
+                                }`}
+                            >
+                                Yes
+                            </Button>
+                        </div>
                     </div>
+
+                    {/* Amount Paid */}
+                    {!fullyPaid && (
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold text-white">Amount Paid</label>
+                            <Input
+                                placeholder="0"
+                                type="number"
+                                {...register("amountPaid", {valueAsNumber: true})}
+                                className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
+                            />
+                        </div>
+                    )}
+
+                    {/* Payment Summary */}
+                    {fullyPaid && (
+                        <div className="animate-in fade-in duration-300 bg-linear-to-r from-green-500/20 to-green-600/20 border border-green-400/30 rounded-lg p-3">
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm font-semibold text-white">Payment Amount:</span>
+                                <span className="text-lg font-bold text-green-300">{formatCurrency(total)}</span>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Total Display & Debt Calculation */}
                     <div className="space-y-3 bg-linear-to-r from-orange-600/30 to-yellow-600/30 border border-orange-400/30 rounded-xl p-4">
                         <div className="flex justify-between items-center">
                             <span className="text-lg font-bold text-white">Total:</span>
-                            <span className="text-2xl font-black text-orange-200">${total}</span>
+                            <span className="text-2xl font-black text-orange-200">{formatCurrency(total)}</span>
                         </div>
                         <div className="border-t border-orange-400/30 pt-3 flex justify-between items-center">
                             <span className="text-sm font-semibold text-white">Amount to Pay:</span>
-                            <span className="text-lg font-bold text-orange-100">${values.amountPaid || 0}</span>
+                            <span className="text-lg font-bold text-orange-100">{formatCurrency(values.amountPaid || 0)}</span>
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-sm font-semibold text-white">Remaining Debt:</span>
                             <span className={`text-lg font-black ${
                                 (total - (values.amountPaid || 0)) <= 0 ? 'text-green-300' : 'text-red-300'
-                            }`}>${Math.max(0, total - (values.amountPaid || 0))}</span>
+                            }`}>{formatCurrency(Math.max(0, total - (values.amountPaid || 0)))}</span>
                         </div>
                     </div>
 
