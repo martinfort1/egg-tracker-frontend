@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import TopBuyers from "@/components/top-buyers";
 import LoadSpin from "@/components/load-spin";
 import { formatCurrency } from "@/lib/utils";
+import { MetricCardValue } from "@/components/metric-card-value";
 
 
 export default function DashboardPage() {
@@ -27,13 +28,14 @@ export default function DashboardPage() {
 
     return (
         <div className="space-y-8">
-            <h1 className="flex justify-center text-2xl font-bold">
+            <h1 className="flex justify-center text-3xl font-['Playfair_Display'] font-bold text-shadow-lg">
                 Dashboard
             </h1>
 
            <TimeFilter period={period} setPeriod={setPeriod} />
-           <h2 className="text-xl font-semibold">Sales Overview</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+           <h2 className="text-xl font-['Playfair_Display'] font-semibold text-shadow-lg">Sales Overview</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <MetricCardValue title="Amount of sales:" value={summary?.totalSales || 0} isCurrency={false} unit=" sales"/>
                 <MetricCard title="Sold eggs for:" value={summary?.totalRevenues || 0} />
                 <MetricCard title="You have been paid:" value={summary?.totalPaid || 0} />
                 <MetricCard title="You are owed:" value={summary?.totalDebts || 0} />
@@ -94,7 +96,7 @@ export default function DashboardPage() {
 
             <SalesChart data={ analytics } period={period} />
 
-            <h2 className="text-xl font-semibold">Monthly Revenue</h2>
+            <h2 className="text-xl font-['Playfair_Display'] font-semibold text-shadow-lg">Monthly Revenue</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {monthly?.map((m: any) => (
                     <div key={m.month} className="bg-white p-4 rounded-xl shadow-2xl border border-slate-300">

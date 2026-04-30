@@ -128,7 +128,7 @@ const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 return (
         <div className="space-y-6 p-2 md:p-6 bg-linear-to-br from-slate-900/30 via-slate-900/20 to-slate-900/30 rounded-2xl border border-white/10 shadow-xl">
             <div className="text-center max-w-lg mx-auto mb-4 bg-linear-to-br from-orange-500/90 to-yellow-500/90 rounded-4xl p-2 border border-white/20">
-                <h1 className="text-3xl font-black text-slate-800 mb-2 ">Egg Laying Calendar</h1>
+                <h1 className="text-3xl font-['Playfair_Display'] font-black text-slate-800 mb-2 text-shadow-sm">Egg Laying Calendar</h1>
                 <p className="text-slate-700">Track daily egg collection</p>
             </div>
 
@@ -141,7 +141,7 @@ return (
                     >
                         ← Previous
                     </Button>
-                    <h2 className="text-xl font-bold text-white">{monthName}</h2>
+                    <h2 className="text-xl font-['Playfair_Display'] font-bold text-white text-shadow-lg">{monthName}</h2>
                     <Button
                         onClick={nextMonth}
                         className="bg-linear-to-br from-orange-500/90 to-yellow-500/90 rounded-xl hover:scale-105 cursor-pointer"

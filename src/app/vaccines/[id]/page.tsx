@@ -73,18 +73,18 @@ export default function VaccineDetailPage() {
         <div className="min-h-screen bg-linear-to-br from-slate-900/50 via-slate-900/30 to-slate-900/50 p-4 md:p-6">
             <div className="max-w-4xl mx-auto">
                 <div className="bg-linear-to-br from-slate-900/80 via-indigo-900/60 to-slate-900/90 border border-white/20 backdrop-blur-xl p-8 rounded-2xl shadow-2xl">
-                    <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
                         <div>
-                            <h1 className="text-3xl md:text-4xl font-black text-white mb-2">{vaccine.name}</h1>
+                            <h1 className="text-3xl md:text-4xl font-['Playfair_Display'] font-black text-white mb-2 text-shadow-lg">{vaccine.name}</h1>
                             <p className="text-indigo-200">{vaccine.applications?.length || 0} application{vaccine.applications?.length !== 1 ? 's' : ''}</p>
                         </div>
-                        <div className="flex gap-3">
+                        <div className="flex flex-col sm:flex-row gap-3">
                             <AddVaccineApplicationModal
                                 vaccine={vaccine}
                                 onSuccess={fetchVaccine}
                             >
                                 <Button
-                                    className="bg-linear-to-r from-green-500 to-green-600 text-white font-bold hover:from-green-600 hover:to-green-700 transition active:scale-95 rounded-xl cursor-pointer"
+                                    className="bg-linear-to-r from-green-400/80 to-green-600/60 text-white hover:from-green-600 hover:to-green-700 rounded-full w-full sm:w-auto flex items-center gap-2 cursor-pointer"
                                 >
                                     Add Application
                                 </Button>

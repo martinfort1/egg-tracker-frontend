@@ -104,18 +104,12 @@ export default function LoginPage() {
 
         {/* Logo/Icon */}
         <motion.div
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
+          initial={{ scale: 0, y: -180 }}
+          animate={{ scale: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           className="text-center mb-8"
         >
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-yellow-400 to-orange-500 rounded-full shadow-2xl mb-4">
-            <Egg className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl md:text-4xl font-black mb-2 bg-linear-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent">
-            Welcome Back
-          </h1>
-          <p className="text-gray-300 text-lg">Sign in to your account</p>
+          <img src="/Logo_NoBuffer.png" alt="Egg Tracker Logo" className="mx-auto size-2/3 my-4" />
         </motion.div>
 
         {/* Login Form */}
@@ -137,7 +131,9 @@ export default function LoginPage() {
             </motion.div>
           )}
 
+            <p className="text-gray-300 text-lg text-center">Sign in to your account</p> 
           <div className="space-y-2">
+
             <label className="text-sm font-semibold text-white" htmlFor="email">
               Email Address
             </label>

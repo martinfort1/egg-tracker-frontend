@@ -16,8 +16,8 @@ export function ChickenPurchaseCard({ chicken, onDelete, onRefresh }: ChickenCar
     const remaining = chicken.amount - totalDeaths;
 
     return (
-        <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow border-l-4 border-blue-500">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
+        <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-blue-500">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4 sm:grid-cols-1">
                 <div>
                     <h3 className="text-lg font-semibold text-gray-900">
                         Purchase on {formatUtcDate(chicken.date)}
@@ -37,22 +37,22 @@ export function ChickenPurchaseCard({ chicken, onDelete, onRefresh }: ChickenCar
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-1 lg:grid-cols-4 gap-4">
                 <div className="bg-blue-50 p-4 rounded-lg">
                     <p className="text-xs font-semibold text-gray-600 uppercase">Purchased</p>
-                    <p className="text-2xl font-bold text-blue-600 mt-1">{formatNumber(chicken.amount)}</p>
+                    <p className="text-xl md:text-2xl font-bold text-blue-600 mt-1">{formatNumber(chicken.amount)}</p>
                 </div>
                 <div className="bg-red-50 p-4 rounded-lg">
                     <p className="text-xs font-semibold text-gray-600 uppercase">Deaths</p>
-                    <p className="text-2xl font-bold text-red-600 mt-1">{formatNumber(totalDeaths)}</p>
+                    <p className="text-xl md:text-2xl font-bold text-red-600 mt-1">{formatNumber(totalDeaths)}</p>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg">
                     <p className="text-xs font-semibold text-gray-600 uppercase">Remaining</p>
-                    <p className="text-2xl font-bold text-green-600 mt-1">{formatNumber(remaining)}</p>
+                    <p className="text-xl md:text-2xl font-bold text-green-600 mt-1">{formatNumber(remaining)}</p>
                 </div>
-                <div className="bg-purple-100 p-4 rounded-lg w-fit">
+                <div className="bg-purple-100 p-4 rounded-lg">
                     <p className="text-xs font-semibold text-gray-600 uppercase">Total Cost</p>
-                    <p className="text-2xl font-bold text-purple-700">{formatCurrency(chicken.totalCost.toFixed(0))}</p>
+                    <p className="text-xl md:text-2xl font-bold text-purple-700">{formatCurrency(chicken.totalCost.toFixed(0))}</p>
                 </div>
             </div>
             

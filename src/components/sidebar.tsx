@@ -105,19 +105,18 @@ export default function Sidebar() {
                     open ? "" : "-translate-x-full md:translate-x-0"
                 }`}
             >
-                <div className="flex justify-between items-start mb-8">
-                    <div className="flex flex-col">
-                        <h1 className="text-2xl font-black text-white tracking-tight">Egg Tracker</h1>
-                        <p className="text-xs text-white/60">Your farm assistant</p>
+                <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="flex flex-row w-full justify-between align-center px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-tighter text-red-400 bg-red-500/10 border-red-500/30 hover:text-white hover:bg-red-500/20 transition-all border hover:border-red-500/30 cursor-pointer mb-4"
+                >
+                    <LogOut className="w-4 h-4" />
+                    Exit
+                </button>
+                <div className="flex justify-between items-center mb-8">
+                    <div className="flex flex-col gap-1">
+                            <img src="/FullLogo_Transparent_NoBuffer.png" alt="Egg Tracker Logo"/>
                     </div>
-                    <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="flex flex-col items-center gap-1 px-2 py-1 rounded-md text-center text-red-300 hover:text-white hover:bg-red-500/10 transition self-start cursor-pointer"
-                    >
-                        <LogOut className="w-4 h-4" />
-                        Log out
-                    </button>
                 </div>
 
                 <nav className="flex flex-col gap-2">

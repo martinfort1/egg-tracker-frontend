@@ -138,7 +138,7 @@ export default function AddVaccineApplicationModal({ vaccine, onSuccess, childre
             </Button>
             <Button
               type="submit"
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+              className="flex-1 bg-linear-to-r from-green-400/80 to-green-600/60 text-white hover:from-green-600 hover:to-green-700 w-full sm:w-auto flex items-center gap-2 cursor-pointer"
               disabled={loading}
             >
               {loading ? "Adding..." : "Add Application"}

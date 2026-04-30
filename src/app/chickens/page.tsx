@@ -105,7 +105,7 @@ export default function ChickensPage() {
     return (
         <div className="space-y-8">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                <h1 className="text-2xl sm:text-3xl font-black text-center sm:text-left">
+                <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-black text-center sm:text-left text-shadow-lg">
                     Chickens Management
                 </h1>
                 <Link href="#" className="hidden">
@@ -114,8 +114,8 @@ export default function ChickensPage() {
             </div>
 
             {/* Metric Cards Row 1 */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <MetricCardValue title="Current Chickens" value={currentCount} unit="" isCurrency={false} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <MetricCardValue title="Current Chickens" value={currentCount}  isCurrency={false} />
                 <div className="bg-linear-to-br from-yellow-600/50 via-violet-600/40 to-green-900/35 border border-white/20 backdrop-blur-xl p-6 rounded-2xl shadow-2xl text-white">
                     <p className="text-xl text-slate-900/90 tracking-wide">Laying Percentage</p>
                     <p className="text-3xl md:text-4xl font-extrabold text-black mt-3">{laying.toFixed(2)}%</p>
@@ -185,7 +185,7 @@ export default function ChickensPage() {
             {/* Purchase History Cards */}
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold">Purchase History</h2>
+                    <h2 className="text-2xl font-['Playfair_Display'] font-bold text-shadow-lg">Purchase History</h2>
                     {chickens.length > 0 && (
                         <span className="text-sm text-gray-500">
                             {chickens.length} purchase{chickens.length !== 1 ? 's' : ''}
@@ -199,7 +199,7 @@ export default function ChickensPage() {
                         <p className="text-gray-400">Add your first purchase to get started.</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 gap-6">
                         {chickens.map((chicken) => (
                             <ChickenPurchaseCard
                                 key={chicken.id}

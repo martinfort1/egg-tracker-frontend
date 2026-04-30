@@ -30,7 +30,7 @@ export default function VaccinesPage() {
     return (
         <div className="space-y-6 p-4 md:p-6 bg-linear-to-br from-slate-900/30 via-slate-900/20 to-slate-900/30 rounded-2xl border border-white/10 shadow-xl">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                <h1 className="flex justify-center text-2xl sm:text-3xl font-black text-white">
+                <h1 className="flex justify-center text-2xl sm:text-3xl font-['Playfair_Display'] font-black text-white text-shadow-lg">
                     Vaccines
                 </h1>
                 <Link href="/vaccines/new">
