@@ -9,6 +9,7 @@ import TopBuyers from "@/components/top-buyers";
 import LoadSpin from "@/components/load-spin";
 import { formatCurrency } from "@/lib/utils";
 import { MetricCardValue } from "@/components/metric-card-value";
+import Footer from "@/components/footer";
 
 
 export default function DashboardPage() {

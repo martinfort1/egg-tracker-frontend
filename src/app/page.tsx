@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Egg, TrendingUp, Users, DollarSign, Zap, BarChart3,  Briefcase, Calendar, Github } from "lucide-react";
+import { Egg, TrendingUp, Users, DollarSign, Zap, BarChart3, Briefcase, Calendar, Github, Bird, ChevronDown } from "lucide-react";
+import Footer from "@/components/footer";
 
 const features = [
   {
@@ -41,7 +42,7 @@ const features = [
     description: "Visualize profit margins and trends"
   },
   {
-    icon: Calendar,
+    icon: Bird,
     title: "Chicken Tracking",
     description: "Complete flock management system"
   },
@@ -49,10 +50,10 @@ const features = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-slate-900 text-white">
+    <div className="bg-slate-950 text-white scroll-smooth">
       {/* Hero Section */}
       <div
-        className="flex-1 flex items-center justify-center bg-cover bg-center relative overflow-hidden"
+        className="h-screen flex items-center justify-center bg-cover bg-center relative overflow-hidden"
         style={{
           backgroundImage: "url('/egg-bg.jpg')"
         }}
@@ -132,10 +133,19 @@ export default function LandingPage() {
           </motion.div>
 
         </div>
+
+        {/* Scroll Indicator */}
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20"
+        >
+          <ChevronDown className="w-8 h-8 text-yellow-400 opacity-70" />
+        </motion.div>
       </div>
 
       {/* Features Section */}
-      <section className="py-20 px-6 bg-slate-900/50 backdrop-blur-sm border-t border-white/10">
+      <section id="features" className="py-24 px-6 bg-slate-900/50 backdrop-blur-sm border-t border-white/10 transition-all duration-700">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -156,14 +166,14 @@ export default function LandingPage() {
                   key={index}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  transition={{ duration: 0.5, delay: index * 0.15 }}
                   viewport={{ once: true }}
-                  className="group relative bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-xl border border-white/10 hover:border-yellow-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/10"
+                  className="group relative bg-linear-to-br from-slate-800 to-slate-900 p-6 rounded-xl border border-white/10 hover:border-yellow-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/10"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/0 to-orange-500/0 group-hover:from-yellow-500/5 group-hover:to-orange-500/5 rounded-xl transition-all duration-300" />
+                  <div className="absolute inset-0 bg-linear-to-br from-yellow-500/0 to-orange-500/0 group-hover:from-yellow-500/5 group-hover:to-orange-500/5 rounded-xl transition-all duration-300" />
                   
                   <div className="relative z-10">
-                    <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <div className="w-12 h-12 bg-linear-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                       <Icon className="w-6 h-6 text-white" />
                     </div>
                     <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
@@ -177,65 +187,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-950 border-t border-white/10 py-12 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            {/* Brand Column */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Egg className="w-6 h-6 text-yellow-400" />
-                <span className="text-lg font-bold">Egg Tracker</span>
-              </div>
-              <p className="text-gray-400 text-sm">Simplifying poultry business management</p>
-            </div>
-
-            {/* Product Column */}
-            <div>
-              <h4 className="font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><Link href="#features" className="hover:text-yellow-400 transition-colors">Features</Link></li>
-                <li><Link href="#" className="hover:text-yellow-400 transition-colors">Pricing</Link></li>
-                <li><Link href="#" className="hover:text-yellow-400 transition-colors">FAQ</Link></li>
-              </ul>
-            </div>
-
-            {/* Resources Column */}
-            <div>
-              <h4 className="font-semibold mb-4">Resources</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><Link href="#" className="hover:text-yellow-400 transition-colors">Documentation</Link></li>
-                <li><Link href="#" className="hover:text-yellow-400 transition-colors">Support</Link></li>
-                <li><Link href="#" className="hover:text-yellow-400 transition-colors">Status</Link></li>
-              </ul>
-            </div>
-
-            {/* Social/Contact Column */}
-            <div>
-              <h4 className="font-semibold mb-4">Connect</h4>
-              <div className="flex gap-4">
-                <a 
-                  href="https://github.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center hover:bg-yellow-500/20 hover:border-yellow-500/50 border border-white/10 transition-all duration-300"
-                >
-                  <Github className="w-5 h-5" />
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* Divider */}
-          <div className="border-t border-white/10 py-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
-            <p>&copy; 2026 Egg Tracker. All rights reserved.</p>
-            <div className="flex gap-6 mt-4 md:mt-0">
-              <Link href="#" className="hover:text-yellow-400 transition-colors">Privacy Policy</Link>
-              <Link href="#" className="hover:text-yellow-400 transition-colors">Terms of Service</Link>
-              <Link href="#" className="hover:text-yellow-400 transition-colors">Cookie Policy</Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

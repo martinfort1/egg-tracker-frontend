@@ -121,7 +121,7 @@ Muchas gracias!`;
     };
 
     return (
-        <div className="grid grid-cols-1 space-y-8 bg-linear-to-br from-slate-900/30 via-slate-900/20 to-slate-900/30 p-4 md:p-6 rounded-2xl border border-white/10 shadow-xl max-w-2xl">
+        <div className="grid grid-cols-1 space-y-8 bg-linear-to-br from-slate-900/30 via-slate-900/20 to-slate-900/30 p-4 md:p-6 rounded-2xl border border-white/10 shadow-xl align-center mx-auto">
             
             {/* Header */}
             <div className="bg-linear-to-br from-indigo-900/30 via-violet-900/25 to-slate-900/40 p-6 rounded-2xl border border-white/20 shadow-lg">
@@ -254,7 +254,7 @@ Muchas gracias!`;
                 <div className="flex gap-3">
                     <Button
                     onClick={handleSendWhatsApp}
-                    size={"sm"}
+                    size={"lg"}
                     className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 text-white cursor-pointer"
                     >
                         <Send size={18} /> Send WhatsApp
@@ -265,7 +265,7 @@ Muchas gracias!`;
                             copied 
                                 ? "bg-green-500/90 text-white" 
                                 : "bg-linear-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 cursor-pointer"
-                        }`}size="sm"
+                        }`}size="lg"
                     >
                         <Copy size={18} />
                         {copied ? "Copied!" : "Copy Message"}
@@ -273,7 +273,8 @@ Muchas gracias!`;
                 </div>
                 <Button
                     onClick={handleDelete}
-                    className="w-full bg-linear-to-r from-red-600/90 to-red-700/90 text-white hover:from-red-700 hover:to-red-800 transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer" size="sm"
+                    className="w-full bg-linear-to-r from-red-600/90 to-red-700/90 text-white hover:from-red-700 hover:to-red-800 transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer" 
+                    size="lg"
                 >
                     <Trash2 size={18} />
                     Delete Sale

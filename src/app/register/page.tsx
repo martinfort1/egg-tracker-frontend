@@ -111,9 +111,9 @@ export default function RegisterPage() {
           transition={{ duration: 0.8, delay: 0.3 }}
           className="text-center my-8"
         >
-          <img src="/Logo_NoBuffer.png" alt="Egg Tracker Logo" className="mx-auto size-2/3 my-4" />
-
-
+          <Link href="/">
+            <img src="/Logo_NoBuffer.png" alt="Egg Tracker Logo" className="mx-auto size-2/3 my-4" />
+          </Link>
         </motion.div>
 
         {/* Register Form */}

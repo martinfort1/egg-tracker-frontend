@@ -69,31 +69,7 @@ export default function LoginPage() {
       {/* Enhanced overlay with gradient */}
       <div className="absolute inset-0 bg-linear-to-br from-black/80 via-black/60 to-black/40 backdrop-blur-[2px]" />
 
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          animate={{
-            rotate: 360,
-            scale: [1, 1.1, 1],
-          }}
-          transition={{
-            rotate: { duration: 20, repeat: Infinity, ease: "linear" },
-            scale: { duration: 4, repeat: Infinity, ease: "easeInOut" }
-          }}
-          className="absolute top-20 left-20 w-32 h-32 bg-yellow-400/10 rounded-full blur-xl"
-        />
-        <motion.div
-          animate={{
-            rotate: -360,
-            scale: [1, 1.2, 1],
-          }}
-          transition={{
-            rotate: { duration: 25, repeat: Infinity, ease: "linear" },
-            scale: { duration: 5, repeat: Infinity, ease: "easeInOut" }
-          }}
-          className="absolute bottom-20 right-20 w-40 h-40 bg-orange-400/10 rounded-full blur-xl"
-        />
-      </div>
+
       {/* Main content */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -109,7 +85,9 @@ export default function LoginPage() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="text-center mb-8"
         >
-          <img src="/Logo_NoBuffer.png" alt="Egg Tracker Logo" className="mx-auto size-2/3 my-4" />
+          <Link href="/">
+            <img src="/Logo_NoBuffer.png" alt="Egg Tracker Logo" className="mx-auto size-2/3 my-4"/>
+          </Link>
         </motion.div>
 
         {/* Login Form */}

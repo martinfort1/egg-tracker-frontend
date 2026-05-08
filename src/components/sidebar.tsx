@@ -108,16 +108,14 @@ export default function Sidebar() {
                 <button
                     type="button"
                     onClick={handleLogout}
-                    className="flex flex-row w-full justify-between align-center px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-tighter text-red-400 bg-red-500/10 border-red-500/30 hover:text-white hover:bg-red-500/20 transition-all border hover:border-red-500/30 cursor-pointer mb-4"
+                    className="flex flex-row w-full justify-center align-center px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-tighter text-red-400 bg-red-500/10 border-red-500/30 hover:text-white hover:bg-red-500/20 transition-all border hover:border-red-500/30 cursor-pointer mb-2"
                 >
-                    <LogOut className="w-4 h-4" />
-                    Exit
+                    Exit sesssion
+                    <LogOut className="w-4 h-4 ml-4" />
                 </button>
-                <div className="flex justify-between items-center mb-8">
-                    <div className="flex flex-col gap-1">
-                            <img src="/FullLogo_Transparent_NoBuffer.png" alt="Egg Tracker Logo"/>
-                    </div>
-                </div>
+                <Link className="flex items-center gap-2 px-4 py-3 mb-8 rounded-xl " href="/">
+                    <img src="/Logo_NoBuffer.png" alt="Egg Tracker Logo"/>
+                </Link>
 
                 <nav className="flex flex-col gap-2">
                     {navItems.map(({ href, label, icon: Icon }) => (
