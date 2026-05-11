@@ -39,7 +39,7 @@ export default function BuyerCard({ buyer, refresh }: any) {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-2 pt-2">
+            <div className="grid grid-cols-1 gap-2 pt-6 sm:pt-2">
                 <Link href={`/buyers/${buyer.id}`}>
                     <Button size="sm" className="w-full hover:bg-slate-700 cursor-pointer">View Details</Button>
                 </Link>

@@ -11,15 +11,35 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import LoadSpin from "@/components/load-spin";
+import { pickContact } from "@/lib/contact-picker";
+import { Smartphone } from "lucide-react";
 
 export default function EditBuyerPage() {
     const router = useRouter();
     const { id } = useParams();
     const [loading, setLoading] = useState(true);
+    const [isLoadingContact, setIsLoadingContact] = useState(false);
 
     const { register, handleSubmit, formState: { errors }, setValue } = useForm<any>({
         resolver: zodResolver(buyerSchema)
     });
+
+    const handleImportContact = async () => {
+        setIsLoadingContact(true);
+        try {
+            const contact = await pickContact();
+            if (contact) {
+                if (contact.name) setValue("name", contact.name);
+                if (contact.phone) setValue("phone", contact.phone);
+                if (contact.address) setValue("address", contact.address);
+                toast.success("Contact imported successfully");
+            }
+        } catch (error: any) {
+            toast.error(error.message || "Failed to import contact");
+        } finally {
+            setIsLoadingContact(false);
+        }
+    };
 
     useEffect(() => {
         const fetchBuyer = async () => {
@@ -59,6 +79,16 @@ export default function EditBuyerPage() {
                     <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Edit Buyer</h1>
                     <p className="text-indigo-200">Update buyer information</p>
                 </div>
+
+                <Button
+                    type="button"
+                    onClick={handleImportContact}
+                    disabled={isLoadingContact}
+                    className="w-full bg-linear-to-r from-green-600 to-emerald-600 text-white font-semibold hover:from-green-700 hover:to-emerald-700 transition active:scale-95 rounded-xl cursor-pointer flex items-center justify-center gap-2"
+                >
+                    <Smartphone size={18} />
+                    {isLoadingContact ? "Importing..." : "Import from Contacts"}
+                </Button>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                     <div className="space-y-2">

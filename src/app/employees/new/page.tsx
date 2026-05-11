@@ -6,17 +6,37 @@ import { api } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { pickContact } from "@/lib/contact-picker";
+import { Smartphone } from "lucide-react";
+import { useState } from "react";
 
 export default function NewEmployeePage() {
     const router = useRouter();
+    const [isLoadingContact, setIsLoadingContact] = useState(false);
 
-    const { register, handleSubmit, formState: { errors } } = useForm({
+    const { register, handleSubmit, formState: { errors }, setValue } = useForm({
         defaultValues: {
             name: "",
             phone: "",
             salary: 0
         }
     });
+
+    const handleImportContact = async () => {
+        setIsLoadingContact(true);
+        try {
+            const contact = await pickContact();
+            if (contact) {
+                if (contact.name) setValue("name", contact.name);
+                if (contact.phone) setValue("phone", contact.phone);
+                toast.success("Contact imported successfully");
+            }
+        } catch (error: any) {
+            toast.error(error.message || "Failed to import contact");
+        } finally {
+            setIsLoadingContact(false);
+        }
+    };
 
     const onSubmit = async (data: any) => {
         try {
@@ -34,6 +54,25 @@ export default function NewEmployeePage() {
                 <div className="text-center mb-8">
                     <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Add Employee</h1>
                     <p className="text-indigo-200">Create a new employee record</p>
+                </div>
+
+                <Button
+                    type="button"
+                    onClick={handleImportContact}
+                    disabled={isLoadingContact}
+                    className="w-full bg-linear-to-r from-green-600 to-emerald-600 text-white font-semibold hover:from-green-700 hover:to-emerald-700 transition active:scale-95 rounded-xl cursor-pointer flex items-center justify-center gap-2"
+                >
+                    <Smartphone size={18} />
+                    {isLoadingContact ? "Importing..." : "Pick from Contacts"}
+                </Button>
+
+                <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-white/20"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                        <span className="px-2 bg-slate-900/90 text-white/60">or fill manually</span>
+                    </div>
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
