@@ -20,6 +20,7 @@ export default function EditSalePage() {
     const [buyers, setBuyers] = useState<any[]>([])
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { register, handleSubmit, watch, formState: { errors }, setValue } = useForm({
         resolver: zodResolver(saleSchema),
@@ -87,6 +88,7 @@ export default function EditSalePage() {
     }, [values]);
 
     const onSubmit = async (data: any) => {
+        setIsSubmitting(true);
         try {
             await api.patch(`/sales/${id}`, data);
             toast.success('Sale updated successfully');
@@ -94,6 +96,8 @@ export default function EditSalePage() {
         } catch (err) {
             console.error(err);
             toast.error('Failed to update sale');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -286,15 +290,17 @@ export default function EditSalePage() {
                         <Button
                             type="button"
                             onClick={() => router.back()}
-                            className="flex-1 bg-gray-600 text-white hover:bg-gray-700 transition active:scale-95 rounded-xl cursor-pointer"
+                            disabled={isSubmitting}
+                            className="flex-1 bg-gray-600 text-white hover:bg-gray-700 transition active:scale-95 rounded-xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Cancel
                         </Button>
                         <Button
                             type="submit"
-                            className="flex-1 bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl py-6 text-lg cursor-pointer"
+                            disabled={isSubmitting}
+                            className="flex-1 bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl py-6 text-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Update Sale
+                            {isSubmitting ? "Updating..." : "Update Sale"}
                         </Button>
                     </div>
                 </form>

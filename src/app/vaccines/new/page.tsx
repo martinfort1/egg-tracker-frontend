@@ -4,11 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { set } from "zod";
 
 export default function NewVaccinePage() {
     const router = useRouter();
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { register, handleSubmit, formState: { errors } } = useForm({
         defaultValues: {
@@ -19,6 +22,7 @@ export default function NewVaccinePage() {
     });
 
     const onSubmit = async (data: any) => {
+        setIsSubmitting(true);
         try {
             const payload = {
                 name: data.name,
@@ -30,6 +34,8 @@ export default function NewVaccinePage() {
             router.push("/vaccines");
         } catch (error) {
             toast.error("Failed to add vaccine");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -73,9 +79,10 @@ export default function NewVaccinePage() {
                         <div className="flex gap-4 pt-6">
                             <Button
                                 type="submit"
+                                disabled={isSubmitting}
                                 className="flex-1 bg-linear-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 font-bold rounded-lg cursor-pointer"
                             >
-                                Add Vaccine
+                                {isSubmitting ? 'Adding...' : 'Add Vaccine'}
                             </Button>
                             <Button
                                 type="button"

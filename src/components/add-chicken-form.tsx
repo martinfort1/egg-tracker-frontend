@@ -9,6 +9,7 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 
 export function AddChickenForm({ onSuccess }: { onSuccess: () => void }) {
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -45,7 +46,7 @@ export function AddChickenForm({ onSuccess }: { onSuccess: () => void }) {
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
-        setLoading(true);
+        setIsSubmitting(true);
 
         try {
             await api.post('/chickens', {
@@ -70,7 +71,7 @@ export function AddChickenForm({ onSuccess }: { onSuccess: () => void }) {
             toast.error('Failed to record chicken purchase');
             console.error(err);
         } finally {
-            setLoading(false);
+            setIsSubmitting(false);
         }
     };
 
@@ -140,10 +141,10 @@ export function AddChickenForm({ onSuccess }: { onSuccess: () => void }) {
                     </div>
                     <Button
                         type="submit"
-                        disabled={loading}
+                        disabled={isSubmitting}
                         className="w-full bg-linear-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700"
                     >
-                        {loading ? 'Recording...' : 'Record Purchase'}
+                        {isSubmitting ? 'Recording...' : 'Record Purchase'}
                     </Button>
                 </form>
             </DialogContent>

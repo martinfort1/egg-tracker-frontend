@@ -8,6 +8,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { is } from "zod/locales";
 
 interface Carton {
     id: string;
@@ -24,6 +25,8 @@ export default function EditCartonPage({ params }: { params: { id: string } }) {
     const router = useRouter();
     const {id} = useParams();
     
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const [loading, setLoading] = useState(true);
 
     const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<Carton>();
@@ -59,12 +62,15 @@ export default function EditCartonPage({ params }: { params: { id: string } }) {
     }, [quantity, price, amountPaid, setValue]);
     
     const onSubmit = async (data: Carton) => {
+        setIsSubmitting(true);
         try {
             await api.put(`/cartons/${id}`, data);
             toast.success("Carton purchase updated successfully");
             router.push(`/cartons/${id}`);
         } catch (error) {
             toast.error("Failed to update carton purchase");
+        } finally {
+            setIsSubmitting(false);
         }
     };
     
@@ -159,9 +165,10 @@ export default function EditCartonPage({ params }: { params: { id: string } }) {
                         </Button>
                         <Button
                             type="submit"
+                            disabled={isSubmitting}
                             className="flex-1 bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl cursor-pointer"
                         >
-                            Update Carton Purchase
+                            {isSubmitting ? 'Updating...' : 'Update Carton Purchase'}
                         </Button>
                     </div>
                 </form>

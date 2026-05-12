@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -23,7 +23,8 @@ interface FeedBag {
 export default function EditFeedBagPage() {
     const router = useRouter();
     const { id } = useParams();
-
+    
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FeedBag>();
 
     const amount = watch("amount");
@@ -58,12 +59,16 @@ export default function EditFeedBagPage() {
     }, [amount, price, amountPaid, setValue]);
 
     const onSubmit = async (data: FeedBag) => {
+        setIsSubmitting(true);
         try {
             await api.put(`/feed-bags/${id}`, data);
             toast.success("Feed purchase updated successfully");
             router.push(`/feed-bags/${id}`);
         } catch (error) {
             toast.error("Failed to update feed purchase");
+        }
+        finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -87,11 +92,11 @@ export default function EditFeedBagPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Amount (kg)</label>
+                        <label className="text-sm font-semibold text-white">Amount (bags)</label>
                         <Input
                             type="number"
                             step="0.01"
-                            placeholder="Amount in kg"
+                            placeholder="Amount in bags"
                             {...register("amount", { valueAsNumber: true, required: "Amount is required", min: 0.01 })}
                             className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                         />
@@ -99,11 +104,11 @@ export default function EditFeedBagPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Price per kg</label>
+                        <label className="text-sm font-semibold text-white">Price per bag</label>
                         <Input
                             type="number"
                             step="0.01"
-                            placeholder="Price per kg"
+                            placeholder="Price per bag"
                             {...register("price", { valueAsNumber: true, required: "Price is required", min: 0.01 })}
                             className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                         />
@@ -166,8 +171,9 @@ export default function EditFeedBagPage() {
                         <Button
                             type="submit"
                             className="flex-1 bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl cursor-pointer"
+                            disabled={isSubmitting}                            
                         >
-                            Update Feed Purchase
+                            {isSubmitting ? "Updating..." : "Update Feed Purchase"}
                         </Button>
                     </div>
                 </form>

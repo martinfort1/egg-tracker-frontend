@@ -20,6 +20,7 @@ export default function NewSalePage() {
     const [buyers, setBuyers] = useState<any[]>([])
     const [total, setTotal] = useState(0);
     const [fullyPaid, setFullyPaid] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
         resolver: zodResolver(saleSchema),
@@ -73,7 +74,7 @@ export default function NewSalePage() {
     }, [fullyPaid, total, setValue]);
 
     const onSubmit = async( data: any) => {
-
+        setIsSubmitting(true);
         try{
             await api.post("/sales", data)
                 .then(res => {
@@ -85,8 +86,9 @@ export default function NewSalePage() {
         } catch (err){
             console.error(err)
             toast.error('Faled to create sale');
+        } finally {
+            setIsSubmitting(false);
         }
-
     }
 
     return (
@@ -315,9 +317,10 @@ export default function NewSalePage() {
                     {/* Submit Button */}
                     <Button 
                         type="submit"
-                        className="w-full bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl py-6 text-lg cursor-pointer"
+                        disabled={isSubmitting}
+                        className="w-full bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl py-6 text-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Create Sale
+                        {isSubmitting ? "Creating..." : "Create Sale"}
                     </Button>
                 </form>
             </div>

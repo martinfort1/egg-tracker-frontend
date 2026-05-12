@@ -19,6 +19,7 @@ export default function EditBuyerPage() {
     const { id } = useParams();
     const [loading, setLoading] = useState(true);
     const [isLoadingContact, setIsLoadingContact] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { register, handleSubmit, formState: { errors }, setValue } = useForm<any>({
         resolver: zodResolver(buyerSchema)
@@ -61,12 +62,15 @@ export default function EditBuyerPage() {
     }, [id, setValue, router]);
 
     const onSubmit = async (data: any) => {
+        setIsSubmitting(true);
         try {
             await api.put(`/buyers/${id}`, data);
             toast.success("Buyer updated successfully");
             router.push(`/buyers/${id}`);
         } catch (error) {
             toast.error("Failed to update buyer");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -135,15 +139,17 @@ export default function EditBuyerPage() {
                         <Button
                             type="button"
                             onClick={() => router.back()}
-                            className="flex-1 bg-gray-600 text-white hover:bg-gray-700 transition active:scale-95 rounded-xl cursor-pointer"
+                            disabled={isSubmitting}
+                            className="flex-1 bg-gray-600 text-white hover:bg-gray-700 transition active:scale-95 rounded-xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Cancel
                         </Button>
                         <Button
                             type="submit"
-                            className="flex-1 bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl cursor-pointer"
+                            disabled={isSubmitting}
+                            className="flex-1 bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Update Buyer
+                            {isSubmitting ? "Updating..." : "Update Buyer"}
                         </Button>
                     </div>
                 </form>

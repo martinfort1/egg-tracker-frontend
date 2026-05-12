@@ -13,6 +13,7 @@ import { useState } from "react";
 export default function NewEmployeePage() {
     const router = useRouter();
     const [isLoadingContact, setIsLoadingContact] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { register, handleSubmit, formState: { errors }, setValue } = useForm({
         defaultValues: {
@@ -39,12 +40,15 @@ export default function NewEmployeePage() {
     };
 
     const onSubmit = async (data: any) => {
+        setIsSubmitting(true);
         try {
             await api.post("/employees", data);
             toast.success("Employee created successfully");
             router.push("/employees");
         } catch (error) {
             toast.error("Failed to create employee");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -109,9 +113,11 @@ export default function NewEmployeePage() {
 
                     <Button
                         type="submit"
+                        disabled={isSubmitting}
+                        
                         className="w-full bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl cursor-pointer"
                     >
-                        Create Employee
+                        {isSubmitting ? "Creating..." : "Create Employee"}
                     </Button>
                 </form>
             </div>

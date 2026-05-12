@@ -11,6 +11,8 @@ import { toast } from "sonner";
 export default function NewCartonPage() {
     const router = useRouter();
 
+    
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
         defaultValues: {
             date: new Date().toISOString().split('T')[0],
@@ -42,12 +44,15 @@ export default function NewCartonPage() {
     }, [fullyPaid, quantity, price, setValue]);
 
     const onSubmit = async (data: any) => {
+        setIsSubmitting(true);
         try {
             await api.post("/cartons", data);
             toast.success("Carton purchase created successfully");
             router.push("/cartons");
         } catch (error) {
             toast.error("Failed to create carton purchase");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -171,9 +176,10 @@ export default function NewCartonPage() {
 
                     <Button
                         type="submit"
+                        disabled={isSubmitting}
                         className="w-full bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl cursor-pointer"
                     >
-                        Create Carton Purchase
+                        {isSubmitting ? 'Creating...' : 'Create Carton Purchase'}
                     </Button>
                 </form>
             </div>

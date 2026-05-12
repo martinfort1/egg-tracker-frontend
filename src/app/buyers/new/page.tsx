@@ -18,6 +18,7 @@ export default function NewBuyerPage() {
     
     const router = useRouter();
     const [isLoadingContact, setIsLoadingContact] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { register, handleSubmit, formState: { errors }, setValue } = useForm<any>({
         resolver: zodResolver(buyerSchema)
@@ -41,9 +42,16 @@ export default function NewBuyerPage() {
     };
 
     const onSubmit = async (data: FormData)=> {
-        await api.post("/buyers", data);
-        toast.success("Created new buyer succesfully")
-        router.push("/buyers");
+        setIsSubmitting(true);
+        try {
+            await api.post("/buyers", data);
+            toast.success("Created new buyer succesfully")
+            router.push("/buyers");
+        } catch (error) {
+            toast.error("Failed to create buyer");
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     return (
@@ -116,9 +124,10 @@ export default function NewBuyerPage() {
 
                     <Button 
                         type="submit"
-                        className="w-full bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl cursor-pointer"
+                        disabled={isSubmitting}
+                        className="w-full bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Create Buyer
+                        {isSubmitting ? "Creating..." : "Create Buyer"}
                     </Button>
                 </form>
             </div>

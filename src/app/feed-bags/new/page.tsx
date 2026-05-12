@@ -10,8 +10,9 @@ import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
 
 export default function NewFeedBagPage() {
-    const router = useRouter();
 
+    const router = useRouter();
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
         defaultValues: {
             date: new Date().toISOString().split('T')[0],
@@ -44,12 +45,16 @@ export default function NewFeedBagPage() {
     }, [fullyPaid, amount, price, setValue]);
 
     const onSubmit = async (data: any) => {
+        setIsSubmitting(true);
         try {
             await api.post("/feed-bags", data);
             toast.success("Feed purchase created successfully");
             router.push("/feed-bags");
         } catch (error) {
             toast.error("Failed to create feed purchase");
+        }
+        finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -185,9 +190,10 @@ export default function NewFeedBagPage() {
 
                     <Button
                         type="submit"
+                        disabled={isSubmitting}
                         className="w-full bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl cursor-pointer"
                     >
-                        Create Feed Purchase
+                        {isSubmitting ? "Creating..." : "Create Feed Purchase"}
                     </Button>
                 </form>
             </div>

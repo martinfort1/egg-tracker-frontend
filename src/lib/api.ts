@@ -1,5 +1,6 @@
 import axios from "axios";
 import { logout } from "@/lib/auth";
+import { toast } from "sonner";
 
 export const api = axios.create({
     // baseURL: "/api",
@@ -16,14 +17,17 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+
 api.interceptors.response.use(
     (response) => response,
     (error) => {
         const status = error?.response?.status;
-        if (status === 401) {
+        if (status === 401 || status === 403) {
             logout();
+            toast.error("Session expired. Please login again.");
+            
             if (typeof window !== "undefined") {
-                window.location.href = "/login";
+                window.location.replace("/login");
             }
         }
         return Promise.reject(error);

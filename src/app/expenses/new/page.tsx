@@ -9,7 +9,8 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export default function NewExpensePage() {
-    const router = useRouter();
+    const router = useRouter();    
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [categories, setCategories] = useState<any[]>([]);
     const [showNewCategory, setShowNewCategory] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState("");
@@ -62,7 +63,7 @@ export default function NewExpensePage() {
             toast.error("Please select or create a category");
             return;
         }
-
+        setIsSubmitting(true);
         try {
             await api.post("/expenses", {
                 ...data,
@@ -74,6 +75,8 @@ export default function NewExpensePage() {
             router.push("/expenses");
         } catch (error) {
             toast.error("Failed to create expense");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -189,9 +192,10 @@ export default function NewExpensePage() {
 
                     <Button
                         type="submit"
+                        disabled={isSubmitting}
                         className="w-full bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl cursor-pointer"
                     >
-                        Create Expense
+                        {isSubmitting ? 'Creating...' : 'Create Expense'}
                     </Button>
                 </form>
             </div>

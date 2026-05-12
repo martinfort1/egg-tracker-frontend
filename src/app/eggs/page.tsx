@@ -17,6 +17,7 @@ export default function EggLayingPage() {
     const [tempBoxes, setTempBoxes] = useState(0);
     const [tempCartons, setTempCartons] = useState(0);
     const [open, setOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         generateCalendarDays();
@@ -58,7 +59,7 @@ export default function EggLayingPage() {
 
     const handleSaveEgg = async () => {
         if (!editingDate) return;
-
+        setIsSubmitting(true);
         try {
             await api.post("/egg-laying", {
                 date: editingDate,
@@ -70,6 +71,8 @@ export default function EggLayingPage() {
             fetchEggData();
         } catch (error) {
             toast.error("Failed to save egg data");
+        } finally {
+            setIsSubmitting(false);
         }
     };
     
@@ -231,10 +234,11 @@ return (
 
                                             <div className="flex gap-2">
                                                 <Button
+                                                    disabled={isSubmitting}
                                                     onClick={handleSaveEgg}
-                                                    className="flex-1 bg-green-600 hover:bg-green-700"
+                                                    className="flex-1 bg-green-600 hover:bg-green-700 cursor-pointer hover:scale-105"
                                                 >
-                                                    Save
+                                                    {isSubmitting ? 'Saving...' : 'Save'}
                                                 </Button>
                                                 {hasData && (
                                                     <Button
@@ -242,7 +246,7 @@ return (
                                                             handleDelete(dateStr);
                                                             setOpen(false);
                                                         }}
-                                                        className="flex-1 bg-red-600 hover:bg-red-700"
+                                                        className="flex-1 bg-red-600 hover:bg-red-700 cursor-pointer hover:scale-105"
                                                     >
                                                         Delete
                                                     </Button>
