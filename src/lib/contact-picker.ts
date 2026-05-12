@@ -9,6 +9,15 @@ export interface ContactInfo {
   address?: string;
 }
 
+export function supportsContactPicker() {
+  return (
+    typeof navigator !== "undefined" &&
+    "contacts" in navigator &&
+    !!(navigator as any).contacts?.select &&
+    window.isSecureContext
+  );
+}
+
 export async function pickContact(): Promise<ContactInfo | null> {
   // Check if Contact Picker API is supported
   if (!("contacts" in navigator)) {

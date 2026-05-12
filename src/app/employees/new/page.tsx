@@ -6,7 +6,7 @@ import { api } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { pickContact } from "@/lib/contact-picker";
+import { pickContact, supportsContactPicker } from "@/lib/contact-picker";
 import { Smartphone } from "lucide-react";
 import { useState } from "react";
 
@@ -22,7 +22,7 @@ export default function NewEmployeePage() {
             salary: 0
         }
     });
-
+    const supported = supportsContactPicker();
     const handleImportContact = async () => {
         setIsLoadingContact(true);
         try {
@@ -60,7 +60,7 @@ export default function NewEmployeePage() {
                     <p className="text-indigo-200">Create a new employee record</p>
                 </div>
 
-                <Button
+                { supported && (<Button
                     type="button"
                     onClick={handleImportContact}
                     disabled={isLoadingContact}
@@ -69,7 +69,7 @@ export default function NewEmployeePage() {
                     <Smartphone size={18} />
                     {isLoadingContact ? "Importing..." : "Pick from Contacts"}
                 </Button>
-
+                )}
                 <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                         <div className="w-full border-t border-white/20"></div>

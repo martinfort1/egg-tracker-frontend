@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { pickContact } from "@/lib/contact-picker";
+import { pickContact, supportsContactPicker } from "@/lib/contact-picker";
 import { Smartphone } from "lucide-react";
 import { useState } from "react";
 
@@ -24,6 +24,7 @@ export default function NewBuyerPage() {
         resolver: zodResolver(buyerSchema)
     })
 
+    const supported = supportsContactPicker();
     const handleImportContact = async () => {
         setIsLoadingContact(true);
         try {
@@ -62,24 +63,27 @@ export default function NewBuyerPage() {
                     <p className="text-indigo-200">Add a new buyer to your system</p>
                 </div>
 
-                <Button
-                    type="button"
-                    onClick={handleImportContact}
-                    disabled={isLoadingContact}
-                    className="w-full bg-linear-to-r from-green-600 to-emerald-600 text-white font-semibold hover:from-green-700 hover:to-emerald-700 transition active:scale-95 rounded-xl cursor-pointer flex items-center justify-center gap-2"
-                >
-                    <Smartphone size={18} />
-                    {isLoadingContact ? "Importing..." : "Import from Contacts"}
-                </Button>
-
-                <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-white/20"></div>
+                { supported && (
+                <div>
+                    <Button
+                        type="button"
+                        onClick={handleImportContact}
+                        disabled={isLoadingContact}
+                        className="w-full bg-linear-to-r from-green-600 to-emerald-600 text-white font-semibold hover:from-green-700 hover:to-emerald-700 transition active:scale-95 rounded-xl cursor-pointer flex items-center justify-center gap-2"
+                        >
+                        <Smartphone size={18} />
+                        {isLoadingContact ? "Importing..." : "Import from Contacts"}
+                    </Button>
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-white/20"></div>
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="px-2 bg-slate-900/90 text-white/60">or fill manually</span>
+                        </div>
                     </div>
-                    <div className="relative flex justify-center text-sm">
-                        <span className="px-2 bg-slate-900/90 text-white/60">or fill manually</span>
-                    </div>
-                </div>
+                </div>    
+                )}
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                     <div className="space-y-2">
