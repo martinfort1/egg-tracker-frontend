@@ -6,6 +6,7 @@ import Link from "next/link";
 import PaymentModal from "./payment-modal";
 import { motion } from "framer-motion";
 import { formatCurrency, formatUtcDate } from "@/lib/utils";
+import { UserCheck, UserMinus, UserPlus, UserX } from "lucide-react";
 
 export default function EmployeeCard({ employee, refresh }: any) {
   const handleDelete = async () => {
@@ -18,11 +19,27 @@ export default function EmployeeCard({ employee, refresh }: any) {
   };
 
   const paymentInfo = getEmployeePaymentStatus(employee);
-  const statusColorMap: any = {
-    'Payment Due': 'bg-red-100 text-red-700 border-red-700',
-    'Partially Paid': 'bg-yellow-100 text-yellow-700 border-yellow-700',
-    'Paid': 'bg-green-100 text-green-700 border-green-700',
-    'Advanced': 'bg-cyan-100 text-cyan-700 border-cyan-700',
+  const statusConfigMap: any = {
+    'Payment Due': {
+      color:'bg-red-100 text-red-700 border-red-700', 
+      icon: <UserX />,
+      label: 'Due'
+    },
+    'Partially Paid': {
+      color:'bg-yellow-100 text-yellow-700 border-yellow-700',
+      icon: <UserMinus />,
+      label: 'Partial'
+    },
+    'Paid': {
+      color:'bg-green-100 text-green-700 border-green-700',
+      icon: <UserCheck />,
+      label: 'Paid'
+    },
+    'Advanced': {
+      color:'bg-cyan-100 text-cyan-700 border-cyan-700',
+      icon: <UserPlus />,
+      label: 'Advanced'
+    }
   };
 
   return (
@@ -34,21 +51,16 @@ export default function EmployeeCard({ employee, refresh }: any) {
     >
       <div className="flex justify-between items-start">
         <h2 className="text-lg font-bold text-white">{employee.name}</h2>
-        <span className={`px-2 py-1 rounded text-sm ${statusColorMap[paymentInfo.status]}`}>
-          {paymentInfo.status === 'Payment Due'
-            ? '🔴 Due'
-            : paymentInfo.status === 'Partially Paid'
-              ? '🟡 Partial'
-              : paymentInfo.status === 'Paid'
-                ? '🟢 Paid'
-                : '🔵 Advanced'}
+        <span className={`px-2 py-1 rounded text-sm ${statusConfigMap[paymentInfo.status].color} align-baseline flex items-center gap-1`}>
+          {statusConfigMap[paymentInfo.status].icon}
+          {statusConfigMap[paymentInfo.status].label}
         </span>
       </div>
 
       <p className="text-sm text-indigo-100">📞 {employee.phone}</p>
 
       <div className="space-y-1 text-indigo-100">
-        <p>Monthly Salary: <span className="font-medium text-white">{formatCurrency(employee.salary)}</span></p>
+        <p>Monthly Salary: <span className="font-medium text-white">{formatCurrency(paymentInfo?.salary ?? employee.salary)}</span></p>
         <p>
           Paid this month:{" "}
           <span className="text-green-300">

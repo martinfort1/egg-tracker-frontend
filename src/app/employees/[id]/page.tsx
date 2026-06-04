@@ -15,12 +15,27 @@ interface Employee {
     name: string;
     phone: string;
     salary: number;
-    totalPaid: number;
-    amountOwed: number;
     lastPaidDate: string | null;
-    payments?: any[];
     createdAt: string;
     updatedAt: string;
+    payments?: EmployeePayment[];
+    salaryPeriods?: SalaryPeriod[];
+}
+
+interface EmployeePayment {
+    id: string;
+    amount: number;
+    date: string;
+    description: string;
+    salaryPeriodId?: string;
+}
+
+interface SalaryPeriod {
+    id: string;
+    month: number;
+    year: number;
+    salary: number;
+    balance: number;
 }
 
 export default function EmployeeDetailPage() {
@@ -60,34 +75,56 @@ export default function EmployeeDetailPage() {
     const paymentInfo = employee ? getEmployeePaymentStatus(employee) : null;
 
     const getMonthlyPaymentHistory = () => {
-        if (!employee?.payments?.length) return [];
+        if (!employee?.salaryPeriods || employee.salaryPeriods.length === 0) return [];
 
-        const monthlyData: { [key: string]: { payments: any[], totalPaid: number, salary: number } } = {};
-
-        employee.payments.forEach((payment: any) => {
-            const date = new Date(payment.date);
-            const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-            if (!monthlyData[key]) {
-                monthlyData[key] = { payments: [], totalPaid: 0, salary: employee.salary };
+        // Build payment map by month
+        const paymentsByMonth: { [key: string]: any[] } = {};
+        employee.payments?.forEach((payment: any) => {
+            if (payment.salaryPeriodId && employee.salaryPeriods) {
+                const period = employee.salaryPeriods.find(p => p.id === payment.salaryPeriodId);
+                if (period) {
+                    const key = `${period.year}-${String(period.month + 1).padStart(2, '0')}`;
+                    if (!paymentsByMonth[key]) {
+                        paymentsByMonth[key] = [];
+                    }
+                    paymentsByMonth[key].push(payment);
+                }
             }
-            monthlyData[key].payments.push(payment);
-            monthlyData[key].totalPaid += payment.amount;
         });
 
-        return Object.entries(monthlyData)
-            .map(([monthKey, data]) => {
-                const [year, month] = monthKey.split('-').map(Number);
-                const owed = data.salary - data.totalPaid;
+        // Build history from salaryPeriods (source of truth)
+        const history = employee.salaryPeriods
+            .map((period: any, idx: number) => {
+                const key = `${period.year}-${String(period.month + 1).padStart(2, '0')}`;
+                const payments = paymentsByMonth[key] || [];
+                const totalPaid = payments.reduce((sum: number, p: any) => sum + p.amount, 0);
+                
+                // Get previous period balance for context
+                const allSortedPeriods = [...employee.salaryPeriods!].sort((a, b) => {
+                    if (a.year !== b.year) return b.year - a.year;
+                    return b.month - a.month;
+                });
+                const currentIdx = allSortedPeriods.findIndex(p => p.id === period.id);
+                const prevPeriod = currentIdx >= 0 && currentIdx < allSortedPeriods.length - 1 
+                    ? allSortedPeriods[currentIdx + 1] 
+                    : null;
+                
+                // Get carryover balance from previous period
+                const carryoverBalance = prevPeriod?.balance ?? 0;
+                
+                // Calculate owed considering balance
+                const owed = (period.salary - carryoverBalance) - totalPaid;
+                
                 let status, color, text;
 
-                if (data.totalPaid === 0) {
+                if (totalPaid === 0) {
                     status = "Payment Due";
                     color = "text-red-400";
-                    text = `Owes $${new Intl.NumberFormat("es-AR").format(owed)}`;
+                    text = `Owes ${formatCurrency(owed)}`;
                 } else if (owed > 0) {
                     status = "Partially Paid";
                     color = "text-yellow-400";
-                    text = `Remaining $${new Intl.NumberFormat("es-AR").format(owed)}`;
+                    text = `Remaining ${formatCurrency(owed)}`;
                 } else if (owed === 0) {
                     status = "Paid";
                     color = "text-green-400";
@@ -95,23 +132,37 @@ export default function EmployeeDetailPage() {
                 } else {
                     status = "Advanced";
                     color = "text-cyan-400";
-                    text = `Advance $${new Intl.NumberFormat("es-AR").format(Math.abs(owed))}`;
+                    text = `Advance ${formatCurrency(Math.abs(owed))}`;
+                }
+
+                // Build balance context message
+                let balanceContext = "";
+                if (prevPeriod) {
+                    if (prevPeriod.balance > 0) {
+                        balanceContext = `Carried over: ${formatCurrency(prevPeriod.balance)} (Advanced)`;
+                    } else if (prevPeriod.balance < 0) {
+                        balanceContext = `Carried over: ${formatCurrency(Math.abs(prevPeriod.balance))} (Owed)`;
+                    }
                 }
 
                 return {
-                    month: new Date(year, month - 1).toLocaleDateString('en-US', { year: 'numeric', month: 'long' }),
-                    year,
-                    monthNum: month,
-                    totalPaid: data.totalPaid,
-                    salary: data.salary,
+                    month: new Date(period.year, period.month).toLocaleDateString('en-US', { year: 'numeric', month: 'long' }),
+                    year: period.year,
+                    monthNum: period.month + 1,
+                    totalPaid,
+                    salary: period.salary,
+                    balance: period.balance,
                     owed,
                     status,
                     color,
                     text,
-                    payments: data.payments
+                    balanceContext,
+                    payments
                 };
             })
             .sort((a, b) => b.year - a.year || b.monthNum - a.monthNum);
+            
+        return history;
     };
 
     const monthlyHistory = getMonthlyPaymentHistory();
@@ -256,6 +307,9 @@ export default function EmployeeDetailPage() {
                                                         {monthData.status}
                                                     </span>
                                                 </div>
+                                                {monthData.balanceContext && (
+                                                    <p className="text-xs text-indigo-300 mb-2">{monthData.balanceContext}</p>
+                                                )}
                                                 <div className="text-sm text-slate-300 space-y-1">
                                                     <p>Salary: {formatCurrency(monthData.salary)}</p>
                                                     <p>Paid: {formatCurrency(monthData.totalPaid)}</p>

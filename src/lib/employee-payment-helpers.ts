@@ -9,6 +9,14 @@ export const getEmployeePaymentStatus = (employee: any) => {
     (payment: any) => payment.month === month && payment.year === year
     );
 
+    // Get previous period's balance to use as carryover INTO this month
+    const prevMonth = month === 0 ? 11 : month - 1;
+    const prevYear = month === 0 ? year - 1 : year;
+    const prevPeriod = employee.salaryPeriods?.find(
+        (p: any) => p.month === prevMonth && p.year === prevYear
+    );
+    const carryoverBalance = prevPeriod?.balance ?? 0;
+
     const salary = currentPeriod?.salary ?? employee.salary;
   
     const paymentsThisMonth = employee.payments?.filter((p: any) => {
@@ -21,7 +29,9 @@ export const getEmployeePaymentStatus = (employee: any) => {
         0
     );
 
-  const owed = salary - paid;
+  // Owed = (salary - carryover_balance) - paid_this_month
+  // If carryover is positive (overpaid), it reduces what we owe
+  const owed = (salary - carryoverBalance) - paid;
 
   if (paid === 0) {
     return {
@@ -30,6 +40,8 @@ export const getEmployeePaymentStatus = (employee: any) => {
       text: `Owed ${formatCurrency(owed)}`,
       paid,
       owed,
+      salary,
+      balance: carryoverBalance,
     };
   }
 
@@ -40,6 +52,8 @@ export const getEmployeePaymentStatus = (employee: any) => {
       text: `Remaining ${formatCurrency(owed)}`,
       paid,
       owed,
+      salary,
+      balance: carryoverBalance,
     };
   }
 
@@ -50,6 +64,8 @@ export const getEmployeePaymentStatus = (employee: any) => {
       text: "Salary completed",
       paid,
       owed: 0,
+      salary,
+      balance: carryoverBalance,
     };
   }
 
@@ -59,5 +75,7 @@ export const getEmployeePaymentStatus = (employee: any) => {
     text: `Advance ${formatCurrency(Math.abs(owed))}`,
     paid,
     owed,
+    salary,
+    balance: carryoverBalance,
   };
 };

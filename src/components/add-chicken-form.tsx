@@ -83,7 +83,7 @@ export function AddChickenForm({ onSuccess }: { onSuccess: () => void }) {
                     Add Chickens
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] bg-slate-900 border border-white/10">
+            <DialogContent className="sm:max-w-106.25 bg-slate-900 border border-white/10">
                 <DialogHeader>
                     <DialogTitle className="text-white">Register Chicken Purchase</DialogTitle>
                 </DialogHeader>

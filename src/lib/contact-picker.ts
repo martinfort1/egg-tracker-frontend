@@ -1,7 +1,4 @@
-/**
- * Contact Picker API utility to import contacts from the device
- * Uses the Contact Picker API available on Chrome, Edge, and Samsung Internet
- */
+// Contact Picker API utility to import contacts from the device
 
 export interface ContactInfo {
   name?: string;
@@ -9,20 +6,18 @@ export interface ContactInfo {
   address?: string;
 }
 
-export function supportsContactPicker() {
-  return (
-    typeof navigator !== "undefined" &&
-    "contacts" in navigator &&
-    !!(navigator as any).contacts?.select &&
-    window.isSecureContext
-  );
+/**
+ * Check if the Contact Picker API is supported on this device
+ */
+export function supportsContactPicker(): boolean {
+  return typeof navigator !== 'undefined' && 'contacts' in navigator;
 }
 
 export async function pickContact(): Promise<ContactInfo | null> {
   // Check if Contact Picker API is supported
   if (!("contacts" in navigator)) {
     throw new Error(
-      "Contact Picker API is not supported on this device. Please use Chrome, Edge, or Samsung Internet to import contacts. You can also manually enter contact information."
+      "Contact Picker API is not supported on this device. Please manually enter contact information."
     );
   }
 

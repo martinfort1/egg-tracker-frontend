@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import LoadSpin from "@/components/load-spin";
-import { pickContact, supportsContactPicker } from "@/lib/contact-picker";
+import { pickContact } from "@/lib/contact-picker";
 import { Smartphone } from "lucide-react";
 
 export default function EditBuyerPage() {
@@ -19,13 +19,11 @@ export default function EditBuyerPage() {
     const { id } = useParams();
     const [loading, setLoading] = useState(true);
     const [isLoadingContact, setIsLoadingContact] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { register, handleSubmit, formState: { errors }, setValue } = useForm<any>({
         resolver: zodResolver(buyerSchema)
     });
-    
-    const supported = supportsContactPicker();
+
     const handleImportContact = async () => {
         setIsLoadingContact(true);
         try {
@@ -63,15 +61,12 @@ export default function EditBuyerPage() {
     }, [id, setValue, router]);
 
     const onSubmit = async (data: any) => {
-        setIsSubmitting(true);
         try {
             await api.put(`/buyers/${id}`, data);
             toast.success("Buyer updated successfully");
             router.push(`/buyers/${id}`);
         } catch (error) {
             toast.error("Failed to update buyer");
-        } finally {
-            setIsSubmitting(false);
         }
     };
 
@@ -85,17 +80,16 @@ export default function EditBuyerPage() {
                     <p className="text-indigo-200">Update buyer information</p>
                 </div>
 
-                { supported && (
-                    <Button
-                        type="button"
-                        onClick={handleImportContact}
-                        disabled={isLoadingContact}
-                        className="w-full bg-linear-to-r from-green-600 to-emerald-600 text-white font-semibold hover:from-green-700 hover:to-emerald-700 transition active:scale-95 rounded-xl cursor-pointer flex items-center justify-center gap-2"
-                    >
-                        <Smartphone size={18} />
-                        {isLoadingContact ? "Importing..." : "Import from Contacts"}
-                    </Button>
-                )}
+                <Button
+                    type="button"
+                    onClick={handleImportContact}
+                    disabled={isLoadingContact}
+                    className="w-full bg-linear-to-r from-green-600 to-emerald-600 text-white font-semibold hover:from-green-700 hover:to-emerald-700 transition active:scale-95 rounded-xl cursor-pointer flex items-center justify-center gap-2"
+                >
+                    <Smartphone size={18} />
+                    {isLoadingContact ? "Importing..." : "Import from Contacts"}
+                </Button>
+
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                     <div className="space-y-2">
                         <label className="text-sm font-semibold text-white">Name</label>
@@ -141,17 +135,15 @@ export default function EditBuyerPage() {
                         <Button
                             type="button"
                             onClick={() => router.back()}
-                            disabled={isSubmitting}
-                            className="flex-1 bg-gray-600 text-white hover:bg-gray-700 transition active:scale-95 rounded-xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 bg-gray-600 text-white hover:bg-gray-700 transition active:scale-95 rounded-xl cursor-pointer"
                         >
                             Cancel
                         </Button>
                         <Button
                             type="submit"
-                            disabled={isSubmitting}
-                            className="flex-1 bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl cursor-pointer"
                         >
-                            {isSubmitting ? "Updating..." : "Update Buyer"}
+                            Update Buyer
                         </Button>
                     </div>
                 </form>
