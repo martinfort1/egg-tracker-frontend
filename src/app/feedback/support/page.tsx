@@ -22,7 +22,7 @@ const supportSchema = z.object({
     .max(100, "Subject must be less than 100 characters"),
   email: z.string().email("Please enter a valid email"),
   category: z.enum(["bug", "feature", "billing", "general", "other"], {
-    errorMap: () => ({ message: "Please select a category" }),
+    message: "Please select a category"
   }),
   message: z
     .string()

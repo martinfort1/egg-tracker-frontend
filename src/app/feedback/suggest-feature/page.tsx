@@ -26,7 +26,7 @@ const featureSuggestionSchema = z.object({
     .min(20, "Description must be at least 20 characters")
     .max(5000, "Description must be less than 5000 characters"),
   category: z.enum(["sales", "employees", "analytics", "automation", "ui", "other"], {
-    errorMap: () => ({ message: "Please select a category" }),
+    message: "Please select a category"
   }),
 });
 
