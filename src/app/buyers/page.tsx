@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import BuyerCard from "@/components/buyer-card";
+import LoadSpin from "@/components/load-spin";
 import { api } from "@/lib/api";
 import { Plus } from "lucide-react";
 import Link from "next/link";
@@ -9,10 +10,18 @@ import { useEffect, useState } from "react"
 
 export default function BuyersPage(){
     const [buyers, setBuyers] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     const fetchBuyers = async () => {
-        const res = await api.get("/buyers");
-        setBuyers(res.data);
+        try {
+            setIsLoading(true);
+            const res = await api.get("/buyers");
+            setBuyers(res.data);
+        } catch (err) {
+            console.error("Failed to fetch buyers:", err);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     useEffect(() => {
@@ -35,11 +44,15 @@ export default function BuyersPage(){
                 </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                {buyers.map((buyer:any)=>(
-                    <BuyerCard key={buyer.id} buyer={buyer} refresh={fetchBuyers} />
-                ))}
-            </div>
+            {isLoading ? (
+                <LoadSpin />
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                    {buyers.map((buyer:any)=>(
+                        <BuyerCard key={buyer.id} buyer={buyer} refresh={fetchBuyers} />
+                    ))}
+                </div>
+            )}
         </div>
     )
 

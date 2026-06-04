@@ -41,19 +41,21 @@ export default function VaccinesPage() {
                 </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                {vaccines.length === 0 ? (
-                    <div className="col-span-full text-center py-12">
-                        <Syringe className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-                        <p className="text-slate-400 text-lg">No vaccines recorded yet</p>
-                        <p className="text-slate-500 text-sm">Add your first vaccine record to get started</p>
-                    </div>
-                ) : (
-                    vaccines.map((vaccine: any) => (
+            {loading ? (
+                <LoadSpin />
+            ) : vaccines.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                    <Syringe className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+                    <p className="text-slate-400 text-lg">No vaccines recorded yet</p>
+                    <p className="text-slate-500 text-sm">Add your first vaccine record to get started</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                    {vaccines.map((vaccine: any) => (
                         <VaccineCard key={vaccine.id} vaccine={vaccine} refresh={fetchVaccines} />
-                    ))
-                )}
-            </div>
+                    ))}
+                </div>
+            )}
         </div>
     )
 }
