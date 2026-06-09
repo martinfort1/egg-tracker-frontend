@@ -2,6 +2,7 @@
 
 import FeedBagCard from "@/components/feed-bag-card";
 import { Button } from "@/components/ui/button";
+import LoadSpin from "@/components/load-spin";
 import { api } from "@/lib/api";
 import { Package, Plus } from "lucide-react";
 import Link from "next/link";
@@ -9,13 +10,17 @@ import { useEffect, useState } from "react";
 
 export default function FeedBagsPage() {
     const [feedBags, setFeedBags] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     const fetchFeedBags = async () => {
         try {
+            setIsLoading(true);
             const response = await api.get("/feed-bags");
             setFeedBags(response.data);
         } catch (err) {
             console.error("Failed to fetch feed bags:", err);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -44,19 +49,21 @@ export default function FeedBagsPage() {
                 </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                {feedBags.length === 0 ? (
-                    <div className="col-span-full text-center py-12">
-                        <Package className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-                        <p className="text-slate-400 text-lg">No feed purchases yet</p>
-                        <p className="text-slate-500 text-sm">Add your first feed purchase to get started</p>
-                    </div>
-                ) : (
-                    feedBags.map((feedBag: any) => (
+            {isLoading ? (
+                <LoadSpin />
+            ) : feedBags.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                    <Package className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+                    <p className="text-slate-400 text-lg">No feed purchases yet</p>
+                    <p className="text-slate-500 text-sm">Add your first feed purchase to get started</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                    {feedBags.map((feedBag: any) => (
                         <FeedBagCard key={feedBag.id} feedBag={feedBag} refresh={fetchFeedBags} />
-                    ))
-                )}
-            </div>
+                    ))}
+                </div>
+            )}
         </div>
     )
 }

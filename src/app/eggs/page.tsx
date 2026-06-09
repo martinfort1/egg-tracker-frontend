@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { InboxIcon, Layers } from "lucide-react";
 import { formatUtcDate } from "@/lib/utils";
-
+import LoadSpin from "@/components/load-spin";
 export default function EggLayingPage() {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [days, setDays] = useState<any[]>([]);
@@ -18,6 +18,7 @@ export default function EggLayingPage() {
     const [tempCartons, setTempCartons] = useState(0);
     const [open, setOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         generateCalendarDays();
@@ -45,6 +46,7 @@ export default function EggLayingPage() {
 
     const fetchEggData = async () => {
         try {
+            setIsLoading(true);
             const response = await api.get(`/egg-laying/by-month/${currentMonth.getFullYear()}/${currentMonth.getMonth() + 1}`);
             const dataMap: { [key: string]: { boxes: number, cartons: number } } = {};
             response.data.forEach((item: any) => {
@@ -54,6 +56,8 @@ export default function EggLayingPage() {
             setEggData(dataMap);
         } catch (error) {
             toast.error("Failed to fetch egg data");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -136,6 +140,9 @@ return (
             </div>
 
             {/* Month Navigation */}
+            {isLoading ? (
+                <LoadSpin />
+            ) : (
             <div className="bg-slate-900/90 border border-white/10 rounded-xl p-4">
                 <div className="flex justify-between items-center mb-4">
                     <Button
@@ -260,6 +267,7 @@ return (
                     })}
                 </div>
             </div>
+            )}
         </div>
     );
 }

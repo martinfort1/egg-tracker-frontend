@@ -2,6 +2,7 @@
 
 import EmployeeCard from "@/components/employee-card";
 import { Button } from "@/components/ui/button";
+import LoadSpin from "@/components/load-spin";
 import { api } from "@/lib/api";
 import { UserCheck, Plus } from "lucide-react";
 import Link from "next/link";
@@ -9,13 +10,17 @@ import { useEffect, useState } from "react";
 
 export default function EmployeesPage(){
     const [employees, setEmployees] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     const fetchEmployees = async () => {
         try {
+            setIsLoading(true);
             const response = await api.get("/employees");
             setEmployees(response.data);
         } catch (err) {
             console.error("Failed to fetch employees:", err);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -36,19 +41,21 @@ export default function EmployeesPage(){
                 </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                {employees.length === 0 ? (
-                    <div className="col-span-full text-center py-12">
-                        <UserCheck className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-                        <p className="text-slate-400 text-lg">No employees yet</p>
-                        <p className="text-slate-500 text-sm">Add your first employee to get started</p>
-                    </div>
-                ) : (
-                    employees.map((employee: any) => (
+            {isLoading ? (
+                <LoadSpin />
+            ) : employees.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                    <UserCheck className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+                    <p className="text-slate-400 text-lg">No employees yet</p>
+                    <p className="text-slate-500 text-sm">Add your first employee to get started</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                    {employees.map((employee: any) => (
                         <EmployeeCard key={employee.id} employee={employee} refresh={fetchEmployees} />
-                    ))
-                )}
-            </div>
+                    ))}
+                </div>
+            )}
         </div>
     )
 }

@@ -232,7 +232,7 @@ function SuggestFeaturePageContent() {
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-semibold h-10 transition-all duration-300"
+            className="w-full bg-linear-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-semibold h-10 transition-all duration-300"
           >
             {isSubmitting ? (
               <>

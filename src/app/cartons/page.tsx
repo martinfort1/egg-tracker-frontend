@@ -2,6 +2,7 @@
 
 import CartonCard from "@/components/carton-card";
 import { Button } from "@/components/ui/button";
+import LoadSpin from "@/components/load-spin";
 import { api } from "@/lib/api";
 import { Box, Plus } from "lucide-react";
 import Link from "next/link";
@@ -9,13 +10,17 @@ import { useEffect, useState } from "react";
 
 export default function CartonsPage() {
     const [cartons, setCartons] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     const fetchCartons = async () => {
         try {
+            setIsLoading(true);
             const response = await api.get("/cartons");
             setCartons(response.data);
         } catch (err) {
             console.error("Failed to fetch cartons:", err);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -44,19 +49,21 @@ export default function CartonsPage() {
                 </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                {cartons.length === 0 ? (
-                    <div className="col-span-full text-center py-12">
-                        <Box className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-                        <p className="text-slate-400 text-lg">No carton purchases yet</p>
-                        <p className="text-slate-500 text-sm">Add your first carton purchase to get started</p>
-                    </div>
-                ) : (
-                    cartons.map((carton: any) => (
+            {isLoading ? (
+                <LoadSpin />
+            ) : cartons.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                    <Box className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+                    <p className="text-slate-400 text-lg">No carton purchases yet</p>
+                    <p className="text-slate-500 text-sm">Add your first carton purchase to get started</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                    {cartons.map((carton: any) => (
                         <CartonCard key={carton.id} carton={carton} refresh={fetchCartons} />
-                    ))
-                )}
-            </div>
+                    ))}
+                </div>
+            )}
         </div>
     )
 }
