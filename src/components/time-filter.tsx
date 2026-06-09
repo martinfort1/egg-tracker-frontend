@@ -8,6 +8,7 @@ export default function TimeFilter({ period, setPeriod }: any){
         { label: "30 days", value: "30d"},
         { label: "90 days", value: "90d"},
         { label: "1 year", value: "1y"},
+        { label: "All data", value: "all"},
     ];
 
     

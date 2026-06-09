@@ -15,14 +15,7 @@ import { useEffect, useState } from "react"
 export default function SalesPage(){
 
     const [period, setPeriod] = useState<string>("7d");
-    const [isLoading, setIsLoading] = useState(true);
-    const { sales, refresh } = useSales(period)
-
-    useEffect(() => {
-        if (sales && sales.length >= 0) {
-            setIsLoading(false);
-        }
-    }, [sales]);
+    const { sales, isLoading, refresh } = useSales(period)
     
     return (
         <div className="space-y-6 p-4 md:p-6 bg-linear-to-br from-yellow-500/25 via-slate-500/30 to-yellow-900/30 rounded-2xl border border-slate/40 shadow-2xl">
@@ -40,8 +33,7 @@ export default function SalesPage(){
                 </Link>
             </div>
 
-            {/* {Falta crear metodo en BACKEND que devuelva unicamente ventas en period NO MONTHLY SALES} */}
-            {/* <SalesFilter period={period} setPeriod={setPeriod} /> */}
+            <SalesFilter period={period} setPeriod={setPeriod} />
 
             {isLoading ? (
                 <LoadSpin />
