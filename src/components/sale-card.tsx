@@ -49,8 +49,14 @@ export default function SaleCard({ sale, refresh }: any) {
             <div className="space-y-1 text-indigo-100">
                 <p>Total: <span className="font-medium text-white">{formatCurrency(sale.totalAmount)}</span></p>
                 <p>Paid: <span className="font-medium text-white">{formatCurrency(sale.amountPaid)}</span></p>
-                <p className="font-semibold text-orange-100">
-                    Debt: <span className="font-bold text-orange-200">{formatCurrency(sale.remainingAmount)}</span>
+                <p className="text-sm- text-black">
+                    {
+                        sale.status === "PAID" ? 
+                        "No remaining debt" 
+                        : (<span className="text-black/80">
+                            Remaining debt: <span className="font-bold text-red-500">{formatCurrency(sale.remainingAmount)}</span>
+                        </span>)
+                    }
                 </p>
             </div>
 
