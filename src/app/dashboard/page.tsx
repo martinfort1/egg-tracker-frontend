@@ -10,13 +10,15 @@ import LoadSpin from "@/components/load-spin";
 import { formatCurrency } from "@/lib/utils";
 import { MetricCardValue } from "@/components/metric-card-value";
 import Footer from "@/components/footer";
+import { useFeedBags } from "@/hooks/useFeedBags";
 
 
 export default function DashboardPage() {
     const [period, setPeriod] = useState<string>("30d")
     const { data, isLoading, error } = useDashboard(period);
     const { analytics } = useAnalytics(period);
-
+    const { feedBags } = useFeedBags();
+    
     if (isLoading) {
         return <LoadSpin />
     }
@@ -41,6 +43,11 @@ export default function DashboardPage() {
                 <MetricCard title="You have been paid:" value={summary?.totalPaid || 0} />
                 <MetricCard title="You are owed:" value={summary?.totalDebts || 0} />
             </div>
+                <div className="bg-gray-200 w-full h-1px p-1 rounded-lg sm:display-none"></div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <MetricCardValue title="Feed bags orders in debt:" value={feedBags?.unpaidCount || 0} isCurrency={false} />
+                <MetricCardValue title="Feed bags debt:" value={feedBags?.totalOwed || 0} isCurrency={true} />
+                </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-white p-6 rounded-xl shadow-2xl border border-slate-300">

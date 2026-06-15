@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const saleSchema = z.object({
   buyerId: z.string().min(1, "Buyer is required"),
+  date: z.string().optional(),
 
   Extra: z.number(),
   N1: z.number(),

@@ -9,7 +9,7 @@ import { Input } from "./ui/input";
 import { Plus } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
-export default function PaymentModal ({ sale, onSuccess, endpoint = 'sales', owed: owedProp, className, children }: any) {
+export default function PaymentModal ({ sale, onSuccess, endpoint = 'sales', owed: owedProp, className, children, isBulkPayment = false }: any) {
     const [amount, setAmount] = useState<number>(0);
     const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
     const [open, setOpen] = useState(false);
@@ -25,8 +25,11 @@ export default function PaymentModal ({ sale, onSuccess, endpoint = 'sales', owe
         }
 
         try {
+            const method = isBulkPayment ? 'post' : 'patch';
             await toast.promise(
-                api.patch(`${endpoint}/${sale.id}/payment`, { amount: paymentAmount, date }),
+                method === 'post' 
+                    ? api.post(endpoint, { amount: paymentAmount, date })
+                    : api.patch(`${endpoint}/${sale.id}/payment`, { amount: paymentAmount, date }),
                 {
                     success: "Payment added",
                     loading: "Adding payment",
@@ -62,19 +65,19 @@ export default function PaymentModal ({ sale, onSuccess, endpoint = 'sales', owe
 
                 <DialogHeader>
                     <DialogTitle className="text-lg font-bold text-white">
-                        Add Payment
+                        {isBulkPayment ? 'Pay All Orders' : 'Add Payment'}
                     </DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-4">
 
-                    {sale?.buyer?.name ? (
+                    {!isBulkPayment && sale?.buyer?.name ? (
                         <div className="text-sm text-slate-200">
                             Buyer: <span className="font-semibold text-white">{sale.buyer.name}</span>
                         </div>
                     ) : (
                         <div className="text-sm text-slate-200">
-                            ID: <span className="font-semibold text-white">{sale.id}</span>
+                            {isBulkPayment ? 'All unpaid orders' : `ID: ${sale.id}`}
                         </div>
                     )}
                     <div className="text-sm text-red-400 font-semibold">

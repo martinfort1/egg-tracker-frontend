@@ -25,6 +25,7 @@ export default function EditSalePage() {
     const { register, handleSubmit, watch, formState: { errors }, setValue } = useForm({
         resolver: zodResolver(saleSchema),
         defaultValues: {
+            date: new Date().toISOString().split('T')[0],
             Extra: 0,
             N1: 0,
             N2: 0,
@@ -52,6 +53,8 @@ export default function EditSalePage() {
 
                 // Set form values
                 setValue("buyerId", sale.buyerId || sale.buyer?.id);
+                const saleDate = sale.date ? new Date(sale.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+                setValue("date", saleDate);
                 setValue("Extra", sale.Extra || 0);
                 setValue("N1", sale.N1 || 0);
                 setValue("N2", sale.N2 || 0);
@@ -129,6 +132,16 @@ export default function EditSalePage() {
                         {errors.buyerId && <p className="text-red-300 text-xs">{String(errors.buyerId?.message)}</p>}
                     </div>
 
+                    {/* Sale Date */}
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-white">Sale Date</label>
+                        <Input
+                            type="date"
+                            {...register("date")}
+                            className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
+                        />
+                    </div>
+
                     <div className="flex justify-center">
                         <Link href="/buyers/new">
                             <Button className="bg-linear-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 rounded-full flex items-center gap-2 transition active:scale-95">
@@ -148,6 +161,7 @@ export default function EditSalePage() {
                                 <Input
                                     placeholder="0"
                                     type="number"
+                                    step="0.5"
                                     {...register("Extra", {valueAsNumber: true})}
                                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                                 />
@@ -171,6 +185,7 @@ export default function EditSalePage() {
                                 <Input
                                     placeholder="0"
                                     type="number"
+                                    step="0.5"
                                     {...register("N1", {valueAsNumber: true})}
                                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                                 />
@@ -194,6 +209,7 @@ export default function EditSalePage() {
                                 <Input
                                     placeholder="0"
                                     type="number"
+                                    step="0.5"
                                     {...register("N2", {valueAsNumber: true})}
                                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                                 />
@@ -217,6 +233,7 @@ export default function EditSalePage() {
                                 <Input
                                     placeholder="0"
                                     type="number"
+                                    step="0.5"
                                     {...register("N3", {valueAsNumber: true})}
                                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                                 />
@@ -240,6 +257,7 @@ export default function EditSalePage() {
                                 <Input
                                     placeholder="0"
                                     type="number"
+                                    step="0.5"
                                     {...register("N4", {valueAsNumber: true})}
                                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                                 />
