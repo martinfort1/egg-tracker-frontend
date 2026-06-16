@@ -7,10 +7,14 @@ import { api } from "@/lib/api";
 import { Package, Plus } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { MetricCardValue } from "@/components/metric-card-value";
+import PaymentModal from "@/components/payment-modal";
+import { toast } from "sonner";
 
 export default function FeedBagsPage() {
     const [feedBags, setFeedBags] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [metrics, setMetrics] = useState({ totalOwed: 0, unpaidCount: 0 });
 
     const fetchFeedBags = async () => {
         try {
@@ -24,7 +28,27 @@ export default function FeedBagsPage() {
         }
     };
 
-    useEffect(() => { fetchFeedBags(); }, []);
+    const fetchMetrics = async () => {
+        try {
+            const response = await api.get("/feed-bags/metrics/summary");
+            setMetrics(response.data);
+        } catch (err) {
+            console.error("Failed to fetch metrics:", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchFeedBags();
+        fetchMetrics();
+    }, []);
+
+    const handlePaymentSuccess = () => {
+        setTimeout(() => {
+            fetchFeedBags();
+            fetchMetrics();
+            toast.success("Payment added successfully");
+        }, 2000);
+    };
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -48,6 +72,31 @@ export default function FeedBagsPage() {
                     </Button>
                 </Link>
             </div>
+
+            {/* Metrics Section */}
+            {!isLoading && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <MetricCardValue title="Unpaid Orders" value={metrics.unpaidCount} unit="" isCurrency={false} />
+                    <MetricCardValue title="Amount Owed" value={metrics.totalOwed} isCurrency={true} />
+                </div>
+            )}
+
+            {/* Bulk Payment Button */}
+            {!isLoading && metrics.totalOwed > 0 && (
+                <div className="flex flex-col items-center justify-between gap-6">
+                    <PaymentModal 
+                        sale={{ id: 'bulk' }} 
+                        endpoint="feed-bags/payment/bulk" 
+                        onSuccess={handlePaymentSuccess} 
+                        className="w-full flex justify-center rounded-2xl shadow-xl hover:bg-gray-600"
+                        isBulkPayment={true}
+                        owed={metrics.totalOwed}
+                    >
+                        <span className="w-full block text-center">Add an indistinct payment here</span>
+                    </PaymentModal>
+                    <div className="w-full rounded-2xl h-0.5 bg-gray-400"></div>
+                </div>
+            )}
 
             {isLoading ? (
                 <LoadSpin />
