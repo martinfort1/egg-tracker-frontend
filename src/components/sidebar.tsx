@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation"
 import { useState, useEffect } from "react";
-import { Menu, X, Home, Users, BarChart3, UserCheck, Package, Box, Syringe, DollarSign, Egg, Bird, LogOut } from "lucide-react";
+import { Menu, X, Home, Users, BarChart3, UserCheck, Package, Box, Syringe, DollarSign, Egg, Bird, ClipboardList, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { logout } from "@/lib/auth";
 
 const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: Home },
     { href: "/buyers", label: "Buyers", icon: Users },
+    { href: "/orders", label: "Orders", icon: ClipboardList },
     { href: "/sales", label: "Sales", icon: BarChart3 },
     { href: "/employees", label: "Employees", icon: UserCheck },
     { href: "/feed-bags", label: "Feed Bags", icon: Package },
