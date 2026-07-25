@@ -15,7 +15,12 @@ import { useEffect, useState } from "react"
 export default function SalesPage(){
 
     const [period, setPeriod] = useState<string>("7d");
+    const [showOutstandingOnly, setShowOutstandingOnly] = useState(false);
     const { sales, isLoading, refresh } = useSales(period)
+
+    const visibleSales = showOutstandingOnly
+        ? sales.filter((sale: any) => sale.status !== "PAID")
+        : sales;
     
     return (
         <div className="space-y-6 p-4 md:p-6 bg-linear-to-br from-yellow-500/25 via-slate-500/30 to-yellow-900/30 rounded-2xl border border-slate/40 shadow-2xl">
@@ -33,13 +38,18 @@ export default function SalesPage(){
                 </Link>
             </div>
 
-            <SalesFilter period={period} setPeriod={setPeriod} />
+            <SalesFilter
+                period={period}
+                setPeriod={setPeriod}
+                showOutstandingOnly={showOutstandingOnly}
+                setShowOutstandingOnly={setShowOutstandingOnly}
+            />
 
             {isLoading ? (
                 <LoadSpin />
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                    {sales.map((sale: any) => (
+                    {visibleSales.map((sale: any) => (
                         <SaleCard key={sale.id} sale={sale} refresh={refresh} />
                     ))}
                 </div>

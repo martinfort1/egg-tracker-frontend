@@ -2,7 +2,7 @@
 
 import { Button } from "./ui/button";
 
-export default function TimeFilter({ period, setPeriod }: any){
+export default function TimeFilter({ period, setPeriod, showOutstandingOnly, setShowOutstandingOnly }: any){
     const options = [
         { label: "7 days", value: "7d"},
         { label: "30 days", value: "30d"},
@@ -28,6 +28,18 @@ export default function TimeFilter({ period, setPeriod }: any){
                     </Button>
                 ))}
             </div>
+
+            <Button
+                type="button"
+                onClick={() => setShowOutstandingOnly((prev: boolean) => !prev)}
+                className={`px-3 py-1.5 text-sm rounded-full border transition ${
+                    showOutstandingOnly
+                        ? "bg-rose-500/90 text-white border-rose-400"
+                        : "bg-slate-800/95 hover:bg-gray-700 cursor-pointer border-slate-600"
+                }`}
+            >
+                {showOutstandingOnly ? "Showing unpaid / partial only" : "Show unpaid / partial only"}
+            </Button>
         </div>
     )
 }
