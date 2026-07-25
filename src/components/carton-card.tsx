@@ -22,6 +22,13 @@ export default function CartonCard({ carton, refresh }: any) {
     refresh?.();
   };
 
+  const totalQuantity = (Number(carton.bigCartonsQuantity ?? 0) + Number(carton.smallCartonsQuantity ?? 0)) || Number(carton.quantity ?? 0);
+  const breakdown = [
+    Number(carton.bigCartonsQuantity ?? 0) > 0 ? `${carton.bigCartonsQuantity} big for ${formatCurrency(carton.bigCartonPrice)} each` : null,
+    Number(carton.smallCartonsQuantity ?? 0) > 0 ? `${carton.smallCartonsQuantity} small for ${formatCurrency(carton.smallCartonPrice)} each` : null,
+    Number(carton.bigCartonsQuantity ?? 0) + Number(carton.smallCartonsQuantity ?? 0) === 0 && Number(carton.quantity ?? 0) > 0 ? `${carton.quantity} cartons @ ${formatCurrency(carton.price)} each` : null,
+  ].filter(Boolean).join(" • ");
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -30,7 +37,7 @@ export default function CartonCard({ carton, refresh }: any) {
       className="bg-linear-to-br from-rose-600/75 via-orange-400/65 to-yellow-500/55 border border-white/20 backdrop-blur-xl p-6 md:p-7 rounded-2xl shadow-2xl space-y-4 hover:-translate-y-1 hover:shadow-2xl transition-transform duration-300"
     >
       <div className="flex justify-between items-start">
-        <h2 className="text-lg font-bold text-white">{carton.quantity} Cartons</h2>
+        <h2 className="text-lg font-bold text-white">{totalQuantity} Cartons</h2>
         <span className={`px-2 py-1 rounded text-sm ${statusColor[carton.status]}`}>
           {carton.status}
         </span>
@@ -39,13 +46,13 @@ export default function CartonCard({ carton, refresh }: any) {
       <p className="text-sm text-indigo-100">{formatUtcDate(carton.date)}</p>
 
       <div className="space-y-1 text-indigo-100">
-        <p>Price: <span className="font-medium text-white">{formatCurrency(carton.price)}</span></p>
+        <p>Breakdown: <span className="font-medium text-white">{breakdown || "No sizes recorded"}</span></p>
         <p>Total: <span className="font-medium text-white">{formatCurrency(carton.totalAmount)}</span></p>
         <p>Paid: <span className="font-medium text-green-200">{formatCurrency(carton.amountPaid)}</span></p>
         <p>Remaining: <span className="font-medium text-orange-200">{formatCurrency(carton.remainingAmount)}</span></p>
       </div>
 
-      <div className="grid grid-cols-1 gap-2 pt-2 ">  
+      <div className="grid grid-cols-1 gap-2 pt-2 ">
         <Link href={`/cartons/${carton.id}`}>
           <Button size="sm" className="w-full hover:bg-slate-600 cursor-pointer">View Details</Button>
         </Link>

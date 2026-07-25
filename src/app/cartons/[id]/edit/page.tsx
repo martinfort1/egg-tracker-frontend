@@ -8,77 +8,95 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { is } from "zod/locales";
 
 interface Carton {
     id: string;
     date: string;
     quantity: number;
     price: number;
+    bigCartonsQuantity: number;
+    smallCartonsQuantity: number;
+    bigCartonPrice: number;
+    smallCartonPrice: number;
     totalAmount: number;
     amountPaid: number;
     remainingAmount: number;
     status: string;
 }
 
-export default function EditCartonPage({ params }: { params: { id: string } }) {
+export default function EditCartonPage() {
     const router = useRouter();
-    const {id} = useParams();
-    
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { id } = useParams();
+    const cartonId = Array.isArray(id) ? id[0] : id;
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [loading, setLoading] = useState(true);
 
     const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<Carton>();
-    const quantity = watch("quantity");
-    const price = watch("price");
-    const amountPaid = watch("amountPaid");
+    const bigCartonsQuantity = Number(watch("bigCartonsQuantity") ?? 0);
+    const smallCartonsQuantity = Number(watch("smallCartonsQuantity") ?? 0);
+    const bigCartonPrice = Number(watch("bigCartonPrice") ?? 0);
+    const smallCartonPrice = Number(watch("smallCartonPrice") ?? 0);
+    const amountPaid = Number(watch("amountPaid") ?? 0);
 
     useEffect(() => {
         const fetchCarton = async () => {
             try {
-                const response = await api.get(`/cartons/${id}`);
+                const response = await api.get(`/cartons/${cartonId}`);
                 const carton = response.data;
-                setValue("date", carton.date.split('T')[0]);
-                setValue("quantity", carton.quantity);
-                setValue("price", carton.price);
-                setValue("totalAmount", carton.totalAmount);
-                setValue("amountPaid", carton.amountPaid);
-                setValue("remainingAmount", carton.remainingAmount);
+                setValue("date", carton.date?.split("T")[0] ?? "");
+                setValue("bigCartonsQuantity", carton.bigCartonsQuantity ?? 0);
+                setValue("smallCartonsQuantity", carton.smallCartonsQuantity ?? 0);
+                setValue("bigCartonPrice", carton.bigCartonPrice ?? 0);
+                setValue("smallCartonPrice", carton.smallCartonPrice ?? 0);
+                setValue("quantity", carton.quantity ?? 0);
+                setValue("price", carton.price ?? 0);
+                setValue("totalAmount", carton.totalAmount ?? 0);
+                setValue("amountPaid", carton.amountPaid ?? 0);
+                setValue("remainingAmount", carton.remainingAmount ?? 0);
                 setLoading(false);
             } catch (error) {
                 toast.error("Failed to fetch carton data");
             }
         };
-        fetchCarton();
-    }, [, setValue]);
 
-    
-    // Auto-calculate total amount and remaining amount
+        if (cartonId) {
+            fetchCarton();
+        }
+    }, [cartonId, setValue]);
+
     useEffect(() => {
-        const total = quantity * price;
+        const total = bigCartonsQuantity * bigCartonPrice + smallCartonsQuantity * smallCartonPrice;
         setValue("totalAmount", total);
-        setValue("remainingAmount", total - amountPaid);
-    }, [quantity, price, amountPaid, setValue]);
-    
+        setValue("remainingAmount", Math.max(total - amountPaid, 0));
+    }, [bigCartonsQuantity, smallCartonsQuantity, bigCartonPrice, smallCartonPrice, amountPaid, setValue]);
+
     const onSubmit = async (data: Carton) => {
         setIsSubmitting(true);
         try {
-            await api.put(`/cartons/${id}`, data);
+            await api.put(`/cartons/${cartonId}`, {
+                ...data,
+                bigCartonsQuantity: Number(data.bigCartonsQuantity ?? 0),
+                smallCartonsQuantity: Number(data.smallCartonsQuantity ?? 0),
+                bigCartonPrice: Number(data.bigCartonPrice ?? 0),
+                smallCartonPrice: Number(data.smallCartonPrice ?? 0),
+                totalAmount: Number(data.totalAmount ?? 0),
+                amountPaid: Number(data.amountPaid ?? 0),
+                remainingAmount: Number(data.remainingAmount ?? 0),
+            });
             toast.success("Carton purchase updated successfully");
-            router.push(`/cartons/${id}`);
+            router.push(`/cartons/${cartonId}`);
         } catch (error) {
             toast.error("Failed to update carton purchase");
         } finally {
             setIsSubmitting(false);
         }
     };
-    
+
     if (loading) {
-        return (
-            <LoadSpin />
-        );
+        return <LoadSpin />;
     }
+
     return (
         <div className="min-h-screen bg-linear-to-br from-slate-900/50 via-slate-900/30 to-slate-900/50 p-4 md:p-6 flex items-center justify-center">
             <div className="w-full max-w-md space-y-6 bg-linear-to-br from-slate-900/80 via-indigo-900/60 to-slate-900/90 border border-white/20 backdrop-blur-xl p-8 rounded-2xl shadow-2xl">
@@ -98,28 +116,50 @@ export default function EditCartonPage({ params }: { params: { id: string } }) {
                         {errors.date && <p className="text-red-300 text-xs">{String(errors.date?.message)}</p>}
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Quantity</label>
-                        <Input
-                            type="number"
-                            min="1"
-                            placeholder="Number of cartons"
-                            {...register("quantity", { valueAsNumber: true, required: "Quantity is required", min: 1 })}
-                            className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
-                        />
-                        {errors.quantity && <p className="text-red-300 text-xs">{String(errors.quantity?.message)}</p>}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold text-white">Big cartons quantity</label>
+                            <Input
+                                type="number"
+                                min="0"
+                                {...register("bigCartonsQuantity", { valueAsNumber: true, min: 0 })}
+                                className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold text-white">Small cartons quantity</label>
+                            <Input
+                                type="number"
+                                min="0"
+                                {...register("smallCartonsQuantity", { valueAsNumber: true, min: 0 })}
+                                className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
+                            />
+                        </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Price per carton</label>
-                        <Input
-                            type="number"
-                            step="0.01"
-                            placeholder="Price per carton"
-                            {...register("price", { valueAsNumber: true, required: "Price is required", min: 0.01 })}
-                            className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
-                        />
-                        {errors.price && <p className="text-red-300 text-xs">{String(errors.price?.message)}</p>}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold text-white">Big carton price</label>
+                            <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                {...register("bigCartonPrice", { valueAsNumber: true, min: 0 })}
+                                className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold text-white">Small carton price</label>
+                            <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                {...register("smallCartonPrice", { valueAsNumber: true, min: 0 })}
+                                className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
+                            />
+                        </div>
                     </div>
 
                     <div className="space-y-2">
@@ -168,11 +208,11 @@ export default function EditCartonPage({ params }: { params: { id: string } }) {
                             disabled={isSubmitting}
                             className="flex-1 bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl cursor-pointer"
                         >
-                            {isSubmitting ? 'Updating...' : 'Update Carton Purchase'}
+                            {isSubmitting ? "Updating..." : "Update Carton Purchase"}
                         </Button>
                     </div>
                 </form>
             </div>
         </div>
-    )
+    );
 }

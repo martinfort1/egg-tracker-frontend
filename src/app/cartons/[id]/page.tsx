@@ -14,6 +14,10 @@ interface Carton {
     date: string;
     quantity: number;
     price: number;
+    bigCartonsQuantity: number;
+    smallCartonsQuantity: number;
+    bigCartonPrice: number;
+    smallCartonPrice: number;
     totalAmount: number;
     amountPaid: number;
     remainingAmount: number;
@@ -27,11 +31,12 @@ export default function CartonDetailPage() {
     const [carton, setCarton] = useState<Carton | null>(null);
     const [loading, setLoading] = useState(true);
     const { id } = useParams();
+    const cartonId = Array.isArray(id) ? id[0] : id;
 
     const fetchCarton = async () => {
         try {
             setLoading(true);
-            const response = await api.get(`/cartons/${id}`);
+            const response = await api.get(`/cartons/${cartonId}`);
             setCarton(response.data);
         } catch (error) {
             toast.error("Failed to fetch carton");
@@ -41,14 +46,16 @@ export default function CartonDetailPage() {
     };
 
     useEffect(() => {
-        fetchCarton();
-    }, [id]);
+        if (cartonId) {
+            fetchCarton();
+        }
+    }, [cartonId]);
 
     const handleDelete = async () => {
         if (!confirm("Are you sure you want to delete this carton purchase?")) return;
 
         try {
-            await api.delete(`/cartons/${id}`);
+            await api.delete(`/cartons/${cartonId}`);
             toast.success("Carton purchase deleted successfully");
             router.push("/cartons");
         } catch (error) {
@@ -81,6 +88,13 @@ export default function CartonDetailPage() {
         );
     }
 
+    const totalQuantity = (Number(carton.bigCartonsQuantity ?? 0) + Number(carton.smallCartonsQuantity ?? 0)) || Number(carton.quantity ?? 0);
+    const breakdown = [
+        Number(carton.bigCartonsQuantity ?? 0) > 0 ? `${carton.bigCartonsQuantity} big at ${formatCurrency(carton.bigCartonPrice)} each` : null,
+        Number(carton.smallCartonsQuantity ?? 0) > 0 ? `${carton.smallCartonsQuantity} small at ${formatCurrency(carton.smallCartonPrice)} each` : null,
+        Number(carton.bigCartonsQuantity ?? 0) + Number(carton.smallCartonsQuantity ?? 0) === 0 && Number(carton.quantity ?? 0) > 0 ? `${carton.quantity} cartons at ${formatCurrency(carton.price)} each` : null,
+    ].filter(Boolean).join(" • ");
+
     return (
         <div className="min-h-screen bg-linear-to-br from-slate-900/50 via-slate-900/30 to-slate-900/50 p-4 md:p-6">
             <div className="max-w-4xl mx-auto">
@@ -88,7 +102,7 @@ export default function CartonDetailPage() {
                     <div className="flex items-center justify-between mb-8">
                         <div>
                             <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Carton Purchase Details</h1>
-                            <p className="text-indigo-200">{carton.quantity} cartons • {formatUtcDate(carton.date)}</p>
+                            <p className="text-indigo-200">{totalQuantity} cartons • {breakdown || "No carton sizes recorded"} • {formatUtcDate(carton.date)}</p>
                         </div>
                         <div className="flex gap-3">
                             {carton.status !== 'PAID' && (
@@ -125,12 +139,12 @@ export default function CartonDetailPage() {
                                         <p className="text-white font-medium">{formatUtcDate(carton.date)}</p>
                                     </div>
                                     <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Quantity</label>
-                                        <p className="text-white font-medium">{carton.quantity} cartons</p>
+                                        <label className="text-sm font-semibold text-indigo-200">Total Cartons</label>
+                                        <p className="text-white font-medium">{totalQuantity} cartons</p>
                                     </div>
                                     <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Price per carton</label>
-                                        <p className="text-white font-medium">{formatCurrency(carton.price)}</p>
+                                        <label className="text-sm font-semibold text-indigo-200">Carton Breakdown</label>
+                                        <p className="text-white font-medium">{breakdown || "No carton sizes recorded"}</p>
                                     </div>
                                 </div>
                             </div>
