@@ -9,6 +9,7 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Input } from "./ui/input";
+import { PriceInput } from "./ui/price-input";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
@@ -60,7 +61,7 @@ const [buyers, setBuyers] = useState<any[]>([])
 const [total, setTotal] = useState(0);
 const [isSubmitting, setIsSubmitting] = useState(false);
 
-const { register, handleSubmit, watch, setValue, reset, formState: { errors } } =
+const { register, handleSubmit, watch, setValue, reset, formState: { errors }, control } =
   useForm({
     resolver: zodResolver(orderSchema),
     defaultValues: getDefaultValues(initialData),
@@ -199,10 +200,10 @@ return(
                 </div>
                 <div>
                     <label className="text-xs font-semibold text-indigo-200 mb-1 block">Price per Unit</label>
-                    <Input 
-                        placeholder="0" 
-                        type="number" 
-                        {...register("ExtraPrice", {valueAsNumber: true})}
+                    <PriceInput
+                        placeholder="0"
+                        control={control}
+                        name="ExtraPrice"
                         className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                     />
                 </div>
@@ -223,10 +224,10 @@ return(
                 </div>
                 <div>
                     <label className="text-xs font-semibold text-indigo-200 mb-1 block">Price per Unit</label>
-                    <Input 
-                        placeholder="0" 
-                        type="number" 
-                        {...register("N1Price", {valueAsNumber: true})}
+                    <PriceInput
+                        placeholder="0"
+                        control={control}
+                        name="N1Price"
                         className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                     />
                 </div>
@@ -247,10 +248,10 @@ return(
                 </div>
                 <div>
                     <label className="text-xs font-semibold text-indigo-200 mb-1 block">Price per Unit</label>
-                    <Input 
-                        placeholder="0" 
-                        type="number" 
-                        {...register("N2Price", {valueAsNumber: true})}
+                    <PriceInput
+                        placeholder="0"
+                        control={control}
+                        name="N2Price"
                         className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                     />
                 </div>
@@ -271,10 +272,10 @@ return(
                 </div>
                 <div>
                     <label className="text-xs font-semibold text-indigo-200 mb-1 block">Price per Unit</label>
-                    <Input 
-                        placeholder="0" 
-                        type="number" 
-                        {...register("N3Price", {valueAsNumber: true})}
+                    <PriceInput
+                        placeholder="0"
+                        control={control}
+                        name="N3Price"
                         className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                     />
                 </div>
@@ -295,10 +296,10 @@ return(
                 </div>
                 <div>
                     <label className="text-xs font-semibold text-indigo-200 mb-1 block">Price per Unit</label>
-                    <Input 
-                        placeholder="0" 
-                        type="number" 
-                        {...register("N4Price", {valueAsNumber: true})}
+                    <PriceInput
+                        placeholder="0"
+                        control={control}
+                        name="N4Price"
                         className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                     />
                 </div>

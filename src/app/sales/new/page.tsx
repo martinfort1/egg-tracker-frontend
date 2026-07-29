@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PriceInput } from "@/components/ui/price-input";
 import { api } from "@/lib/api";
 import { saleSchema } from "@/lib/schemas/sales.schema";
 import { formatCurrency } from "@/lib/utils";
@@ -22,7 +23,7 @@ export default function NewSalePage() {
     const [fullyPaid, setFullyPaid] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
+    const { register, handleSubmit, watch, setValue, formState: { errors }, control } = useForm({
         resolver: zodResolver(saleSchema),
         defaultValues: {
             date: new Date().toISOString().split('T')[0],
@@ -154,10 +155,10 @@ export default function NewSalePage() {
                             </div>
                             <div>
                                 <label className="text-xs font-semibold text-indigo-200 mb-1 block">Price per Unit</label>
-                                <Input 
-                                    placeholder="0" 
-                                    type="number" 
-                                    {...register("ExtraPrice", {valueAsNumber: true})}
+                                <PriceInput
+                                    placeholder="0"
+                                    control={control}
+                                    name="ExtraPrice"
                                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                                 />
                             </div>
@@ -178,10 +179,10 @@ export default function NewSalePage() {
                             </div>
                             <div>
                                 <label className="text-xs font-semibold text-indigo-200 mb-1 block">Price per Unit</label>
-                                <Input 
-                                    placeholder="0" 
-                                    type="number" 
-                                    {...register("N1Price", {valueAsNumber: true})}
+                                <PriceInput
+                                    placeholder="0"
+                                    control={control}
+                                    name="N1Price"
                                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                                 />
                             </div>
@@ -202,10 +203,10 @@ export default function NewSalePage() {
                             </div>
                             <div>
                                 <label className="text-xs font-semibold text-indigo-200 mb-1 block">Price per Unit</label>
-                                <Input 
-                                    placeholder="0" 
-                                    type="number" 
-                                    {...register("N2Price", {valueAsNumber: true})}
+                                <PriceInput
+                                    placeholder="0"
+                                    control={control}
+                                    name="N2Price"
                                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                                 />
                             </div>
@@ -226,10 +227,10 @@ export default function NewSalePage() {
                             </div>
                             <div>
                                 <label className="text-xs font-semibold text-indigo-200 mb-1 block">Price per Unit</label>
-                                <Input 
-                                    placeholder="0" 
-                                    type="number" 
-                                    {...register("N3Price", {valueAsNumber: true})}
+                                <PriceInput
+                                    placeholder="0"
+                                    control={control}
+                                    name="N3Price"
                                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                                 />
                             </div>
@@ -250,10 +251,10 @@ export default function NewSalePage() {
                             </div>
                             <div>
                                 <label className="text-xs font-semibold text-indigo-200 mb-1 block">Price per Unit</label>
-                                <Input 
-                                    placeholder="0" 
-                                    type="number" 
-                                    {...register("N4Price", {valueAsNumber: true})}
+                                <PriceInput
+                                    placeholder="0"
+                                    control={control}
+                                    name="N4Price"
                                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                                 />
                             </div>
@@ -293,10 +294,10 @@ export default function NewSalePage() {
                     {!fullyPaid && (
                         <div className="space-y-2">
                             <label className="text-sm font-semibold text-white">Amount Paid</label>
-                            <Input
+                            <PriceInput
                                 placeholder="0"
-                                type="number"
-                                {...register("amountPaid", {valueAsNumber: true})}
+                                control={control}
+                                name="amountPaid"
                                 className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                             />
                         </div>

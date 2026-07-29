@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PriceInput } from "@/components/ui/price-input";
 import { api } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -16,7 +17,7 @@ export default function NewExpensePage() {
     const [newCategoryName, setNewCategoryName] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
 
-    const { register, handleSubmit, formState: { errors } } = useForm({
+    const { register, handleSubmit, formState: { errors }, control } = useForm({
         defaultValues: {
             date: new Date().toISOString().split('T')[0],
             name: "",
@@ -169,11 +170,10 @@ export default function NewExpensePage() {
 
                         <div className="space-y-2">
                             <label className="text-sm font-semibold text-white">Price per Unit</label>
-                            <Input
-                                type="number"
-                                step="0.01"
+                            <PriceInput
                                 placeholder="0.00"
-                                {...register("price", { valueAsNumber: true, required: "Price is required" })}
+                                control={control}
+                                name="price"
                                 className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                             />
                             {errors.price && <p className="text-red-300 text-xs">{String(errors.price?.message)}</p>}

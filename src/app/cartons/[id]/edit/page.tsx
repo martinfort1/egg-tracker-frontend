@@ -3,6 +3,7 @@
 import LoadSpin from "@/components/load-spin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PriceInput } from "@/components/ui/price-input";
 import { api } from "@/lib/api";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -32,7 +33,7 @@ export default function EditCartonPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<Carton>();
+    const { register, handleSubmit, watch, setValue, formState: { errors }, control } = useForm<Carton>();
     const bigCartonsQuantity = Number(watch("bigCartonsQuantity") ?? 0);
     const smallCartonsQuantity = Number(watch("smallCartonsQuantity") ?? 0);
     const bigCartonPrice = Number(watch("bigCartonPrice") ?? 0);
@@ -141,22 +142,22 @@ export default function EditCartonPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="space-y-2">
                             <label className="text-sm font-semibold text-white">Big carton price</label>
-                            <Input
-                                type="number"
-                                step="0.01"
+                            <PriceInput
                                 min="0"
-                                {...register("bigCartonPrice", { valueAsNumber: true, min: 0 })}
+                                placeholder="Price"
+                                control={control}
+                                name="bigCartonPrice"
                                 className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                             />
                         </div>
 
                         <div className="space-y-2">
                             <label className="text-sm font-semibold text-white">Small carton price</label>
-                            <Input
-                                type="number"
-                                step="0.01"
+                            <PriceInput
                                 min="0"
-                                {...register("smallCartonPrice", { valueAsNumber: true, min: 0 })}
+                                placeholder="Price"
+                                control={control}
+                                name="smallCartonPrice"
                                 className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                             />
                         </div>
@@ -175,11 +176,10 @@ export default function EditCartonPage() {
 
                     <div className="space-y-2">
                         <label className="text-sm font-semibold text-white">Amount Paid</label>
-                        <Input
-                            type="number"
-                            step="0.01"
+                        <PriceInput
                             placeholder="Amount already paid"
-                            {...register("amountPaid", { valueAsNumber: true, min: 0 })}
+                            control={control}
+                            name="amountPaid"
                             className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                         />
                     </div>

@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PriceInput } from "@/components/ui/price-input";
 import { api } from "@/lib/api";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -25,7 +26,7 @@ export default function EditFeedBagPage() {
     const { id } = useParams();
     
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FeedBag>();
+    const { register, handleSubmit, watch, setValue, formState: { errors }, control } = useForm<FeedBag>();
 
     const amount = watch("amount");
     const price = watch("price");
@@ -105,11 +106,10 @@ export default function EditFeedBagPage() {
 
                     <div className="space-y-2">
                         <label className="text-sm font-semibold text-white">Price per bag</label>
-                        <Input
-                            type="number"
-                            step="0.01"
+                        <PriceInput
                             placeholder="Price per bag"
-                            {...register("price", { valueAsNumber: true, required: "Price is required", min: 0.01 })}
+                            control={control}
+                            name="price"
                             className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                         />
                         {errors.price && <p className="text-red-300 text-xs">{String(errors.price?.message)}</p>}

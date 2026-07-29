@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PriceInput } from "@/components/ui/price-input";
 import { api } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -11,7 +12,7 @@ import { toast } from "sonner";
 export default function NewCartonPage() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
+    const { register, handleSubmit, watch, setValue, formState: { errors }, control } = useForm({
         defaultValues: {
             date: new Date().toISOString().split("T")[0],
             bigCartonsQuantity: 0,
@@ -119,24 +120,22 @@ export default function NewCartonPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="space-y-2">
                             <label className="text-sm font-semibold text-white">Big carton price</label>
-                            <Input
-                                type="number"
-                                step="0.01"
+                            <PriceInput
                                 min="0"
                                 placeholder="Price"
-                                {...register("bigCartonPrice", { valueAsNumber: true, min: 0 })}
+                                control={control}
+                                name="bigCartonPrice"
                                 className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                             />
                         </div>
 
                         <div className="space-y-2">
                             <label className="text-sm font-semibold text-white">Small carton price</label>
-                            <Input
-                                type="number"
-                                step="0.01"
+                            <PriceInput
                                 min="0"
                                 placeholder="Price"
-                                {...register("smallCartonPrice", { valueAsNumber: true, min: 0 })}
+                                control={control}
+                                name="smallCartonPrice"
                                 className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                             />
                         </div>
@@ -184,11 +183,10 @@ export default function NewCartonPage() {
                     {!fullyPaid && (
                         <div className="space-y-2">
                             <label className="text-sm font-semibold text-white">Amount Paid</label>
-                            <Input
-                                type="number"
-                                step="0.01"
+                            <PriceInput
                                 placeholder="Amount already paid"
-                                {...register("amountPaid", { valueAsNumber: true, min: 0 })}
+                                control={control}
+                                name="amountPaid"
                                 className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
                             />
                         </div>
