@@ -2,7 +2,21 @@
 
 import { Button } from "./ui/button";
 
-export default function TimeFilter({ period, setPeriod, showOutstandingOnly, setShowOutstandingOnly }: any){
+type TimeFilterProps = {
+    period: string;
+    setPeriod: (value: string) => void;
+    showOutstandingOnly?: boolean;
+    setShowOutstandingOnly?: (value: boolean | ((prev: boolean) => boolean)) => void;
+    showOutstandingToggle?: boolean;
+};
+
+export default function TimeFilter({
+    period,
+    setPeriod,
+    showOutstandingOnly,
+    setShowOutstandingOnly,
+    showOutstandingToggle = false,
+}: TimeFilterProps) {
     const options = [
         { label: "7 days", value: "7d"},
         { label: "30 days", value: "30d"},
@@ -11,35 +25,42 @@ export default function TimeFilter({ period, setPeriod, showOutstandingOnly, set
         { label: "All data", value: "all"},
     ];
 
-    
-    return(
-        <div className="flex flex-col items-center gap-2 bg-linear-to-b from-slate-800 to-slate-600  text-white p-4 rounded-xl">
+    const handleOutstandingToggle = () => {
+        if (setShowOutstandingOnly) {
+            setShowOutstandingOnly((prev: boolean) => !prev);
+        }
+    };
+
+    return (
+        <div className="flex flex-col items-center gap-2 bg-linear-to-b from-slate-800 to-slate-600 text-white p-4 rounded-xl">
             <h4 className="text-sm font-medium self-center">Choose a time period:</h4>
             <div className="flex flex-wrap justify-center gap-1 md:gap-2">
-                {options.map(option => (
-                    <Button 
+                {options.map((option) => (
+                    <Button
                         key={option.value}
                         onClick={() => setPeriod(option.value)}
                         className={`px-2 py-1 md:px-3 text-sm md:text-base rounded-full border transition
-                        ${period === option.value ? "bg-linear-to-r from-yellow-400 to-orange-500 text-white scale-110": "bg-slate-800/95  hover:bg-gray-700 cursor-pointer"}
+                        ${period === option.value ? "bg-linear-to-r from-yellow-400 to-orange-500 text-white scale-110" : "bg-slate-800/95 hover:bg-gray-700 cursor-pointer"}
                         `}
-                        >
-                            {option.label}
+                    >
+                        {option.label}
                     </Button>
                 ))}
             </div>
 
-            <Button
-                type="button"
-                onClick={() => setShowOutstandingOnly((prev: boolean) => !prev)}
-                className={`px-3 py-1.5 text-sm rounded-full border transition ${
-                    showOutstandingOnly
-                        ? "bg-rose-500/90 text-white border-rose-400"
-                        : "bg-slate-800/95 hover:bg-gray-700 cursor-pointer border-slate-600"
-                }`}
-            >
-                {showOutstandingOnly ? "Showing unpaid / partial only" : "Show unpaid / partial only"}
-            </Button>
+            {showOutstandingToggle && setShowOutstandingOnly && (
+                <Button
+                    type="button"
+                    onClick={handleOutstandingToggle}
+                    className={`px-3 py-1.5 text-sm rounded-full border transition ${
+                        showOutstandingOnly
+                            ? "bg-rose-500/90 text-white border-rose-400"
+                            : "bg-slate-800/95 hover:bg-gray-700 cursor-pointer border-slate-600"
+                    }`}
+                >
+                    {showOutstandingOnly ? "Showing unpaid / partial only" : "Show unpaid / partial only"}
+                </Button>
+            )}
         </div>
-    )
+    );
 }

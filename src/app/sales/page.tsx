@@ -43,6 +43,7 @@ export default function SalesPage(){
                 setPeriod={setPeriod}
                 showOutstandingOnly={showOutstandingOnly}
                 setShowOutstandingOnly={setShowOutstandingOnly}
+                showOutstandingToggle
             />
 
             {isLoading ? (
