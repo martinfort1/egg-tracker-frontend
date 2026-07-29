@@ -2,7 +2,6 @@
 
 import LoadSpin from "@/components/load-spin";
 import { Button } from "@/components/ui/button";
-import PaymentModal from "@/components/payment-modal";
 import { api } from "@/lib/api";
 import { Copy, Trash2, Edit, Send, PackageCheck } from "lucide-react";
 import { useParams, useRouter } from "next/navigation"
@@ -34,16 +33,6 @@ export default function OrderPage(){
             router.push("/orders");
         } catch (error) {
             toast.error("Error deleting order");
-        }
-    };
-
-    const handleFulfill = async () => {
-        try {
-            await api.post(`/orders/${id}/fulfill`);
-            toast.success("Order fulfilled successfully");
-            router.push("/orders");
-        } catch (error) {
-            toast.error("Error fulfilling order");
         }
     };
 
@@ -93,27 +82,21 @@ export default function OrderPage(){
             </div>
 {/* Actions */}
         <div className="flex flex-col md:flex-col-2 gap-3">
-                <Button
-                        onClick={handleFulfill}
-                        className="w-full md:w-1/2 md:mx-auto bg-linear-to-r from-green-600/90 to-green-700/90 text-white hover:from-green-700 hover:to-green-800 transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer" 
+                <FulfillOrderModal
+                    order={order}
+                    onSuccess={(payload: any) => {
+                        const saleId = payload?.sale?.id ?? payload?.id ?? payload?.saleId;
+                        router.push(saleId ? `/sales/${saleId}` : "/orders");
+                    }}
+                >
+                    <Button
                         size="lg"
+                        className="w-full md:w-1/2 md:mx-auto bg-linear-to-r from-green-600/90 to-green-700/90 text-white hover:from-green-700 hover:to-green-800 transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
                     >
                         <PackageCheck size={18} />
                         Fulfill Order
                     </Button>
-                    <FulfillOrderModal
-                        order={order}
-                        onSuccess={(sale: any) => {
-                            router.push(`/sales/${sale.id}`);
-                        }}
-                        >
-                        <Button
-                            size="lg"
-                            className="w-full bg-green-600 hover:bg-green-700"
-                        >
-                            Complete Delivery
-                        </Button>
-                        </FulfillOrderModal>
+                </FulfillOrderModal>
                     <Button
                         onClick={handleDelete}
                         className="w-full md:w-1/2 md:mx-auto bg-linear-to-r from-red-600/90 to-red-700/90 text-white hover:from-red-700 hover:to-red-800 transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer" 

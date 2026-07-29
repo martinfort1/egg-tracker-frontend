@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { PackageCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -34,6 +35,7 @@ export default function OrderRow({
     item: any;
     onRefresh: () => void;
 }) {
+    const router = useRouter();
     const order = item.order || item;
     const buyer = item.buyer || order.buyer;
     const orderWithBuyer = { ...order, buyer };
@@ -46,6 +48,17 @@ export default function OrderRow({
         } catch {
             toast.error("Error deleting order");
         }
+    };
+
+    const handleFulfillSuccess = (payload: any) => {
+        const saleId = payload?.sale?.id ?? payload?.id ?? payload?.saleId;
+
+        if (saleId) {
+            router.push(`/sales/${saleId}`);
+            return;
+        }
+
+        onRefresh();
     };
 
     return (
@@ -88,7 +101,7 @@ export default function OrderRow({
                     <div className="flex items-center gap-1">
                         <FulfillOrderModal
                             order={orderWithBuyer}
-                            onSuccess={onRefresh}
+                            onSuccess={handleFulfillSuccess}
                         >
                             <Button
                                 type="button"
