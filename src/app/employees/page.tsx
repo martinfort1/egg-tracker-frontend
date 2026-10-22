@@ -8,7 +8,7 @@ import { UserCheck, Plus } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-export default function EmployeesPage(){
+export default function EmployeesPage() {
     const [employees, setEmployees] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -24,18 +24,22 @@ export default function EmployeesPage(){
         }
     };
 
-    useEffect(() => { fetchEmployees(); }, [])
+    useEffect(() => { fetchEmployees(); }, []);
 
     return (
-        <div className="space-y-6 p-4 md:p-6 bg-linear-to-br from-slate-900/30 via-slate-900/20 to-slate-900/30 rounded-2xl border border-white/10 shadow-xl">
-
+        <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                <h1 className="flex justify-center text-2xl sm:text-3xl font-['Playfair_Display'] font-black text-white text-shadow-lg">
-                    Employees
-                </h1>
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-semibold text-slate-900">
+                        Employees & Payroll
+                    </h1>
+                    <p className="text-sm text-slate-500 mt-1">
+                        Manage farm staff, monthly salary payments, advances and balances
+                    </p>
+                </div>
                 <Link href="/employees/new">
-                    <Button className="bg-linear-to-r from-green-400/80 to-green-600/60 text-white hover:from-green-600 hover:to-green-700 rounded-full w-full sm:w-auto flex items-center gap-2 cursor-pointer">
-                        <Plus size={18} />
+                    <Button className="bg-teal-600 hover:bg-teal-700 text-white rounded-lg px-4 py-2 font-medium shadow-sm transition active:scale-95 flex items-center gap-2 cursor-pointer w-full sm:w-auto">
+                        <Plus size={16} />
                         Add Employee
                     </Button>
                 </Link>
@@ -44,10 +48,10 @@ export default function EmployeesPage(){
             {isLoading ? (
                 <LoadSpin />
             ) : employees.length === 0 ? (
-                <div className="col-span-full text-center py-12">
-                    <UserCheck className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-                    <p className="text-slate-400 text-lg">No employees yet</p>
-                    <p className="text-slate-500 text-sm">Add your first employee to get started</p>
+                <div className="text-center py-16 bg-white rounded-2xl border border-teal-100 shadow-sm">
+                    <UserCheck className="w-14 h-14 text-teal-300 mx-auto mb-4" />
+                    <p className="text-slate-700 text-lg font-medium">No employees registered yet</p>
+                    <p className="text-slate-400 text-sm mt-1">Add your staff members to track salaries and payouts</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
@@ -57,5 +61,5 @@ export default function EmployeesPage(){
                 </div>
             )}
         </div>
-    )
+    );
 }

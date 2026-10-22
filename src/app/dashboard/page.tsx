@@ -50,53 +50,53 @@ export default function DashboardPage() {
                 </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-2xl border border-slate-300">
-                    <h3 className="text-lg font-semibold mb-4">Profit Summary</h3>
-                    <div className="space-y-2">
-                        <div className="flex justify-between">
-                            <span>Total Revenue:</span>
-                            <span className="font-medium text-green-600">{formatCurrency(summary?.totalRevenues || 0)}</span>
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/90 hover:shadow-md transition-shadow">
+                    <h3 className="text-lg font-bold text-slate-900 mb-4">Profit Summary</h3>
+                    <div className="space-y-3">
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="text-slate-600">Total Revenue:</span>
+                            <span className="font-bold text-emerald-600">{formatCurrency(summary?.totalRevenues || 0)}</span>
                         </div>
-                        <div className="flex justify-between">
-                            <span>Total Expenses:</span>
-                            <span className="font-medium text-red-600">{formatCurrency(expenses?.totalExpenses || 0)}</span>
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="text-slate-600">Total Expenses:</span>
+                            <span className="font-bold text-rose-600">{formatCurrency(expenses?.totalExpenses || 0)}</span>
                         </div>
-                        <hr className="my-2" />
-                        <div className="flex justify-between text-lg font-bold">
-                            <span>Net Profit:</span>
-                            <span className={`${((summary?.totalRevenues || 0) - (expenses?.totalExpenses || 0)) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <hr className="my-2 border-slate-100" />
+                        <div className="flex justify-between items-center text-base font-bold">
+                            <span className="text-slate-800">Net Profit:</span>
+                            <span className={`${((summary?.totalRevenues || 0) - (expenses?.totalExpenses || 0)) >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                                 {formatCurrency((summary?.totalRevenues || 0) - (expenses?.totalExpenses || 0))}
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-2xl border border-slate-300">
-                    <h3 className="text-lg font-semibold mb-4">Expense Breakdown</h3>
-                    <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                            <span>Employee Salaries:</span>
-                            <span className="font-medium">{formatCurrency(expenses?.employeePayments || 0)}</span>
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/90 hover:shadow-md transition-shadow">
+                    <h3 className="text-lg font-bold text-slate-900 mb-4">Expense Breakdown</h3>
+                    <div className="space-y-2.5 text-sm">
+                        <div className="flex justify-between items-center">
+                            <span className="text-slate-600">Employee Salaries:</span>
+                            <span className="font-semibold text-slate-800">{formatCurrency(expenses?.employeePayments || 0)}</span>
                         </div>
-                        <div className="flex justify-between">
-                            <span>Feed Bags:</span>
-                            <span className="font-medium">{formatCurrency(expenses?.feedBags || 0)}</span>
+                        <div className="flex justify-between items-center">
+                            <span className="text-slate-600">Feed Bags:</span>
+                            <span className="font-semibold text-slate-800">{formatCurrency(expenses?.feedBags || 0)}</span>
                         </div>
-                        <div className="flex justify-between">
-                            <span>Cartons:</span>
-                            <span className="font-medium">{formatCurrency(expenses?.cartons || 0)}</span>
+                        <div className="flex justify-between items-center">
+                            <span className="text-slate-600">Cartons:</span>
+                            <span className="font-semibold text-slate-800">{formatCurrency(expenses?.cartons || 0)}</span>
                         </div>
-                        <div className="flex justify-between">
-                            <span>Vaccines:</span>
-                            <span className="font-medium">{formatCurrency(expenses?.vaccineCosts || 0)}</span>
+                        <div className="flex justify-between items-center">
+                            <span className="text-slate-600">Vaccines:</span>
+                            <span className="font-semibold text-slate-800">{formatCurrency(expenses?.vaccineCosts || 0)}</span>
                         </div>
-                        <div className="flex justify-between">
-                            <span>Chickens:</span>
-                            <span className="font-medium">{formatCurrency(expenses?.chickens || 0)}</span>
+                        <div className="flex justify-between items-center">
+                            <span className="text-slate-600">Chickens:</span>
+                            <span className="font-semibold text-slate-800">{formatCurrency(expenses?.chickens || 0)}</span>
                         </div>
-                        <div className="flex justify-between">
-                            <span>Other Expenses:</span>
-                            <span className="font-medium">{formatCurrency(expenses?.other || 0)}</span>
+                        <div className="flex justify-between items-center">
+                            <span className="text-slate-600">Other Expenses:</span>
+                            <span className="font-semibold text-slate-800">{formatCurrency(expenses?.other || 0)}</span>
                         </div>
                     </div>
                 </div>
@@ -107,10 +107,9 @@ export default function DashboardPage() {
             <h2 className="text-xl font-['Playfair_Display'] font-semibold text-shadow-lg">Monthly Revenue</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {monthly?.map((m: any) => (
-                    <div key={m.month} className="bg-white p-4 rounded-xl shadow-2xl border border-slate-300">
-                    <p className="text-sm text-gray-500">{m.month} Revenues</p>
-                    <p className="text-sm text-gray-500"></p>
-                    <p className="font-bold">{formatCurrency(m.revenue)}</p>
+                    <div key={m.month} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/90 hover:shadow-md transition-shadow">
+                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{m.month} Revenues</p>
+                        <p className="text-xl font-black text-slate-900 mt-2">{formatCurrency(m.revenue)}</p>
                     </div>
                 ))}
             </div>

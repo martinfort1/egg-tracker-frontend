@@ -133,28 +133,36 @@ const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 
 return (
-        <div className="space-y-6 p-2 md:p-6 bg-linear-to-br from-slate-900/30 via-slate-900/20 to-slate-900/30 rounded-2xl border border-white/10 shadow-xl">
-            <div className="text-center max-w-lg mx-auto mb-4 bg-linear-to-br from-orange-500/90 to-yellow-500/90 rounded-4xl p-2 border border-white/20">
-                <h1 className="text-3xl font-['Playfair_Display'] font-black text-slate-800 mb-2 text-shadow-sm">Egg Laying Calendar</h1>
-                <p className="text-slate-700">Track daily egg collection</p>
+        <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-semibold text-slate-900">
+                        Egg Laying Calendar
+                    </h1>
+                    <p className="text-sm text-slate-500 mt-1">
+                        Track daily egg collection, boxes and cartons gathered from your flock
+                    </p>
+                </div>
             </div>
 
-            {/* Month Navigation */}
+            {/* Month Navigation & Calendar */}
             {isLoading ? (
                 <LoadSpin />
             ) : (
-            <div className="bg-slate-900/90 border border-white/10 rounded-xl p-4">
-                <div className="flex justify-between items-center mb-4">
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-sm">
+                <div className="flex justify-between items-center mb-6">
                     <Button
                         onClick={prevMonth}
-                        className="bg-linear-to-br from-orange-500/90 to-yellow-500/90 rounded-xl hover:scale-105 cursor-pointer"
+                        variant="outline"
+                        className="text-slate-700 hover:bg-slate-100 rounded-lg text-xs font-semibold px-3 py-1.5 transition cursor-pointer"
                     >
                         ← Previous
                     </Button>
-                    <h2 className="text-xl font-['Playfair_Display'] font-bold text-white text-shadow-lg">{monthName}</h2>
+                    <h2 className="text-xl font-bold text-slate-900">{monthName}</h2>
                     <Button
                         onClick={nextMonth}
-                        className="bg-linear-to-br from-orange-500/90 to-yellow-500/90 rounded-xl hover:scale-105 cursor-pointer"
+                        variant="outline"
+                        className="text-slate-700 hover:bg-slate-100 rounded-lg text-xs font-semibold px-3 py-1.5 transition cursor-pointer"
                     >
                         Next →
                     </Button>
@@ -164,7 +172,7 @@ return (
                 <div className="grid grid-cols-7 gap-2">
                     {/* Week days header */}
                     {weekDays.map(day => (
-                        <div key={day} className="text-center text-sm font-bold text-indigo-300 py-2">
+                        <div key={day} className="text-center text-xs font-bold text-slate-400 uppercase tracking-wider py-2">
                             {day}
                         </div>
                     ))}
@@ -172,7 +180,7 @@ return (
                     {/* Calendar days */}
                     {days.map((date, index) => {
                         if (!date) {
-                            return <div key={`empty-${index}`} className="bg-white/5 rounded-2xl p-2"></div>;
+                            return <div key={`empty-${index}`} className="bg-slate-50/50 rounded-xl p-2 min-h-16"></div>;
                         }
 
                         const dateStr = formatDate(date);
@@ -181,79 +189,86 @@ return (
 
                         let bgClass = '';
                         if (today) {
-                            bgClass = 'bg-linear-to-br from-orange-500/90 to-yellow-500/90';
+                            bgClass = 'bg-amber-50 text-amber-900 border-2 border-amber-400 font-bold shadow-xs';
                         } else if (hasData) {
-                            bgClass = 'bg-linear-to-bl from-green-500 via-green-700 to-green-500 text-white hover:bg-green-700';
+                            bgClass = 'bg-emerald-50 text-emerald-900 border border-emerald-200/90 hover:bg-emerald-100/70';
                         } else {
-                            bgClass = 'bg-white/10 text-slate-300 hover:bg-white/20 border-orange-500/35 border-2';
+                            bgClass = 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/60';
                         }
-
-                        let textClass = hasData ? 'text-slate-800 font-semibold underline' : (today ? 'text-slate-800 font-semibold' : 'text-slate-300');
 
                         return (
                             <Dialog key={index} open={open && editingDate === formatDate(date)} onOpenChange={setOpen}>
                                 <DialogTrigger asChild>
                                     <button
                                         onClick={() => openEditDialog(date)}
-                                        className={`p-2 rounded text-sm font-medium transition cursor-pointer ${bgClass}`}
+                                        className={`p-2.5 rounded-xl text-sm font-medium transition cursor-pointer min-h-16 flex flex-col justify-between ${bgClass}`}
                                     >
-                                        <div className={hasData ? 'text-slate-800 font-semibold underline' : (today ? 'text-slate-800 font-semibold' : 'text-slate-300')}>{date.getDate()}</div>
-                                        {hasData && (
-                                            <div className="text-xs mt-3">
-                                                <Layers className="w-4 h-4 inline md:mr-1 text-yellow-500"/> {hasData.boxes}
-                                                <br />
-                                                <InboxIcon className="w-4 h-4 inline md:mr-1 text-orange-500"/> {hasData.cartons}
+                                        <div className="flex justify-between items-center w-full">
+                                            <span className="font-bold text-xs">{date.getDate()}</span>
+                                            {today && <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>}
+                                        </div>
+                                        {hasData ? (
+                                            <div className="text-[11px] font-semibold mt-1 space-y-0.5 text-left">
+                                                <div className="flex items-center gap-1 text-emerald-800">
+                                                    <Layers className="w-3 h-3 text-emerald-600"/> {hasData.boxes}b
+                                                </div>
+                                                <div className="flex items-center gap-1 text-emerald-800">
+                                                    <InboxIcon className="w-3 h-3 text-emerald-600"/> {hasData.cartons}c
+                                                </div>
                                             </div>
+                                        ) : (
+                                            <span className="text-[10px] text-slate-300 self-end mt-2">+</span>
                                         )}
                                     </button>
                                 </DialogTrigger>
 
                                 {editingDate === formatDate(date) && (
-                                    <DialogContent className="bg-slate-900 border border-white/20">
+                                    <DialogContent className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xl">
                                         <DialogHeader>
-                                            <DialogTitle className="text-white">
+                                            <DialogTitle className="text-slate-900 font-bold text-lg">
                                                 Egg Collection - {formatUtcDate(dateStr)}
                                             </DialogTitle>
                                         </DialogHeader>
 
-                                        <div className="space-y-4">
+                                        <div className="space-y-4 pt-2">
                                             <div>
-                                                <label className="text-sm font-semibold text-indigo-200">Egg Boxes</label>
+                                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-1.5">Egg Boxes</label>
                                                 <Input
                                                     type="number"
                                                     value={tempBoxes}
                                                     onChange={(e) => setTempBoxes(Number(e.target.value))}
-                                                    className="bg-white/20 border-white/30 text-white"
+                                                    className="bg-slate-50 border-slate-200 text-slate-900 rounded-lg"
                                                     min="0"
                                                 />
                                             </div>
 
                                             <div>
-                                                <label className="text-sm font-semibold text-indigo-200">Cartons</label>
+                                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-1.5">Cartons</label>
                                                 <Input
                                                     type="number"
                                                     value={tempCartons}
                                                     onChange={(e) => setTempCartons(Number(e.target.value))}
-                                                    className="bg-white/20 border-white/30 text-white"
+                                                    className="bg-slate-50 border-slate-200 text-slate-900 rounded-lg"
                                                     min="0"
                                                 />
                                             </div>
 
-                                            <div className="flex gap-2">
+                                            <div className="flex gap-2 pt-2">
                                                 <Button
                                                     disabled={isSubmitting}
                                                     onClick={handleSaveEgg}
-                                                    className="flex-1 bg-green-600 hover:bg-green-700 cursor-pointer hover:scale-105"
+                                                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg cursor-pointer"
                                                 >
-                                                    {isSubmitting ? 'Saving...' : 'Save'}
+                                                    {isSubmitting ? 'Saving...' : 'Save Collection'}
                                                 </Button>
                                                 {hasData && (
                                                     <Button
                                                         onClick={() => {
-                                                            handleDelete(dateStr);
+                                                             handleDelete(dateStr);
                                                             setOpen(false);
                                                         }}
-                                                        className="flex-1 bg-red-600 hover:bg-red-700 cursor-pointer hover:scale-105"
+                                                        variant="outline"
+                                                        className="text-rose-600 hover:bg-rose-50 border-rose-200 rounded-lg cursor-pointer"
                                                     >
                                                         Delete
                                                     </Button>

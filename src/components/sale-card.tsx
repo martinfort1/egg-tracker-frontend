@@ -3,12 +3,11 @@ import { toast } from "sonner";
 import { Button } from "./ui/button";
 import Link from "next/link";
 import PaymentModal from "./payment-modal";
-import { motion } from "framer-motion"
+import { motion } from "framer-motion";
 import { formatCurrency, formatUtcDate } from "@/lib/utils";
-
+import { Calendar, CheckCircle2, AlertCircle, Clock } from "lucide-react";
 
 export default function SaleCard({ sale, refresh }: any) {
-
     const handleDelete = async () => {
         await toast.promise(
             api.delete(`/sales/${sale.id}`),
@@ -18,69 +17,111 @@ export default function SaleCard({ sale, refresh }: any) {
                 error: "Error deleting sale",
             }
         );
-    }
-
-    const statusColor: any = {
-        PAID: "bg-green-100 text-green-700 border-green-700 shadow shadow-green-700",
-        PARTIAL: "bg-yellow-100 text-yellow-700 border-yellow-700 shadow shadow-yellow-700",
-        UNPAID: "bg-red-100 text-red-700 border-red-700 shadow shadow-red-700"
+        refresh?.();
     };
 
-    return(
-        <motion.div 
-        initial={{ opacity: 0, y: 20}}
-        animate={{ opacity: 1, y: 0}}
-        transition={{ duration: 0.4 }}
-        className="bg-linear-to-br from-green-500/50 via-green-800/60 to-cyan-800/50 border border-white/20 backdrop-blur-xl p-6 md:p-7 rounded-2xl shadow-2xl space-y-4 hover:-translate-y-1 hover:shadow-2xl transition-transform duration-300">
-            <div className="flex justify-between items-start">
-                <h2 className="text-lg font-bold text-white">
-                    {sale.buyer.name}
-                </h2>
+    const statusBadge: Record<string, { className: string; icon: any }> = {
+        PAID: {
+            className: "bg-emerald-50 text-emerald-700 border-emerald-200",
+            icon: CheckCircle2,
+        },
+        PARTIAL: {
+            className: "bg-amber-50 text-amber-700 border-amber-200",
+            icon: Clock,
+        },
+        UNPAID: {
+            className: "bg-rose-50 text-rose-700 border-rose-200",
+            icon: AlertCircle,
+        },
+    };
 
-                <span className={`px-2 py-1 rounded text-sm ${statusColor[sale.status]}`}>
-                    {sale.status}
-                </span>
+    const StatusIcon = statusBadge[sale.status]?.icon || AlertCircle;
+    const badgeClass = statusBadge[sale.status]?.className || "bg-slate-100 text-slate-700 border-slate-200";
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="group relative bg-white rounded-2xl border border-emerald-100/90 p-5 sm:p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden gap-4"
+        >
+            {/* Top Section Accent Line */}
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600" />
+
+            <div className="space-y-3">
+                <div className="flex justify-between items-start gap-2">
+                    <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 mb-1">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+                                Sale
+                            </span>
+                        </div>
+                        <h2 className="text-lg font-bold text-slate-900 truncate group-hover:text-emerald-700 transition-colors">
+                            {sale.buyer?.name ?? "Customer"}
+                        </h2>
+                    </div>
+
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border shrink-0 ${badgeClass}`}>
+                        <StatusIcon className="w-3.5 h-3.5" />
+                        {sale.status}
+                    </span>
+                </div>
+
+                <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                    <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>{formatUtcDate(sale.date)}</span>
+                </div>
+
+                {/* Amount Summary */}
+                <div className="bg-emerald-50/50 rounded-xl p-3.5 space-y-2 border border-emerald-100/70 text-xs">
+                    <div className="flex justify-between items-center text-slate-600">
+                        <span>Total Amount:</span>
+                        <span className="text-sm font-bold text-slate-900">{formatCurrency(sale.totalAmount)}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-slate-600">
+                        <span>Amount Paid:</span>
+                        <span className="font-semibold text-emerald-700">{formatCurrency(sale.amountPaid)}</span>
+                    </div>
+                    <div className="pt-1.5 border-t border-emerald-200/60 flex justify-between items-center">
+                        <span className="text-slate-500">Remaining Debt:</span>
+                        {sale.status === "PAID" ? (
+                            <span className="font-semibold text-emerald-700">No debt</span>
+                        ) : (
+                            <span className="font-bold text-rose-600">{formatCurrency(sale.remainingAmount)}</span>
+                        )}
+                    </div>
+                </div>
             </div>
 
-            <div className="text-sm text-slate-950">
-                {formatUtcDate(sale.date)}
-            </div>
+            {/* Action Buttons */}
+            <div className="grid grid-cols-1 gap-2 pt-1">
+                <Link href={`/sales/${sale.id}`} className="w-full">
+                    <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition active:scale-95 cursor-pointer rounded-lg font-medium text-xs h-9">
+                        Sale Details
+                    </Button>
+                </Link>
 
-            <div className="space-y-1 text-indigo-100">
-                <p>Total: <span className="font-medium text-white">{formatCurrency(sale.totalAmount)}</span></p>
-                <p>Paid: <span className="font-medium text-white">{formatCurrency(sale.amountPaid)}</span></p>
-                <p className="text-sm- text-black">
-                    {
-                        sale.status === "PAID" ? 
-                        "No remaining debt" 
-                        : (<span className="text-black/80">
-                            Remaining debt: <span className="font-bold text-red-500">{formatCurrency(sale.remainingAmount)}</span>
-                        </span>)
-                    }
-                </p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-2 pt-2">
-                    <Link href={`/sales/${sale.id}`}>
-                        <Button className="w-full transition active:scale-95 hover:scale-105 cursor-pointer" size="sm">
-                            Sale Details
-                        </Button>
-                    </Link>
-                {sale.status !== "PAID" &&(
-                    <PaymentModal 
-                    className="w-full rounded-2xl shadow-xl hover:bg-gray-600 hover:scale-105 transition cursor-pointer"
-                    sale={sale} 
-                    onSuccess={refresh} >
+                {sale.status !== "PAID" && (
+                    <PaymentModal
+                        className="w-full bg-amber-500 hover:bg-amber-600 text-white rounded-lg shadow-sm transition active:scale-95 cursor-pointer font-medium text-xs h-9 flex items-center justify-center"
+                        sale={sale}
+                        onSuccess={refresh}
+                    >
                         <span className="w-full block text-center">
-                            Add payment
+                            Add Payment
                         </span>
                     </PaymentModal>
                 )}
-                    <Button className="w-full bg-linear-to-r from-red-500/95 to-red-900/95 text-white hover:bg-red-500 hover:scale-105 transition active:scale-95 cursor-pointer" onClick={handleDelete} variant="outline" size="sm">
-                        Delete
-                    </Button>
 
+                <Button
+                    onClick={handleDelete}
+                    variant="outline"
+                    className="w-full text-slate-500 hover:text-rose-600 hover:bg-rose-50 border-slate-200 hover:border-rose-200 transition active:scale-95 cursor-pointer rounded-lg font-medium text-xs h-9"
+                >
+                    Delete
+                </Button>
             </div>
         </motion.div>
-    )
+    );
 }

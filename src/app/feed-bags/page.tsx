@@ -46,28 +46,24 @@ export default function FeedBagsPage() {
         setTimeout(() => {
             fetchFeedBags();
             fetchMetrics();
-            toast.success("Payment added successfully");
-        }, 2000);
-    };
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'PAID': return 'text-green-300 bg-green-500/20 border-green-500/30';
-            case 'PARTIAL': return 'text-yellow-300 bg-yellow-500/20 border-yellow-500/30';
-            case 'UNPAID': return 'text-red-300 bg-red-500/20 border-red-500/30';
-            default: return 'text-gray-300 bg-gray-500/20 border-gray-500/30';
-        }
+            toast.success("Payment registered successfully");
+        }, 1500);
     };
 
     return (
-        <div className="space-y-6 p-4 md:p-6 bg-linear-to-br from-slate-900/30 via-slate-900/20 to-slate-900/30 rounded-2xl border border-white/10 shadow-xl">
+        <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                <h1 className="flex justify-center text-2xl sm:text-3xl font-['Playfair_Display'] font-black text-white text-shadow-lg">
-                    Feed Bags
-                </h1>
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-semibold text-slate-900">
+                        Feed Bags & Nutrition
+                    </h1>
+                    <p className="text-sm text-slate-500 mt-1">
+                        Track poultry feed orders, feed phases, supplier payments and debts
+                    </p>
+                </div>
                 <Link href="/feed-bags/new">
-                    <Button className="bg-linear-to-br from-green-400/80 to-green-600/60 text-indigo-100 hover:bg-green-600 rounded-full w-full sm:w-auto cursor-pointer">
-                        <Plus size={18} />
+                    <Button className="bg-orange-600 hover:bg-orange-700 text-white rounded-lg px-4 py-2 font-medium shadow-sm transition active:scale-95 flex items-center gap-2 cursor-pointer w-full sm:w-auto">
+                        <Plus size={16} />
                         Add Feed Purchase
                     </Button>
                 </Link>
@@ -76,35 +72,38 @@ export default function FeedBagsPage() {
             {/* Metrics Section */}
             {!isLoading && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <MetricCardValue title="Unpaid Orders" value={metrics.unpaidCount} unit="" isCurrency={false} />
-                    <MetricCardValue title="Amount Owed" value={metrics.totalOwed} isCurrency={true} />
+                    <MetricCardValue title="Unpaid Feed Orders" value={metrics.unpaidCount} unit=" orders" isCurrency={false} />
+                    <MetricCardValue title="Total Feed Debt" value={metrics.totalOwed} isCurrency={true} />
                 </div>
             )}
 
             {/* Bulk Payment Button */}
             {!isLoading && metrics.totalOwed > 0 && (
-                <div className="flex flex-col items-center justify-between gap-6">
+                <div className="bg-white p-4 rounded-xl border border-orange-100 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-wider text-orange-700">Debt Reconciliation</p>
+                        <p className="text-xs text-slate-500">Apply a general indistinct payment towards overall feed supplier debt</p>
+                    </div>
                     <PaymentModal 
                         sale={{ id: 'bulk' }} 
                         endpoint="feed-bags/payment/bulk" 
                         onSuccess={handlePaymentSuccess} 
-                        className="w-full flex justify-center rounded-2xl shadow-xl hover:bg-gray-600"
+                        className="bg-amber-500 hover:bg-amber-600 text-white rounded-lg px-4 py-2 text-xs font-semibold shadow-sm transition active:scale-95 cursor-pointer w-full sm:w-auto text-center"
                         isBulkPayment={true}
                         owed={metrics.totalOwed}
                     >
-                        <span className="w-full block text-center">Add an indistinct payment here</span>
+                        <span>Register General Payment</span>
                     </PaymentModal>
-                    <div className="w-full rounded-2xl h-0.5 bg-gray-400"></div>
                 </div>
             )}
 
             {isLoading ? (
                 <LoadSpin />
             ) : feedBags.length === 0 ? (
-                <div className="col-span-full text-center py-12">
-                    <Package className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-                    <p className="text-slate-400 text-lg">No feed purchases yet</p>
-                    <p className="text-slate-500 text-sm">Add your first feed purchase to get started</p>
+                <div className="text-center py-16 bg-white rounded-2xl border border-orange-100 shadow-sm">
+                    <Package className="w-14 h-14 text-orange-300 mx-auto mb-4" />
+                    <p className="text-slate-700 text-lg font-medium">No feed purchases recorded yet</p>
+                    <p className="text-slate-400 text-sm mt-1">Add your first feed purchase to get started</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
@@ -114,5 +113,5 @@ export default function FeedBagsPage() {
                 </div>
             )}
         </div>
-    )
+    );
 }

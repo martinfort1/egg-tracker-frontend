@@ -115,15 +115,22 @@ export default function ChickensPage() {
 
             {/* Metric Cards Row 1 */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <MetricCardValue title="Current Chickens" value={currentCount}  isCurrency={false} />
-                <div className="bg-linear-to-br from-yellow-600/50 via-violet-600/40 to-green-900/35 border border-white/20 backdrop-blur-xl p-6 rounded-2xl shadow-2xl text-white">
-                    <p className="text-xl text-slate-900/90 tracking-wide">Laying Percentage</p>
-                    <p className="text-3xl md:text-4xl font-extrabold text-black mt-3">{laying.toFixed(2)}%</p>
-                    {layingHistory.length > 0 && (
-                        <p className="text-xs text-slate-700 mt-2">As of {formatUtcDate(layingHistory[layingHistory.length - 1].date)}</p>
-                    )}
+                <MetricCardValue title="Current Chickens" value={currentCount} isCurrency={false} unit=" birds" />
+                <div className="group relative bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 overflow-hidden flex flex-col justify-between">
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-yellow-500 to-emerald-500 opacity-90" />
+                    <div>
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Laying Percentage</p>
+                        <p className="text-2xl sm:text-3xl font-black text-slate-900 mt-2 tracking-tight group-hover:text-amber-600 transition-colors">
+                            {laying.toFixed(2)}%
+                        </p>
+                        {layingHistory.length > 0 && (
+                            <p className="text-xs text-slate-400 mt-2">
+                                As of {formatUtcDate(layingHistory[layingHistory.length - 1].date)}
+                            </p>
+                        )}
+                    </div>
                 </div>
-                <MetricCard title="Total Invested" value={chickens.reduce((sum, c) => sum + c.totalCost, 0)} />
+                <MetricCard title="Total Flock Invested" value={chickens.reduce((sum, c) => sum + c.totalCost, 0)} />
             </div>
 
         
