@@ -1,6 +1,5 @@
-"use client"
+"use client";
 
-import z from "zod";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/lib/api";
@@ -10,18 +9,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { pickContact } from "@/lib/contact-picker";
-import { Smartphone } from "lucide-react";
+import { Smartphone, ArrowLeft, User, Phone, MapPin, FileText } from "lucide-react";
 import { useState } from "react";
 
-
 export default function NewBuyerPage() {
-    
     const router = useRouter();
     const [isLoadingContact, setIsLoadingContact] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const { register, handleSubmit, formState: { errors }, setValue } = useForm<any>({
-        resolver: zodResolver(buyerSchema)
-    })
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        setValue,
+    } = useForm<any>({
+        resolver: zodResolver(buyerSchema),
+    });
 
     const handleImportContact = async () => {
         setIsLoadingContact(true);
@@ -40,89 +43,155 @@ export default function NewBuyerPage() {
         }
     };
 
-    const onSubmit = async (data: FormData)=> {
-        await api.post("/buyers", data);
-        toast.success("Created new buyer succesfully")
-        router.push("/buyers");
-    }
+    const onSubmit = async (data: any) => {
+        setIsSubmitting(true);
+        try {
+            const res = await api.post("/buyers", data);
+            toast.success("Customer created successfully");
+            router.push(`/buyers/${res.data.id || ""}`);
+        } catch (error) {
+            toast.error("Failed to create customer");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-slate-900/50 via-slate-900/30 to-slate-900/50 p-4 md:p-6 flex items-center justify-center">
-            <div className="w-full max-w-md space-y-6 bg-linear-to-br from-slate-900/80 via-indigo-900/60 to-slate-900/90 border border-white/20 backdrop-blur-xl p-8 rounded-2xl shadow-2xl">
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Create Buyer</h1>
-                    <p className="text-indigo-200">Add a new buyer to your system</p>
+        <div className="max-w-xl mx-auto space-y-6">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <button
+                    type="button"
+                    onClick={() => router.back()}
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back
+                </button>
+
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    <span className="w-2 h-2 rounded-full bg-indigo-500" />
+                    New Customer
+                </span>
+            </div>
+
+            {/* Main Form Card */}
+            <div className="relative bg-white rounded-2xl border border-indigo-100 shadow-sm overflow-hidden p-6 sm:p-8 space-y-6">
+                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-500 via-blue-500 to-indigo-600" />
+
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-semibold text-slate-900">
+                        Add New Customer
+                    </h1>
+                    <p className="text-sm text-slate-500 mt-1">
+                        Register a customer to track egg sales, deliveries and debts
+                    </p>
                 </div>
 
+                {/* Import Contact Button */}
                 <Button
                     type="button"
                     onClick={handleImportContact}
                     disabled={isLoadingContact}
-                    className="w-full bg-linear-to-r from-green-600 to-emerald-600 text-white font-semibold hover:from-green-700 hover:to-emerald-700 transition active:scale-95 rounded-xl cursor-pointer flex items-center justify-center gap-2"
+                    variant="outline"
+                    className="w-full border-indigo-200 bg-indigo-50/50 hover:bg-indigo-50 text-indigo-700 font-semibold rounded-xl h-11 flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
                 >
-                    <Smartphone size={18} />
-                    {isLoadingContact ? "Importing..." : "Import from Contacts"}
+                    <Smartphone className="w-4 h-4 text-indigo-600" />
+                    {isLoadingContact ? "Importing..." : "Import from Phone Contacts"}
                 </Button>
 
                 <div className="relative">
                     <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-white/20"></div>
+                        <div className="w-full border-t border-slate-200" />
                     </div>
-                    <div className="relative flex justify-center text-sm">
-                        <span className="px-2 bg-slate-900/90 text-white/60">or fill manually</span>
+                    <div className="relative flex justify-center text-xs">
+                        <span className="px-3 bg-white text-slate-400 font-medium uppercase tracking-wider">
+                            or enter details manually
+                        </span>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Name</label>
-                        <Input 
-                            placeholder="Buyer name" 
-                            {...register("name")} 
-                            className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                            <User className="w-3.5 h-3.5 text-indigo-600" />
+                            Customer Name *
+                        </label>
+                        <Input
+                            placeholder="e.g. Juan Pérez"
+                            {...register("name")}
+                            className="h-11 bg-white border border-slate-200 text-slate-900 rounded-xl px-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                         />
-                        {errors.name && <p className="text-red-300 text-xs">{String(errors.name?.message)}</p>}
+                        {errors.name && (
+                            <p className="text-rose-600 text-xs font-medium">{String(errors.name?.message)}</p>
+                        )}
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Phone</label>
-                        <Input 
-                            placeholder="Phone number" 
-                            {...register("phone")} 
-                            className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                            <Phone className="w-3.5 h-3.5 text-indigo-600" />
+                            Phone Number
+                        </label>
+                        <Input
+                            placeholder="e.g. +54 9 387 1234567"
+                            {...register("phone")}
+                            className="h-11 bg-white border border-slate-200 text-slate-900 rounded-xl px-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                         />
-                        {errors.phone && <p className="text-red-300 text-xs">{String(errors.phone?.message)}</p>}
+                        {errors.phone && (
+                            <p className="text-rose-600 text-xs font-medium">{String(errors.phone?.message)}</p>
+                        )}
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Address</label>
-                        <Input 
-                            placeholder="Street address" 
-                            {...register("address")} 
-                            className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                            <MapPin className="w-3.5 h-3.5 text-indigo-600" />
+                            Delivery Address
+                        </label>
+                        <Input
+                            placeholder="e.g. Av. Belgrano 1234, Salta"
+                            {...register("address")}
+                            className="h-11 bg-white border border-slate-200 text-slate-900 rounded-xl px-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                         />
-                        {errors.address && <p className="text-red-300 text-xs">{String(errors.address?.message)}</p>}
+                        {errors.address && (
+                            <p className="text-rose-600 text-xs font-medium">{String(errors.address?.message)}</p>
+                        )}
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Notes</label>
-                        <Input 
-                            placeholder="Additional notes" 
-                            {...register("notes")} 
-                            className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                            <FileText className="w-3.5 h-3.5 text-indigo-600" />
+                            Notes (Preferences, delivery schedule, etc.)
+                        </label>
+                        <Input
+                            placeholder="Additional notes"
+                            {...register("notes")}
+                            className="h-11 bg-white border border-slate-200 text-slate-900 rounded-xl px-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                         />
-                        {errors.notes && <p className="text-red-300 text-xs">{String(errors.notes?.message)}</p>}
+                        {errors.notes && (
+                            <p className="text-rose-600 text-xs font-medium">{String(errors.notes?.message)}</p>
+                        )}
                     </div>
 
-                    <Button 
-                        type="submit"
-                        className="w-full bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl cursor-pointer"
-                    >
-                        Create Buyer
-                    </Button>
+                    <div className="flex gap-3 pt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => router.back()}
+                            disabled={isSubmitting}
+                            className="flex-1 border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl h-12 font-semibold"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl h-12 shadow-sm transition active:scale-95 cursor-pointer disabled:opacity-50"
+                        >
+                            {isSubmitting ? "Creating..." : "Save Customer"}
+                        </Button>
+                    </div>
                 </form>
             </div>
         </div>
-    )
+    );
 }
-

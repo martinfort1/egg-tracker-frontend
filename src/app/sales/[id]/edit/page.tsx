@@ -24,6 +24,7 @@ export default function EditSalePage() {
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [saleNumber, setSaleNumber] = useState<number | null>(null);
 
     const {
         register,
@@ -58,6 +59,9 @@ export default function EditSalePage() {
 
                 const saleRes = await api.get(`/sales/${id}`);
                 const sale = saleRes.data.sale || saleRes.data;
+                if (sale.saleNumber) {
+                    setSaleNumber(sale.saleNumber);
+                }
 
                 setValue("buyerId", sale.buyerId || sale.buyer?.id);
                 const saleDate = sale.date
@@ -141,7 +145,7 @@ export default function EditSalePage() {
 
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    Edit Sale #{id}
+                    {saleNumber ? `Venta N° ${saleNumber}` : `Edit Sale #${typeof id === "string" ? id.slice(0, 8) : id}`}
                 </span>
             </div>
 

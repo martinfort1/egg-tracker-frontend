@@ -84,8 +84,9 @@ export default function SalePage() {
         if (!buyer?.name) return null;
 
         const details = buildSaleDetails(sale);
+        const saleNumText = sale.saleNumber ? ` N° ${sale.saleNumber}` : "";
 
-        const message = `Hola ${buyer.name}! Te paso la venta:
+        const message = `Hola ${buyer.name}! Te paso el detalle de la venta${saleNumText}:
 Fecha: *_${new Date(sale.date).toLocaleDateString()}_*
 
 ${details}
@@ -174,7 +175,7 @@ Muchas gracias!`;
 
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    Sale #{sale.id}
+                    {sale.saleNumber ? `Venta N° ${sale.saleNumber}` : `Venta #${sale.id.slice(0, 8)}`}
                 </span>
             </div>
 

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,33 +9,41 @@ import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
+import { ArrowLeft, Calendar, Package, DollarSign, Layers, CheckCircle2 } from "lucide-react";
 
 export default function NewFeedBagPage() {
-
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { register, handleSubmit, watch, setValue, formState: { errors }, control } = useForm({
+    const [fullyPaid, setFullyPaid] = useState(false);
+
+    const {
+        register,
+        handleSubmit,
+        watch,
+        setValue,
+        formState: { errors },
+        control,
+    } = useForm({
         defaultValues: {
-            date: new Date().toISOString().split('T')[0],
+            date: new Date().toISOString().split("T")[0],
             amount: 0,
             price: 0,
             totalAmount: 0,
             amountPaid: 0,
             remainingAmount: 0,
-            phase: 1
-        }
+            phase: 1,
+        },
     });
 
-    const amount = watch("amount");
-    const price = watch("price");
-    const amountPaid = watch("amountPaid");
-    const [fullyPaid, setFullyPaid] = useState(false);
+    const amount = Number(watch("amount")) || 0;
+    const price = Number(watch("price")) || 0;
+    const amountPaid = Number(watch("amountPaid")) || 0;
 
-    // Auto-calculate total amount and remaining amount
+    // Auto-calculate total and remaining
     useEffect(() => {
         const total = amount * price;
         setValue("totalAmount", total);
-        setValue("remainingAmount", total - (fullyPaid ? total : amountPaid));
+        setValue("remainingAmount", Math.max(0, total - (fullyPaid ? total : amountPaid)));
     }, [amount, price, amountPaid, fullyPaid, setValue]);
 
     // Set amountPaid when fullyPaid changes
@@ -48,155 +56,217 @@ export default function NewFeedBagPage() {
     const onSubmit = async (data: any) => {
         setIsSubmitting(true);
         try {
-            await api.post("/feed-bags", data);
-            toast.success("Feed purchase created successfully");
-            router.push("/feed-bags");
+            const res = await api.post("/feed-bags", data);
+            toast.success("Feed purchase recorded successfully");
+            router.push(`/feed-bags/${res.data?.id || ""}`);
         } catch (error) {
             toast.error("Failed to create feed purchase");
-        }
-        finally {
+        } finally {
             setIsSubmitting(false);
         }
     };
 
+    const total = amount * price;
+    const remaining = Math.max(0, total - (fullyPaid ? total : amountPaid));
+
     return (
-        <div className="min-h-screen bg-linear-to-br from-slate-900/50 via-slate-900/30 to-slate-900/50 p-4 md:p-6 flex items-center justify-center">
-            <div className="w-full max-w-md space-y-6 bg-linear-to-br from-slate-900/80 via-indigo-900/60 to-slate-900/90 border border-white/20 backdrop-blur-xl p-8 rounded-2xl shadow-2xl">
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Add Feed Purchase</h1>
-                    <p className="text-indigo-200">Record a new feed bag purchase</p>
+        <div className="max-w-xl mx-auto space-y-6">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <button
+                    type="button"
+                    onClick={() => router.back()}
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back
+                </button>
+
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-orange-50 text-orange-700 border border-orange-200">
+                    <span className="w-2 h-2 rounded-full bg-orange-500" />
+                    New Feed Purchase
+                </span>
+            </div>
+
+            {/* Main Form Card */}
+            <div className="relative bg-white rounded-2xl border border-orange-100 shadow-sm overflow-hidden p-6 sm:p-8 space-y-6">
+                <div className="h-1.5 bg-gradient-to-r from-orange-400 via-amber-500 to-orange-600" />
+
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-semibold text-slate-900">
+                        Record Feed Purchase
+                    </h1>
+                    <p className="text-sm text-slate-500 mt-1">
+                        Register a batch of poultry feed bags, unit price, nutritional phase and supplier payment
+                    </p>
                 </div>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Purchase Date</label>
-                        <Input
-                            type="date"
-                            {...register("date", { required: "Date is required" })}
-                            className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
-                        />
-                        {errors.date && <p className="text-red-300 text-xs">{String(errors.date?.message)}</p>}
-                    </div>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                    {/* Date and Phase */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                                <Calendar className="w-3.5 h-3.5 text-orange-600" />
+                                Purchase Date *
+                            </label>
+                            <Input
+                                type="date"
+                                {...register("date", { required: "Date is required" })}
+                                className="h-11 bg-white border border-slate-200 text-slate-900 rounded-xl px-3 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                            />
+                            {errors.date && (
+                                <p className="text-rose-600 text-xs font-medium">{String(errors.date?.message)}</p>
+                            )}
+                        </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Amount (bags)</label>
-                        <Input
-                            type="number"
-                            step="0.01"
-                            placeholder="Amount in bags"
-                            {...register("amount", { valueAsNumber: true, required: "Amount is required", min: 0.01 })}
-                            className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
-                        />
-                        {errors.amount && <p className="text-red-300 text-xs">{String(errors.amount?.message)}</p>}
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Price per bag</label>
-                        <PriceInput
-                            placeholder="Price per bag"
-                            control={control}
-                            name="price"
-                            className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
-                        />
-                        {errors.price && <p className="text-red-300 text-xs">{String(errors.price?.message)}</p>}
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Total Amount</label>
-                        <Input
-                            type="number"
-                            step="0.01"
-                            readOnly
-                            {...register("totalAmount", { valueAsNumber: true })}
-                            className="bg-white/10 border-white/20 text-white cursor-not-allowed"
-                        />
-                    </div>
-
-                    {/* Fully Paid Toggle */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Pay Full Amount?</label>
-                        <div className="flex gap-2">
-                            <Button
-                                type="button"
-                                onClick={() => setFullyPaid(false)}
-                                className={`flex-1 transition ${
-                                    !fullyPaid
-                                        ? 'bg-linear-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-700 text-white'
-                                        : 'bg-white/10 text-slate-300 hover:bg-white/20 cursor-pointer'
-                                }`}
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                                <Layers className="w-3.5 h-3.5 text-orange-600" />
+                                Feed Phase *
+                            </label>
+                            <select
+                                {...register("phase", { valueAsNumber: true, required: "Phase is required" })}
+                                className="w-full h-11 bg-white border border-slate-200 text-slate-900 rounded-xl px-3 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 shadow-xs outline-none transition"
                             >
-                                No
-                            </Button>
-                            <Button
-                                type="button"
-                                onClick={() => setFullyPaid(true)}
-                                className={`flex-1 transition ${
-                                    fullyPaid
-                                        ? 'bg-linear-to-r from-green-500 via-green-700 to-green-900 hover:from-green-700 hover:to-green-800 text-white'
-                                        : 'bg-white/10 text-slate-300 hover:bg-white/20 cursor-pointer'
-                                }`}
-                            >
-                                Yes
-                            </Button>
+                                <option value={1}>Phase 1 (Growth / Inception)</option>
+                                <option value={2}>Phase 2 (Egg Production)</option>
+                            </select>
+                            {errors.phase && (
+                                <p className="text-rose-600 text-xs font-medium">{String(errors.phase?.message)}</p>
+                            )}
                         </div>
                     </div>
 
-                    {/* Amount Paid */}
-                    {!fullyPaid && (
-                        <div className="space-y-2">
-                            <label className="text-sm font-semibold text-white">Amount Paid</label>
+                    {/* Amount & Price */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                                <Package className="w-3.5 h-3.5 text-orange-600" />
+                                Quantity (Bags) *
+                            </label>
                             <Input
                                 type="number"
-                                step="0.01"
-                                placeholder="Amount already paid"
-                                {...register("amountPaid", { valueAsNumber: true, min: 0 })}
-                                className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
+                                step="any"
+                                placeholder="0"
+                                {...register("amount", { valueAsNumber: true, required: "Amount is required", min: 0.01 })}
+                                className="h-11 bg-white border border-slate-200 text-slate-900 rounded-xl px-3 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                            />
+                            {errors.amount && (
+                                <p className="text-rose-600 text-xs font-medium">{String(errors.amount?.message)}</p>
+                            )}
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                                <DollarSign className="w-3.5 h-3.5 text-orange-600" />
+                                Price per Bag *
+                            </label>
+                            <PriceInput
+                                placeholder="0"
+                                control={control}
+                                name="price"
+                                className="h-11 bg-white border border-slate-200 text-slate-900 rounded-xl px-3 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                            />
+                            {errors.price && (
+                                <p className="text-rose-600 text-xs font-medium">{String(errors.price?.message)}</p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Payment Status Toggle */}
+                    <div className="space-y-2 pt-2 border-t border-slate-100">
+                        <label className="text-xs font-semibold text-slate-700">
+                            Payment to Supplier
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setFullyPaid(false)}
+                                className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition cursor-pointer ${
+                                    !fullyPaid
+                                        ? "bg-amber-50 border-amber-300 text-amber-800 shadow-xs"
+                                        : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                                }`}
+                            >
+                                Partial / In Debt
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setFullyPaid(true)}
+                                className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                                    fullyPaid
+                                        ? "bg-orange-600 border-orange-600 text-white shadow-xs"
+                                        : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                                }`}
+                            >
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                Fully Paid
+                            </button>
+                        </div>
+                    </div>
+
+                    {!fullyPaid ? (
+                        <div className="space-y-1.5 animate-in fade-in duration-200">
+                            <label className="text-xs font-semibold text-slate-600">
+                                Initial Amount Paid
+                            </label>
+                            <PriceInput
+                                placeholder="0"
+                                control={control}
+                                name="amountPaid"
+                                className="h-11 bg-white border border-slate-200 text-slate-900 rounded-xl px-3 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
                             />
                         </div>
-                    )}
-
-                    {/* Payment Summary */}
-                    {fullyPaid && (
-                        <div className="animate-in fade-in duration-300 bg-linear-to-r from-green-500/20 to-green-600/20 border border-green-400/30 rounded-lg p-3">
-                            <div className="flex justify-between items-center">
-                                <span className="text-sm font-semibold text-white">Payment Amount:</span>
-                                <span className="text-lg font-bold text-green-300">{formatCurrency(amount * price)}</span>
-                            </div>
+                    ) : (
+                        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-xs animate-in fade-in duration-200">
+                            <span className="font-medium text-emerald-800">
+                                Full payment of {formatCurrency(total)} registered
+                            </span>
+                            <span className="font-bold text-emerald-700">Settled</span>
                         </div>
                     )}
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Remaining Amount</label>
-                        <Input
-                            type="number"
-                            step="0.01"
-                            readOnly
-                            {...register("remainingAmount", { valueAsNumber: true })}
-                            className="bg-white/10 border-white/20 text-white cursor-not-allowed"
-                        />
+                    {/* Summary Calculation Banner */}
+                    <div className="bg-gradient-to-br from-orange-500/10 via-amber-500/5 to-orange-500/10 border border-orange-200/80 rounded-2xl p-4 space-y-2 mt-2">
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="font-semibold text-slate-700">Total Purchase:</span>
+                            <span className="text-xl font-black text-slate-900">{formatCurrency(total)}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs text-slate-600">
+                            <span>Amount Paid:</span>
+                            <span className="font-semibold text-emerald-700">
+                                {formatCurrency(fullyPaid ? total : amountPaid)}
+                            </span>
+                        </div>
+                        <div className="pt-2 border-t border-orange-200/70 flex justify-between items-center text-xs">
+                            <span className="font-semibold text-slate-700">Remaining Supplier Debt:</span>
+                            <span className={`font-bold ${remaining > 0 ? "text-rose-600" : "text-emerald-700"}`}>
+                                {remaining > 0 ? formatCurrency(remaining) : "No debt"}
+                            </span>
+                        </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Feed Phase</label>
-                        <select
-                            {...register("phase", { valueAsNumber: true, required: "Phase is required" })}
-                            className="w-full bg-white/20 border border-white/30 text-white rounded-lg px-3 py-2 focus:border-indigo-400 focus:ring-indigo-400/20"
+                    {/* Submit and Cancel */}
+                    <div className="flex gap-3 pt-3">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => router.back()}
+                            disabled={isSubmitting}
+                            className="flex-1 border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl h-12 font-semibold"
                         >
-                            <option value={1} className="bg-slate-800">Phase 1</option>
-                            <option value={2} className="bg-slate-800">Phase 2</option>
-                        </select>
-                        {errors.phase && <p className="text-red-300 text-xs">{String(errors.phase?.message)}</p>}
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl h-12 shadow-sm transition active:scale-95 cursor-pointer disabled:opacity-50"
+                        >
+                            {isSubmitting ? "Recording..." : "Save Feed Purchase"}
+                        </Button>
                     </div>
-
-                    <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl cursor-pointer"
-                    >
-                        {isSubmitting ? "Creating..." : "Create Feed Purchase"}
-                    </Button>
                 </form>
             </div>
         </div>
-    )
+    );
 }

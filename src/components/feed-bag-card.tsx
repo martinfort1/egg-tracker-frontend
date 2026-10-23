@@ -51,11 +51,11 @@ export default function FeedBagCard({ feedBag, refresh }: any) {
             <div className="flex items-center gap-1.5 mb-1">
               <span className="w-2 h-2 rounded-full bg-orange-500 shrink-0" />
               <span className="text-[11px] font-bold uppercase tracking-wider text-orange-700">
-                Feed Bags
+                {feedBag.purchaseNumber ? `Compra N° ${feedBag.purchaseNumber}` : "Alimento"}
               </span>
             </div>
             <h2 className="text-lg font-bold text-slate-900 truncate group-hover:text-orange-800 transition-colors">
-              {feedBag.amount} Bags
+              {feedBag.amount} Bolsas
             </h2>
           </div>
 

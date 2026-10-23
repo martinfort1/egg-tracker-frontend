@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import LoadSpin from "@/components/load-spin";
 import PaymentModal from "@/components/payment-modal";
@@ -8,9 +8,24 @@ import { formatCurrency, formatUtcDate } from "@/lib/utils";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import Link from "next/link";
+import {
+    ArrowLeft,
+    Calendar,
+    Package,
+    DollarSign,
+    CheckCircle2,
+    Clock,
+    AlertCircle,
+    Edit,
+    Trash2,
+    Layers,
+    Receipt,
+} from "lucide-react";
 
 interface FeedBag {
     id: string;
+    purchaseNumber?: number;
     date: string;
     amount: number;
     price: number;
@@ -35,7 +50,7 @@ export default function FeedBagDetailPage() {
             const response = await api.get(`/feed-bags/${id}`);
             setFeedBag(response.data);
         } catch (error) {
-            toast.error("Failed to fetch feed bag");
+            toast.error("Failed to fetch feed purchase");
         } finally {
             setLoading(false);
         }
@@ -57,137 +72,220 @@ export default function FeedBagDetailPage() {
         }
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'PAID': return 'bg-green-500/20 text-green-300 border-green-500/30';
-            case 'PARTIAL': return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
-            case 'UNPAID': return 'bg-red-500/20 text-red-300 border-red-500/30';
-            default: return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
-        }
+    if (loading) return <LoadSpin />;
+    if (!feedBag) return <div className="text-center py-12 text-slate-500">Feed purchase not found</div>;
+
+    const statusBadge: Record<string, { className: string; icon: any }> = {
+        PAID: {
+            className: "bg-emerald-50 text-emerald-700 border-emerald-200",
+            icon: CheckCircle2,
+        },
+        PARTIAL: {
+            className: "bg-amber-50 text-amber-700 border-amber-200",
+            icon: Clock,
+        },
+        UNPAID: {
+            className: "bg-rose-50 text-rose-700 border-rose-200",
+            icon: AlertCircle,
+        },
     };
 
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-linear-to-br from-slate-900/50 via-slate-900/30 to-slate-900/50 p-4 md:p-6 flex items-center justify-center">
-                <LoadSpin />
-            </div>
-        );
-    }
-
-    if (!feedBag) {
-        return (
-            <div className="min-h-screen bg-linear-to-br from-slate-900/50 via-slate-900/30 to-slate-900/50 p-4 md:p-6 flex items-center justify-center">
-                <div className="text-white">Feed purchase not found</div>
-            </div>
-        );
-    }
+    const badge = statusBadge[feedBag.status] || {
+        className: "bg-slate-100 text-slate-700 border-slate-200",
+        icon: Clock,
+    };
+    const StatusIcon = badge.icon;
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-slate-900/50 via-slate-900/30 to-slate-900/50 p-4 md:p-6">
-            <div className="max-w-4xl mx-auto">
-                <div className="bg-linear-to-br from-slate-900/80 via-indigo-900/60 to-slate-900/90 border border-white/20 backdrop-blur-xl p-8 rounded-2xl shadow-2xl">
-                    <div className="flex items-center justify-between mb-8">
-                        <div>
-                            <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Feed Purchase Details</h1>
-                            <p className="text-indigo-200">Phase {feedBag.phase} • {formatUtcDate(feedBag.date)}</p>
+        <div className="max-w-4xl mx-auto space-y-6">
+            {/* Top Navigation Bar */}
+            <div className="flex items-center justify-between">
+                <button
+                    type="button"
+                    onClick={() => router.push("/feed-bags")}
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to Feed Purchases
+                </button>
+
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-orange-50 text-orange-700 border border-orange-200">
+                    <span className="w-2 h-2 rounded-full bg-orange-500" />
+                    Compra N° {feedBag.purchaseNumber ?? feedBag.id.slice(0, 8)}
+                </span>
+            </div>
+
+            {/* Header Card */}
+            <div className="relative bg-white rounded-2xl border border-orange-100 shadow-sm overflow-hidden p-6 sm:p-8">
+                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-400 via-amber-500 to-orange-600" />
+
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-1">
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-semibold text-slate-900">
+                                {feedBag.purchaseNumber ? `Orden de Compra N° ${feedBag.purchaseNumber}` : "Orden de Compra de Alimento"}
+                            </h1>
+                            <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${badge.className}`}>
+                                <StatusIcon className="w-3.5 h-3.5" />
+                                {feedBag.status}
+                            </span>
                         </div>
-                        <div className="flex gap-3">
-                            {feedBag.status !== 'PAID' && (
-                                <PaymentModal
-                                    sale={feedBag}
-                                    endpoint="feed-bags"
-                                    onSuccess={fetchFeedBag}
-                                >
-                                    Add Payment
-                                </PaymentModal>
-                            )}
-                            <Button
-                                onClick={() => router.push(`/feed-bags/${feedBag.id}/edit`)}
-                                size="sm"
-                                className="bg-linear-to-r from-blue-600 to-cyan-600 text-white font-bold hover:from-blue-700 hover:to-cyan-700 transition active:scale-95 rounded-xl cursor-pointer"
-                            >
-                                Edit
-                            </Button>
-                            <Button
-                                onClick={handleDelete}
-                                size="sm"
-                                className="bg-linear-to-r from-red-600 to-pink-600 text-white font-bold hover:from-red-700 hover:to-pink-700 transition active:scale-95 rounded-xl cursor-pointer"
-                            >
-                                Delete
-                            </Button>
-                        </div>
+                        <p className="text-sm text-slate-500 flex items-center gap-1.5">
+                            <Calendar className="w-4 h-4 text-orange-600" />
+                            Purchased on {formatUtcDate(feedBag.date)} • Phase {feedBag.phase} Nutrition
+                        </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-6">
-                            <div className="bg-white/10 border border-white/20 p-6 rounded-xl">
-                                <h3 className="text-lg font-bold text-white mb-4">Purchase Information</h3>
-                                <div className="space-y-3">
-                                    <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Purchase Date</label>
-                                        <p className="text-white font-medium">{formatUtcDate(feedBag.date)}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Feed Phase</label>
-                                        <p className="text-white font-medium">Phase {feedBag.phase}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Amount</label>
-                                        <p className="text-white font-medium">{feedBag.amount} bags</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Price per bag</label>
-                                        <p className="text-white font-medium">{formatCurrency(feedBag.price)}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white/10 border border-white/20 p-6 rounded-xl">
-                                <h3 className="text-lg font-bold text-white mb-4">Payment Information</h3>
-                                <div className="space-y-3">
-                                    <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Total Amount</label>
-                                        <p className="text-white font-medium">{formatCurrency(feedBag.totalAmount)}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Amount Paid</label>
-                                        <p className="text-green-300 font-medium">{formatCurrency(feedBag.amountPaid)}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Remaining Amount</label>
-                                        <p className="text-orange-300 font-medium">{formatCurrency(feedBag.remainingAmount)}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Payment Status: </label>
-                                        <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(feedBag.status)}`}>
-                                            {feedBag.status}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-6">
-                            <div className="bg-white/10 border border-white/20 p-6 rounded-xl">
-                                <h3 className="text-lg font-bold text-white mb-4">Timestamps</h3>
-                                <div className="space-y-3">
-                                    <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Created</label>
-                                        <p className="text-white font-medium">
-                                            {formatUtcDate(feedBag.createdAt)}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Last Updated</label>
-                                        <p className="text-white font-medium">
-                                            {formatUtcDate(feedBag.updatedAt)}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div className="flex items-center gap-2">
+                        <Link href={`/feed-bags/${feedBag.id}/edit`}>
+                            <Button
+                                variant="outline"
+                                className="border-slate-200 text-slate-700 hover:text-orange-600 hover:bg-orange-50/50 rounded-xl flex items-center gap-1.5 text-sm font-semibold cursor-pointer"
+                            >
+                                <Edit className="w-4 h-4" />
+                                Modify Purchase
+                            </Button>
+                        </Link>
                     </div>
                 </div>
+            </div>
+
+            {/* Key Metrics Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-sm">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                        <Package className="w-3.5 h-3.5 text-orange-600" />
+                        Quantity
+                    </p>
+                    <p className="text-2xl font-black text-slate-900">
+                        {feedBag.amount} <span className="text-xs font-semibold text-slate-400">bags</span>
+                    </p>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-sm">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                        <Layers className="w-3.5 h-3.5 text-orange-600" />
+                        Feed Phase
+                    </p>
+                    <p className="text-2xl font-black text-slate-900">
+                        Phase {feedBag.phase}
+                    </p>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-sm">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                        Price per Bag
+                    </p>
+                    <p className="text-2xl font-black text-slate-900">
+                        {formatCurrency(feedBag.price)}
+                    </p>
+                </div>
+
+                <div className="bg-orange-50/60 rounded-2xl border border-orange-200/80 p-4 shadow-sm">
+                    <p className="text-xs font-semibold text-orange-700 uppercase tracking-wider mb-1">
+                        Total Amount
+                    </p>
+                    <p className="text-2xl font-black text-slate-900">
+                        {formatCurrency(feedBag.totalAmount)}
+                    </p>
+                </div>
+
+                <div className="bg-emerald-50/60 rounded-2xl border border-emerald-200/80 p-4 shadow-sm">
+                    <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wider mb-1">
+                        Amount Paid
+                    </p>
+                    <p className="text-2xl font-black text-emerald-800">
+                        {formatCurrency(feedBag.amountPaid)}
+                    </p>
+                </div>
+
+                <div className={`rounded-2xl border p-4 shadow-sm ${
+                    feedBag.remainingAmount > 0
+                        ? "bg-rose-50/60 border-rose-200/80"
+                        : "bg-emerald-50/60 border-emerald-200/80"
+                }`}>
+                    <p className={`text-xs font-semibold uppercase tracking-wider mb-1 ${
+                        feedBag.remainingAmount > 0 ? "text-rose-700" : "text-emerald-700"
+                    }`}>
+                        Remaining Debt
+                    </p>
+                    <p className={`text-2xl font-black ${
+                        feedBag.remainingAmount > 0 ? "text-rose-700" : "text-emerald-700"
+                    }`}>
+                        {feedBag.remainingAmount > 0 ? formatCurrency(feedBag.remainingAmount) : "Paid in Full"}
+                    </p>
+                </div>
+            </div>
+
+            {/* Breakdown & Calculation Details */}
+            <div className="bg-white rounded-2xl border border-orange-100 p-6 shadow-sm space-y-4">
+                <h2 className="text-base font-bold text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-100">
+                    <Receipt className="w-4 h-4 text-orange-600" />
+                    Purchase Breakdown
+                </h2>
+
+                <div className="p-4 bg-slate-50/70 rounded-xl border border-slate-200/70 space-y-2">
+                    <div className="flex justify-between items-center text-sm text-slate-700">
+                        <span>Formula: {feedBag.amount} bags × {formatCurrency(feedBag.price)}</span>
+                        <span className="font-bold text-slate-900">{formatCurrency(feedBag.totalAmount)}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs text-slate-500">
+                        <span>Paid towards this purchase:</span>
+                        <span className="font-semibold text-emerald-700">{formatCurrency(feedBag.amountPaid)}</span>
+                    </div>
+                    <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-sm font-bold">
+                        <span className="text-slate-800">Remaining Balance:</span>
+                        <span className={feedBag.remainingAmount > 0 ? "text-rose-600" : "text-emerald-700"}>
+                            {feedBag.remainingAmount > 0 ? formatCurrency(feedBag.remainingAmount) : "Fully Settled"}
+                        </span>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-400 pt-1">
+                    <div>
+                        <span className="font-semibold text-slate-500">Registered date:</span>{" "}
+                        {formatUtcDate(feedBag.createdAt)}
+                    </div>
+                    <div>
+                        <span className="font-semibold text-slate-500">Last updated:</span>{" "}
+                        {formatUtcDate(feedBag.updatedAt)}
+                    </div>
+                </div>
+            </div>
+
+            {/* Actions Bar */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                {feedBag.status !== "PAID" && (
+                    <PaymentModal
+                        sale={feedBag}
+                        endpoint="feed-bags"
+                        onSuccess={fetchFeedBag}
+                    >
+                        <Button className="w-full sm:flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl h-12 shadow-sm transition active:scale-95 cursor-pointer flex items-center justify-center gap-2">
+                            <DollarSign className="w-4 h-4" />
+                            Add Payment to this Purchase
+                        </Button>
+                    </PaymentModal>
+                )}
+
+                <Link href={`/feed-bags/${feedBag.id}/edit`} className="sm:flex-1">
+                    <Button
+                        variant="outline"
+                        className="w-full border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl h-12 font-semibold flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                        <Edit className="w-4 h-4" />
+                        Modify this Purchase
+                    </Button>
+                </Link>
+
+                <Button
+                    onClick={handleDelete}
+                    variant="outline"
+                    className="border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 rounded-xl h-12 flex items-center justify-center gap-2 font-semibold cursor-pointer"
+                >
+                    <Trash2 className="w-4 h-4" />
+                    Delete Purchase
+                </Button>
             </div>
         </div>
     );
