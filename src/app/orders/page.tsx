@@ -66,7 +66,7 @@ export default function OrdersPage() {
                     </p>
                 </div>
                 <Link href="/orders/new">
-                    <Button className="bg-linear-to-br from-green-400/80 to-green-600/60 text-white hover:from-green-600 hover:to-green-700 rounded-full w-full sm:w-auto cursor-pointer">
+                    <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2 font-medium shadow-sm transition active:scale-95 flex items-center gap-2 cursor-pointer w-full sm:w-auto">
                         <Plus className="w-4 h-4 mr-1" />
                         New Order
                     </Button>

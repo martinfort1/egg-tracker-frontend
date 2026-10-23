@@ -1,29 +1,50 @@
-"use client"
+"use client";
 
 import LoadSpin from "@/components/load-spin";
 import { Button } from "@/components/ui/button";
 import PaymentModal from "@/components/payment-modal";
 import { api } from "@/lib/api";
-import { Copy, Trash2, Edit, Send } from "lucide-react";
-import { useParams, useRouter } from "next/navigation"
+import {
+    Copy,
+    Trash2,
+    Edit,
+    Send,
+    ArrowLeft,
+    Calendar,
+    User,
+    Phone,
+    MapPin,
+    DollarSign,
+    CheckCircle2,
+    AlertCircle,
+    Clock,
+    ShoppingBag,
+    Check,
+} from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { formatCurrency, formatUtcDate } from "@/lib/utils";
 
-export default function SalePage(){
+export default function SalePage() {
     const { id } = useParams();
     const router = useRouter();
     const [data, setData] = useState<any>(null);
     const [copied, setCopied] = useState(false);
 
     const fetchData = async () => {
-        const res = await api.get(`/sales/${id}`);
-        setData(res.data);
+        try {
+            const res = await api.get(`/sales/${id}`);
+            setData(res.data);
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to fetch sale details");
+        }
     };
 
-    useEffect(() =>{
-        fetchData()
+    useEffect(() => {
+        fetchData();
     }, [id]);
 
     const handleDelete = async () => {
@@ -37,7 +58,7 @@ export default function SalePage(){
     };
 
     const buildSaleDetails = (sale: any) => {
-          const items = [
+        const items = [
             { label: "Extra", qty: sale.Extra, price: sale.ExtraPrice },
             { label: "N1", qty: sale.N1, price: sale.N1Price },
             { label: "N2", qty: sale.N2, price: sale.N2Price },
@@ -45,22 +66,24 @@ export default function SalePage(){
             { label: "N4", qty: sale.N4, price: sale.N4Price },
         ];
 
-        return items.filter(item => item.qty > 0 ).map(item => {
-            const subtotal = item.qty * item.price;
-            return `-${item.label}: ${item.qty} * $${item.price} = $${subtotal}`;
-        })
-        .join("\n");
-    }
+        return items
+            .filter((item) => item.qty > 0)
+            .map((item) => {
+                const subtotal = item.qty * item.price;
+                return `-${item.label}: ${item.qty} * $${item.price} = $${subtotal}`;
+            })
+            .join("\n");
+    };
 
     const generateMessage = () => {
-        if(!data) return null;
+        if (!data) return null;
 
         const sale = data.sale || data;
         const buyer = data.buyer || data?.buyer;
 
-        if(!buyer?.name) return null;
+        if (!buyer?.name) return null;
 
-        const details = buildSaleDetails(sale)
+        const details = buildSaleDetails(sale);
 
         const message = `Hola ${buyer.name}! Te paso la venta:
 Fecha: *_${new Date(sale.date).toLocaleDateString()}_*
@@ -74,15 +97,13 @@ ${details}
 Muchas gracias!`;
 
         return message;
-    }
+    };
 
     const handleCopyToClipboard = () => {
-        
-        const message = generateMessage()
-        if(!message) return toast.error("No se pudo generar el mensaje");
+        const message = generateMessage();
+        if (!message) return toast.error("No se pudo generar el mensaje");
 
-        navigator.clipboard.writeText(message)
-
+        navigator.clipboard.writeText(message);
         setCopied(true);
         toast.success("Copied to clipboard!");
         setTimeout(() => setCopied(false), 2000);
@@ -90,196 +111,296 @@ Muchas gracias!`;
 
     const handleSendWhatsApp = () => {
         const message = generateMessage();
-        if(!message) return toast.error("No se pudo generar el mensaje");
+        if (!message) return toast.error("No se pudo generar el mensaje");
 
         const buyer = data.buyer || data?.buyer;
-
         const encodedMessage = encodeURIComponent(message);
-
         let phone = buyer?.phone?.replace(/\D/g, "");
 
-        if(phone && !phone.startsWith("54")){
+        if (phone && !phone.startsWith("54")) {
             phone = `549${phone}`;
         }
 
-        const url = phone 
-        ? `https://wa.me/${phone}?text=${encodedMessage}`
-        : `https://wa.me/?text=${encodedMessage}`
+        const url = phone
+            ? `https://wa.me/${phone}?text=${encodedMessage}`
+            : `https://wa.me/?text=${encodedMessage}`;
 
         window.open(url, "_blank");
-    }
+    };
 
-    if(!data) return <LoadSpin /> 
+    if (!data) return <LoadSpin />;
 
     const sale = data.sale || data;
     const buyer = data.buyer || data?.buyer;
 
-    const statusColor: any = {
-        PAID: "bg-green-500/20 border-green-400 text-green-200",
-        PARTIAL: "bg-yellow-500/20 border-yellow-400 text-yellow-200",
-        UNPAID: "bg-red-500/20 border-red-400 text-red-200"
+    const statusBadge: Record<string, { className: string; icon: any }> = {
+        PAID: {
+            className: "bg-emerald-50 text-emerald-700 border-emerald-200",
+            icon: CheckCircle2,
+        },
+        PARTIAL: {
+            className: "bg-amber-50 text-amber-700 border-amber-200",
+            icon: Clock,
+        },
+        UNPAID: {
+            className: "bg-rose-50 text-rose-700 border-rose-200",
+            icon: AlertCircle,
+        },
     };
 
+    const StatusIcon = statusBadge[sale.status]?.icon || AlertCircle;
+    const badgeClass = statusBadge[sale.status]?.className || "bg-slate-100 text-slate-700 border-slate-200";
+
+    const items = [
+        { label: "Extra", qty: sale.Extra, price: sale.ExtraPrice },
+        { label: "N° 1", qty: sale.N1, price: sale.N1Price },
+        { label: "N° 2", qty: sale.N2, price: sale.N2Price },
+        { label: "N° 3", qty: sale.N3, price: sale.N3Price },
+        { label: "N° 4", qty: sale.N4, price: sale.N4Price },
+    ].filter((item) => Number(item.qty) > 0);
+
     return (
-        <div className="grid grid-cols-1 space-y-8 bg-linear-to-br from-slate-900/30 via-slate-900/20 to-slate-900/30 p-4 md:p-6 rounded-2xl border border-white/10 shadow-xl align-center mx-auto">
-            
-            {/* Header */}
-            <div className="bg-linear-to-br from-indigo-900/30 via-violet-900/25 to-slate-900/40 p-6 rounded-2xl border border-white/20 shadow-lg">
-                <div className="flex justify-between items-start mb-4">
-                    <div>
-                        <h1 className="text-3xl font-black text-white mb-1">Sale Details</h1>
-                        <p className="text-indigo-200 text-sm">ID: {sale.id}</p>
+        <div className="max-w-4xl mx-auto space-y-6">
+            {/* Navigation & Section Tag */}
+            <div className="flex items-center justify-between">
+                <button
+                    type="button"
+                    onClick={() => router.push("/sales")}
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to Sales
+                </button>
+
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    Sale #{sale.id}
+                </span>
+            </div>
+
+            {/* Header Card */}
+            <div className="relative bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-hidden p-6 sm:p-8">
+                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600" />
+
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-1">
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-semibold text-slate-900">
+                                Sale Details
+                            </h1>
+                            <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${badgeClass}`}>
+                                <StatusIcon className="w-3.5 h-3.5" />
+                                {sale.status}
+                            </span>
+                        </div>
+                        <p className="text-sm text-slate-500 flex items-center gap-1.5">
+                            <Calendar className="w-4 h-4 text-emerald-600" />
+                            Registered on {formatUtcDate(sale.date)}
+                        </p>
                     </div>
-                    <Link href={`/sales/${id}/edit`}>
-                        <Button className="bg-linear-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 transition active:scale-95 flex items-center gap-2">
-                            <Edit size={16} />
-                            Edit
-                        </Button>
-                    </Link>
-                </div>
-                <div className="grid grid-cols-1 text-center">
-                    <p className="text-indigo-100 text-lg font-semibold">Buyer: {buyer.name}</p>
-                    <span className={`px-4 py-2 rounded-lg border text-sm font-bold ${statusColor[sale.status]}`}>
-                        {sale.status}
-                    </span>
+
+                    <div className="flex items-center gap-2">
+                        <Link href={`/sales/${id}/edit`}>
+                            <Button
+                                variant="outline"
+                                className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-emerald-700 rounded-xl flex items-center gap-1.5 text-sm font-semibold"
+                            >
+                                <Edit className="w-4 h-4" />
+                                Edit Sale
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
             </div>
 
-            {/* Sale Stats Grid */}
+            {/* Key Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-linear-to-br from-cyan-600/30 via-cyan-700/20 to-slate-900/40 border border-cyan-400/30 p-4 rounded-2xl">
-                    <p className="text-cyan-100 text-sm mb-1">Date</p>
-                    <p className="text-white font-bold">{formatUtcDate(sale.date)}</p>
+                <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-sm">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                        Sale Date
+                    </p>
+                    <p className="text-base sm:text-lg font-bold text-slate-900">
+                        {formatUtcDate(sale.date)}
+                    </p>
                 </div>
 
-                <div className="bg-linear-to-br from-orange-600/30 via-orange-700/20 to-slate-900/40 border border-orange-400/30 p-4 rounded-2xl">
-                    <p className="text-orange-100 text-sm mb-1">Total</p>
-                    <p className="text-white font-bold">{formatCurrency(sale.totalAmount)}</p>
+                <div className="bg-emerald-50/60 rounded-2xl border border-emerald-200/80 p-4 shadow-sm">
+                    <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wider mb-1">
+                        Total Amount
+                    </p>
+                    <p className="text-xl sm:text-2xl font-black text-slate-900">
+                        {formatCurrency(sale.totalAmount)}
+                    </p>
                 </div>
 
-                <div className="bg-linear-to-br from-green-600/30 via-green-700/20 to-slate-900/40 border border-green-400/30 p-4 rounded-2xl">
-                    <p className="text-green-100 text-sm mb-1">Paid</p>
-                    <p className="text-white font-bold">{formatCurrency(sale.amountPaid)}</p>
+                <div className="bg-teal-50/60 rounded-2xl border border-teal-200/80 p-4 shadow-sm">
+                    <p className="text-xs font-semibold text-teal-700 uppercase tracking-wider mb-1">
+                        Amount Paid
+                    </p>
+                    <p className="text-xl sm:text-2xl font-black text-teal-800">
+                        {formatCurrency(sale.amountPaid)}
+                    </p>
                 </div>
 
-                <div className="bg-linear-to-br from-red-600/30 via-red-700/20 to-slate-900/40 border border-red-400/30 p-4 rounded-2xl">
-                    <p className="text-red-100 text-sm mb-1">Debt</p>
-                    <p className="text-white font-bold">{formatCurrency(sale.remainingAmount)}</p>
+                <div className={`rounded-2xl border p-4 shadow-sm ${
+                    sale.remainingAmount > 0
+                        ? "bg-rose-50/60 border-rose-200/80"
+                        : "bg-emerald-50/60 border-emerald-200/80"
+                }`}>
+                    <p className={`text-xs font-semibold uppercase tracking-wider mb-1 ${
+                        sale.remainingAmount > 0 ? "text-rose-700" : "text-emerald-700"
+                    }`}>
+                        Remaining Debt
+                    </p>
+                    <p className={`text-xl sm:text-2xl font-black ${
+                        sale.remainingAmount > 0 ? "text-rose-700" : "text-emerald-700"
+                    }`}>
+                        {sale.remainingAmount > 0 ? formatCurrency(sale.remainingAmount) : "Paid"}
+                    </p>
                 </div>
             </div>
 
             {/* Items Breakdown */}
-            <div className="bg-linear-to-br from-slate-900/80 via-indigo-900/50 to-slate-900/90 border border-white/20 backdrop-blur-xl p-6 rounded-2xl shadow-lg">
-                <h2 className="text-lg font-black text-white mb-4">Items Breakdown</h2>
-                <div className="space-y-3">
-                    {sale.Extra > 0 && (
-                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg border border-white/10">
-                            <span className="grid text-indigo-100">Extra:</span>
-                            <div className="grid-cols-1">
-                                <span className="grid text-indigo-100">{sale.Extra} units</span>
-                                <span className="grid text-indigo-100 text-xs">{formatCurrency(sale.ExtraPrice)}</span>
+            <div className="bg-white rounded-2xl border border-emerald-100/90 p-6 shadow-sm space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <ShoppingBag className="w-4 h-4 text-emerald-600" />
+                        Items Breakdown
+                    </h2>
+                    <span className="text-xs text-slate-400">
+                        {items.length} {items.length === 1 ? "category" : "categories"}
+                    </span>
+                </div>
+
+                {items.length === 0 ? (
+                    <p className="text-sm text-slate-500 py-2">No egg quantities recorded for this sale.</p>
+                ) : (
+                    <div className="space-y-2.5">
+                        {items.map((item, index) => (
+                            <div
+                                key={index}
+                                className="flex items-center justify-between p-3.5 bg-slate-50/70 hover:bg-emerald-50/30 rounded-xl border border-slate-100 transition-colors"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <span className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center">
+                                        {item.label}
+                                    </span>
+                                    <div>
+                                        <p className="text-sm font-bold text-slate-900">
+                                            {item.qty} {item.qty === 1 ? "tray" : "trays"}
+                                        </p>
+                                        <p className="text-xs text-slate-500">
+                                            Price: {formatCurrency(item.price)} each
+                                        </p>
+                                    </div>
+                                </div>
+                                <span className="text-base font-extrabold text-slate-900">
+                                    {formatCurrency(item.qty * item.price)}
+                                </span>
                             </div>
-                            <span className="text-white font-bold">{formatCurrency(sale.Extra * sale.ExtraPrice)}</span>
-                        </div>
+                        ))}
+                    </div>
+                )}
+
+                <div className="flex justify-between items-center bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-emerald-500/10 border border-emerald-200/80 p-4 rounded-xl">
+                    <span className="text-base font-bold text-slate-800">Total Calculation:</span>
+                    <span className="text-2xl font-black text-emerald-700">
+                        {formatCurrency(sale.totalAmount)}
+                    </span>
+                </div>
+            </div>
+
+            {/* Buyer Information Card */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-sm space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <User className="w-4 h-4 text-emerald-600" />
+                        Buyer Information
+                    </h2>
+                    {buyer?.id && (
+                        <Link
+                            href={`/buyers/${buyer.id}`}
+                            className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 hover:underline"
+                        >
+                            View Buyer Profile →
+                        </Link>
                     )}
-                    {sale.N1 > 0 && (
-                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg border border-white/10">
-                            <span className="grid text-indigo-100">N1:</span>
-                            <div className="grid-cols-1">
-                                <span className="grid text-indigo-100">{sale.N1} units</span>
-                                <span className="grid text-indigo-100 text-xs">{formatCurrency(sale.N1Price)}</span>
-                            </div>
-                            <span className="text-white font-bold">{formatCurrency(sale.N1 * sale.N1Price)}</span>
-                        </div>
-                    )}
-                    {sale.N2 > 0 && (
-                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg border border-white/10">
-                            <span className="grid text-indigo-100">N2:</span>
-                            <div className="grid-cols-1">
-                                <span className="grid text-indigo-100">{sale.N2} units</span>
-                                <span className="grid text-indigo-100 text-xs">{formatCurrency(sale.N2Price)}</span>
-                            </div>
-                            <span className="text-white font-bold">{formatCurrency(sale.N2 * sale.N2Price)}</span>
-                        </div>
-                    )}
-                    {sale.N3 > 0 && (
-                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg border border-white/10">
-                            <span className="grid text-indigo-100">N3:</span>
-                            <div className="grid-cols-1">
-                                <span className="grid text-indigo-100">{sale.N3} units</span>
-                                <span className="grid text-indigo-100 text-xs">{formatCurrency(sale.N3Price)}</span>
-                            </div>
-                            <span className="text-white font-bold">{formatCurrency(sale.N3 * sale.N3Price)}</span>
-                        </div>
-                    )}
-                    {sale.N4 > 0 && (
-                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg border border-white/10">
-                            <span className="grid text-indigo-100">N4:</span>
-                            <div className="grid-cols-1">
-                                <span className="grid text-indigo-100">{sale.N4} units</span>
-                                <span className="grid text-indigo-100 text-xs">{formatCurrency(sale.N4Price)}</span>
-                            </div>
-                            <span className="text-white font-bold">{formatCurrency(sale.N4 * sale.N4Price)}</span>
-                        </div>
-                    )}
-                    <div className="flex justify-between bg-linear-to-br from-orange-600/30 via-orange-700/20 to-slate-900/40 border border-orange-400/30 p-4 rounded-2xl">
-                        <p className="flex text-orange-100 text-xl mb-1 font-bold">Total:</p>
-                        <p className="flex text-white font-bold text-2xl">{formatCurrency(sale.totalAmount)}</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-1">
+                        <span className="text-xs text-slate-400 font-medium">Customer Name</span>
+                        <p className="text-base font-bold text-slate-900">
+                            {buyer?.name || "Customer not specified"}
+                        </p>
+                    </div>
+
+                    <div className="space-y-1">
+                        <span className="text-xs text-slate-400 font-medium">Phone</span>
+                        <p className="text-sm font-semibold text-slate-700 flex items-center gap-1.5">
+                            <Phone className="w-3.5 h-3.5 text-slate-400" />
+                            {buyer?.phone || "No phone registered"}
+                        </p>
+                    </div>
+
+                    <div className="space-y-1">
+                        <span className="text-xs text-slate-400 font-medium">Delivery Address</span>
+                        <p className="text-sm font-semibold text-slate-700 flex items-center gap-1.5">
+                            <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            {buyer?.address || "No address provided"}
+                        </p>
                     </div>
                 </div>
             </div>
 
-            {/* Buyer Info */}
-            <div className="bg-linear-to-br from-slate-900/70 via-purple-900/40 to-slate-900/80 border border-white/20 backdrop-blur-xl p-6 rounded-2xl shadow-lg">
-                <h2 className="text-lg font-black text-white mb-3">Buyer Information</h2>
-                <div className="space-y-2 text-indigo-100">
-                    <p><span className="text-white font-bold">Name:</span> {buyer.name}</p>
-                    <p><span className="text-white font-bold">Phone:</span> {buyer.phone}</p>
-                    <p><span className="text-white font-bold">Address:</span> {buyer.address}</p>
-                </div>
-            </div>
+            {/* Action Buttons */}
+            <div className="space-y-3">
+                {sale.status !== "PAID" && (
+                    <PaymentModal sale={sale} onSuccess={fetchData}>
+                        <div className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl py-3 px-4 shadow-sm hover:shadow transition active:scale-95 flex items-center justify-center gap-2 text-base cursor-pointer">
+                            <DollarSign className="w-5 h-5" />
+                            Add Payment
+                        </div>
+                    </PaymentModal>
+                )}
 
-            {/* Actions */}
-            <div className="flex flex-col gap-3">
-                    {sale.status !== "PAID" && (
-                        <PaymentModal 
-                            sale={sale} 
-                            onSucess={fetchData}
-                        >
-                            <span className="w-full block text-center">
-                                Add Payment
-                            </span>
-                        </PaymentModal>
-                    )}
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                     <Button
-                    onClick={handleSendWhatsApp}
-                    size={"lg"}
-                    className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 text-white cursor-pointer"
+                        onClick={handleSendWhatsApp}
+                        className="flex-1 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-semibold rounded-xl h-11 flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                     >
-                        <Send size={18} /> Send WhatsApp
+                        <Send className="w-4 h-4" />
+                        Send via WhatsApp
                     </Button>
+
                     <Button
                         onClick={handleCopyToClipboard}
-                        className={`flex-1 flex items-center justify-center gap-2 transition active:scale-95 ${
-                            copied 
-                                ? "bg-green-500/90 text-white" 
-                                : "bg-linear-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 cursor-pointer"
-                        }`}size="lg"
+                        variant="outline"
+                        className="flex-1 border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl h-11 flex items-center justify-center gap-2 font-semibold cursor-pointer"
                     >
-                        <Copy size={18} />
-                        {copied ? "Copied!" : "Copy Message"}
+                        {copied ? (
+                            <>
+                                <Check className="w-4 h-4 text-emerald-600" />
+                                <span className="text-emerald-700">Copied to Clipboard!</span>
+                            </>
+                        ) : (
+                            <>
+                                <Copy className="w-4 h-4" />
+                                Copy Message
+                            </>
+                        )}
+                    </Button>
+
+                    <Button
+                        onClick={handleDelete}
+                        variant="outline"
+                        className="border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 rounded-xl h-11 flex items-center justify-center gap-2 font-semibold cursor-pointer"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                        Delete Sale
                     </Button>
                 </div>
-                <Button
-                    onClick={handleDelete}
-                    className="w-full bg-linear-to-r from-red-600/90 to-red-700/90 text-white hover:from-red-700 hover:to-red-800 transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer" 
-                    size="lg"
-                >
-                    <Trash2 size={18} />
-                    Delete Sale
-                </Button>
             </div>
         </div>
-    )
+    );
 }
