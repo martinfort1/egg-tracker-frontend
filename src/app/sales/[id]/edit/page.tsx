@@ -184,7 +184,7 @@ export default function EditSalePage() {
                                     <option value="">Select buyer...</option>
                                     {buyers.map((buyer) => (
                                         <option key={buyer.id} value={buyer.id}>
-                                            {buyer.name} {buyer.phone ? `(${buyer.phone})` : ""}
+                                            {buyer.name}
                                         </option>
                                     ))}
                                 </select>
