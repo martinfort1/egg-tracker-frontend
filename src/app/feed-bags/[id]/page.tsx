@@ -2,6 +2,7 @@
 
 import LoadSpin from "@/components/load-spin";
 import PaymentModal from "@/components/payment-modal";
+import PaymentHistoryModal from "@/components/payment-history-modal";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { formatCurrency, formatUtcDate } from "@/lib/utils";
@@ -21,6 +22,8 @@ import {
     Trash2,
     Layers,
     Receipt,
+    History,
+    MessageSquare,
 } from "lucide-react";
 
 interface FeedBag {
@@ -36,6 +39,7 @@ interface FeedBag {
     status: string;
     createdAt: string;
     updatedAt: string;
+    payments?: any[];
 }
 
 export default function FeedBagDetailPage() {
@@ -251,6 +255,86 @@ export default function FeedBagDetailPage() {
                         {formatUtcDate(feedBag.updatedAt)}
                     </div>
                 </div>
+            </div>
+
+            {/* Payment History Section */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-sm space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                        <History className="w-4 h-4 text-orange-600" />
+                        <h2 className="text-base font-bold text-slate-900">
+                            Historial de Pagos de la Compra
+                        </h2>
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 border border-orange-200">
+                            {feedBag.payments?.length ?? (feedBag.amountPaid > 0 ? 1 : 0)} pagos
+                        </span>
+                    </div>
+
+                    <PaymentHistoryModal item={feedBag} endpoint="feed-bags">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer text-slate-700 border-slate-200 hover:bg-slate-50"
+                        >
+                            <History className="w-3.5 h-3.5" />
+                            Abrir Historial Completo
+                        </Button>
+                    </PaymentHistoryModal>
+                </div>
+
+                {!feedBag.payments || feedBag.payments.length === 0 ? (
+                    feedBag.amountPaid > 0 ? (
+                        <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-200/70 flex items-center justify-between">
+                            <div className="space-y-0.5">
+                                <span className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+                                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                                    {formatUtcDate(feedBag.date)}
+                                </span>
+                                <span className="text-[11px] text-slate-400 italic block">
+                                    Pago registrado
+                                </span>
+                            </div>
+                            <span className="text-sm font-black text-emerald-700">
+                                +{formatCurrency(feedBag.amountPaid)}
+                            </span>
+                        </div>
+                    ) : (
+                        <p className="text-xs text-slate-400 text-center py-4 italic">
+                            No se registran pagos realizados para esta compra todavía.
+                        </p>
+                    )
+                ) : (
+                    <div className="space-y-2.5">
+                        {feedBag.payments.map((p: any, idx: number) => (
+                            <div
+                                key={p.id || idx}
+                                className="bg-slate-50/70 hover:bg-emerald-50/30 rounded-xl p-3.5 border border-slate-200/70 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                            >
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <span className="w-6 h-6 rounded-md bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center">
+                                            #{(feedBag.payments?.length ?? 0) - idx}
+                                        </span>
+                                        <span className="text-xs font-semibold text-slate-800 flex items-center gap-1">
+                                            <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                                            {formatUtcDate(p.date)}
+                                        </span>
+                                    </div>
+                                    {p.note && (
+                                        <p className="text-xs text-slate-600 flex items-center gap-1.5 italic pl-8">
+                                            <MessageSquare className="w-3 h-3 text-indigo-500 shrink-0" />
+                                            &ldquo;{p.note}&rdquo;
+                                        </p>
+                                    )}
+                                </div>
+
+                                <span className="text-sm font-black text-emerald-700 bg-white border border-emerald-200 px-3 py-1 rounded-lg self-end sm:self-auto">
+                                    +{formatCurrency(p.amount)}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Actions Bar */}

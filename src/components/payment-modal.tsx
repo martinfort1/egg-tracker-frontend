@@ -38,6 +38,7 @@ export default function PaymentModal({
     const [date, setDate] = useState<string>(
         new Date().toISOString().split("T")[0]
     );
+    const [note, setNote] = useState<string>("");
     const [open, setOpen] = useState(false);
     const [fullyPaid, setFullyPaid] = useState(true);
 
@@ -72,10 +73,11 @@ export default function PaymentModal({
             const method = isBulkPayment ? "post" : "patch";
             await toast.promise(
                 method === "post"
-                    ? api.post(endpoint, { amount: paymentAmount, date })
+                    ? api.post(endpoint, { amount: paymentAmount, date, note: note.trim() || undefined })
                     : api.patch(`${endpoint}/${sale.id}/payment`, {
                           amount: paymentAmount,
                           date,
+                          note: note.trim() || undefined,
                       }),
                 {
                     success: "Orden de pago registrada con éxito",
@@ -86,6 +88,7 @@ export default function PaymentModal({
             onSuccess?.();
             setOpen(false);
             setAmount(0);
+            setNote("");
             setDate(new Date().toISOString().split("T")[0]);
             setFullyPaid(true);
         } catch (err) {
@@ -283,6 +286,21 @@ export default function PaymentModal({
                                 type="date"
                                 value={date}
                                 onChange={(e) => setDate(e.target.value)}
+                            />
+                        </div>
+
+                        {/* Note / Comment */}
+                        <div className="space-y-1">
+                            <label className="text-xs font-semibold text-slate-600 flex items-center justify-between">
+                                <span>Nota o Comentario</span>
+                                <span className="text-[10px] text-slate-400 font-normal">Opcional</span>
+                            </label>
+                            <Input
+                                className="h-10 bg-white border border-slate-200 text-slate-900 rounded-xl px-3 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 shadow-2xs placeholder:text-slate-400"
+                                type="text"
+                                placeholder="Ej: Transferencia Banco Galicia, Cheque N° 1234, Efectivo..."
+                                value={note}
+                                onChange={(e) => setNote(e.target.value)}
                             />
                         </div>
 

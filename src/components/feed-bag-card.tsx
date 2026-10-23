@@ -3,9 +3,10 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import Link from "next/link";
 import PaymentModal from "./payment-modal";
+import PaymentHistoryModal from "./payment-history-modal";
 import { motion } from "framer-motion";
 import { formatCurrency, formatUtcDate } from "@/lib/utils";
-import { Package, Calendar, CheckCircle2, AlertCircle, Clock } from "lucide-react";
+import { Package, Calendar, CheckCircle2, AlertCircle, Clock, History } from "lucide-react";
 
 export default function FeedBagCard({ feedBag, refresh }: any) {
   const handleDelete = async () => {
@@ -105,6 +106,15 @@ export default function FeedBagCard({ feedBag, refresh }: any) {
             View Details
           </Button>
         </Link>
+
+        <PaymentHistoryModal item={feedBag} endpoint="feed-bags">
+          <Button
+            className="w-full bg-orange-50 hover:bg-orange-100 text-orange-800 border border-orange-200 transition active:scale-95 cursor-pointer rounded-lg font-bold text-xs h-9 flex items-center justify-center gap-1.5"
+          >
+            <History className="w-3.5 h-3.5 text-orange-600" />
+            <span>Historial de Pagos ({feedBag.payments?.length ?? (feedBag.amountPaid > 0 ? 1 : 0)})</span>
+          </Button>
+        </PaymentHistoryModal>
 
         {feedBag.status !== "PAID" && (
           <PaymentModal

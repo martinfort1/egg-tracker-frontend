@@ -19,10 +19,13 @@ import {
     Table as TableIcon,
     LayoutGrid,
     Printer,
+    History,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import PaymentModal from "@/components/payment-modal";
+import PaymentHistoryModal from "@/components/payment-history-modal";
+import AllFeedPaymentsModal from "@/components/all-feed-payments-modal";
 import { toast } from "sonner";
 import { formatCurrency, formatUtcDate } from "@/lib/utils";
 
@@ -123,7 +126,9 @@ export default function FeedBagsSupplierStatementPage() {
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                    <AllFeedPaymentsModal />
+
                     <button
                         type="button"
                         onClick={() => window.print()}
@@ -349,8 +354,19 @@ export default function FeedBagsSupplierStatementPage() {
                                             <td className="py-3 px-4 text-right font-bold text-slate-900 whitespace-nowrap">
                                                 {formatCurrency(feedBag.totalAmount)}
                                             </td>
-                                            <td className="py-3 px-4 text-right font-semibold text-emerald-700 whitespace-nowrap">
-                                                {formatCurrency(feedBag.amountPaid)}
+                                            <td className="py-3 px-4 text-right whitespace-nowrap">
+                                                <PaymentHistoryModal item={feedBag} endpoint="feed-bags">
+                                                    <button
+                                                        type="button"
+                                                        className="inline-flex items-center gap-1.5 font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-lg transition active:scale-95 cursor-pointer text-xs"
+                                                        title="Hacé clic para ver el historial de pagos de esta compra"
+                                                    >
+                                                        <span>{formatCurrency(feedBag.amountPaid)}</span>
+                                                        <span className="text-[10px] bg-emerald-200/80 text-emerald-900 px-1.5 py-0.5 rounded font-black">
+                                                            {feedBag.payments?.length ?? (feedBag.amountPaid > 0 ? 1 : 0)} pagos
+                                                        </span>
+                                                    </button>
+                                                </PaymentHistoryModal>
                                             </td>
                                             <td className="py-3 px-4 text-right font-black whitespace-nowrap">
                                                 <span
@@ -405,6 +421,18 @@ export default function FeedBagsSupplierStatementPage() {
                                                             </Button>
                                                         </PaymentModal>
                                                     )}
+
+                                                    {/* Payment History */}
+                                                    <PaymentHistoryModal item={feedBag} endpoint="feed-bags">
+                                                        <Button
+                                                            size="sm"
+                                                            title="Ver historial de pagos y comentarios"
+                                                            className="h-8 px-2.5 text-xs font-bold bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 rounded-lg flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                                                        >
+                                                            <History className="w-3.5 h-3.5 text-orange-600" />
+                                                            <span>Historial ({feedBag.payments?.length ?? (feedBag.amountPaid > 0 ? 1 : 0)})</span>
+                                                        </Button>
+                                                    </PaymentHistoryModal>
 
                                                     {/* Details */}
                                                     <Link href={`/feed-bags/${feedBag.id}`}>
