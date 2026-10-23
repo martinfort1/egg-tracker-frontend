@@ -86,7 +86,9 @@ export default function LoginPage() {
           className="text-center mb-8"
         >
           <Link href="/">
-            <img src="/Logo_NoBuffer.png" alt="Egg Tracker Logo" className="mx-auto size-2/3 my-4"/>
+            <div className="bg-white rounded-2xl p-4 shadow-xl max-w-[280px] mx-auto my-4 border border-white/20">
+              <img src="/huevos-noa.png" alt="Huevos NOA Logo" className="w-full h-auto object-contain" />
+            </div>
           </Link>
         </motion.div>
 

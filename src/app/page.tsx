@@ -97,7 +97,9 @@ export default function LandingPage() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="mb-6"
           >
-            <img src="/Logo_NoBuffer.png" alt="Egg Tracker Logo" className="mx-auto size-3/4 md:size-2/5 my-4" />
+            <div className="bg-white rounded-3xl p-6 shadow-2xl max-w-sm mx-auto my-4 border border-white/40">
+              <img src="/huevos-noa.png" alt="Huevos NOA Logo" className="w-full h-auto object-contain" />
+            </div>
           </motion.div>
 
           {/* Subtitle */}

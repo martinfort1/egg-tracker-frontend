@@ -12,14 +12,16 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="flex flex-col items-center justify-center text-center space-y-4">
             <div className="flex items-center gap-2">
-              <img
-                src="/Logo_NoBuffer.png"
-                alt="Egg Tracker Logo"
-                className="w-40 h-48 object-contain"
-              />
+              <div className="bg-white rounded-xl p-3 shadow-md max-w-[200px]">
+                <img
+                  src="/huevos-noa.png"
+                  alt="Huevos NOA Logo"
+                  className="w-full h-auto object-contain"
+                />
+              </div>
             </div>
             <p className="text-gray-400 text-sm">
-              Simplifying poultry business management
+              Huevos NOA — Gestión avícola
             </p>
           </div>
 

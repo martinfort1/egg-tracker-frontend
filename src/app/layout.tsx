@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Egg Tracker",
-  description: "Created by Martin Fort",
+  title: "Huevos NOA",
+  description: "Sistema de gestión avícola Huevos NOA",
 };
 
 export default function RootLayout({
