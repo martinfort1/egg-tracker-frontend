@@ -28,9 +28,11 @@ import {
 import { formatCurrency, formatUtcDate } from "@/lib/utils";
 import LoadSpin from "./load-spin";
 import Link from "next/link";
+import DateRangeFilter, { DateFilterPreset } from "./date-range-filter";
 
 interface FeedBagPaymentWithBag {
     id: string;
+    paymentNumber?: number;
     amount: number;
     date: string;
     note?: string | null;
@@ -57,11 +59,17 @@ export default function AllFeedPaymentsModal({
     const [payments, setPayments] = useState<FeedBagPaymentWithBag[]>([]);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState("");
+    const [preset, setPreset] = useState<DateFilterPreset>("all");
+    const [startDate, setStartDate] = useState<string>("");
+    const [endDate, setEndDate] = useState<string>("");
 
-    const fetchAllPayments = async () => {
+    const fetchAllPayments = async (sDate = startDate, eDate = endDate) => {
         setLoading(true);
         try {
-            const res = await api.get("/feed-bags/payments/all");
+            const params: any = {};
+            if (sDate) params.startDate = sDate;
+            if (eDate) params.endDate = eDate;
+            const res = await api.get("/feed-bags/payments/all", { params });
             setPayments(res.data || []);
         } catch (err) {
             console.error("Error fetching all feed payments", err);
@@ -72,9 +80,9 @@ export default function AllFeedPaymentsModal({
 
     useEffect(() => {
         if (open) {
-            fetchAllPayments();
+            fetchAllPayments(startDate, endDate);
         }
-    }, [open]);
+    }, [open, startDate, endDate]);
 
     // Calculate totals
     const totalPaid = useMemo(() => {
@@ -142,7 +150,7 @@ export default function AllFeedPaymentsModal({
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                     <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3.5 space-y-0.5">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 block">
-                            Total Histórico Abonado
+                            Total Abonado en Período
                         </span>
                         <span className="text-xl font-black text-emerald-700">
                             {formatCurrency(totalPaid)}
@@ -151,7 +159,7 @@ export default function AllFeedPaymentsModal({
 
                     <div className="bg-orange-50/70 border border-orange-200 rounded-xl p-3.5 space-y-0.5">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-orange-800 block">
-                            Cantidad Total de Pagos
+                            Cantidad de Pagos
                         </span>
                         <span className="text-xl font-black text-orange-900">
                             {payments.length} <span className="text-xs font-semibold text-slate-500">registros</span>
@@ -169,6 +177,18 @@ export default function AllFeedPaymentsModal({
                         </span>
                     </div>
                 </div>
+
+                {/* Date Range Filter */}
+                <DateRangeFilter
+                    startDate={startDate}
+                    setStartDate={setStartDate}
+                    endDate={endDate}
+                    setEndDate={setEndDate}
+                    activePreset={preset}
+                    onSelectPreset={setPreset}
+                    accentColor="orange"
+                    totalCount={filteredPayments.length}
+                />
 
                 {/* Search Bar */}
                 <div className="relative pt-1">
@@ -197,7 +217,7 @@ export default function AllFeedPaymentsModal({
                             <p className="text-xs text-slate-400 max-w-sm mx-auto">
                                 {search
                                     ? "No hay resultados para la búsqueda ingresada."
-                                    : "Todavía no se ha registrado ningún pago en el sistema."}
+                                    : "No se registran pagos en el rango de fechas seleccionado."}
                             </p>
                         </div>
                     ) : (
@@ -207,7 +227,7 @@ export default function AllFeedPaymentsModal({
                                     <thead className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 sticky top-0 z-10">
                                         <tr>
                                             <th className="py-3 px-4">Fecha de Pago</th>
-                                            <th className="py-3 px-4">Operación</th>
+                                            <th className="py-3 px-4">Operación / Actividad</th>
                                             <th className="py-3 px-4">Detalle de Compra</th>
                                             <th className="py-3 px-4 text-right">Monto Abonado</th>
                                             <th className="py-3 px-4">Nota / Comentario</th>
@@ -219,6 +239,9 @@ export default function AllFeedPaymentsModal({
                                             const purchaseLabel = bag?.purchaseNumber
                                                 ? `Compra N° ${bag.purchaseNumber}`
                                                 : `Compra #${p.feedBag?.id?.slice(0, 8) || "N/A"}`;
+                                            const paymentLabel = p.paymentNumber
+                                                ? `Pago N° ${p.paymentNumber}`
+                                                : `Pago #${p.id?.slice(0, 8) || index + 1}`;
 
                                             return (
                                                 <tr
@@ -229,6 +252,17 @@ export default function AllFeedPaymentsModal({
                                                         <div className="flex items-center gap-1.5">
                                                             <Calendar className="w-3.5 h-3.5 text-slate-400" />
                                                             <span>{formatUtcDate(p.date)}</span>
+                                                        </div>
+                                                    </td>
+
+                                                    <td className="py-3 px-4 whitespace-nowrap">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="p-1 rounded-md bg-emerald-100 text-emerald-700 shrink-0">
+                                                                <Receipt className="w-3.5 h-3.5" />
+                                                            </span>
+                                                            <span className="font-bold text-emerald-800">
+                                                                {paymentLabel}
+                                                            </span>
                                                         </div>
                                                     </td>
 
