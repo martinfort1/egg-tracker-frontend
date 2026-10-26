@@ -170,44 +170,78 @@ Muchas gracias!`;
                     className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
                 >
                     <ArrowLeft className="w-4 h-4" />
-                    Back to Sales
+                    Volver a Ventas
                 </button>
 
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    {sale.saleNumber ? `Venta N° ${sale.saleNumber}` : `Venta #${sale.id.slice(0, 8)}`}
-                </span>
+                <div className="flex items-center gap-2">
+                    {buyer?.name && (
+                        <span className="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full border border-slate-200 flex items-center gap-1.5">
+                            <User className="w-3.5 h-3.5 text-slate-500" />
+                            <span>{buyer.name}</span>
+                        </span>
+                    )}
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                        {sale.saleNumber ? `Venta N° ${sale.saleNumber}` : `Venta #${sale.id.slice(0, 8)}`}
+                    </span>
+                </div>
             </div>
 
-            {/* Header Card */}
+            {/* Header Card with Prominent Buyer Name */}
             <div className="relative bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-hidden p-6 sm:p-8">
                 <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600" />
 
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-1">
-                    <div className="space-y-1">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pt-1">
+                    <div className="space-y-2">
+                        {/* Pre-title Tag */}
                         <div className="flex items-center gap-2">
-                            <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-semibold text-slate-900">
-                                Sale Details
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                                {sale.saleNumber ? `Venta N° ${sale.saleNumber}` : "Venta"}
+                            </span>
+                            <span className="text-xs text-slate-400">Comprador / Cliente</span>
+                        </div>
+
+                        {/* Buyer Name Prominently Displayed on Top */}
+                        <div className="flex items-center gap-3 flex-wrap">
+                            <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-bold text-slate-900 flex items-center gap-2">
+                                <User className="w-7 h-7 text-emerald-600 shrink-0" />
+                                <span>{buyer?.name || "Cliente no especificado"}</span>
                             </h1>
                             <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${badgeClass}`}>
                                 <StatusIcon className="w-3.5 h-3.5" />
                                 {sale.status}
                             </span>
                         </div>
-                        <p className="text-sm text-slate-500 flex items-center gap-1.5">
-                            <Calendar className="w-4 h-4 text-emerald-600" />
-                            Registered on {formatUtcDate(sale.date)}
-                        </p>
+
+                        {/* Customer & Date Metadata */}
+                        <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-slate-500 pt-1">
+                            <span className="flex items-center gap-1.5">
+                                <Calendar className="w-4 h-4 text-emerald-600" />
+                                <span>Registrada el {formatUtcDate(sale.date)}</span>
+                            </span>
+                            {buyer?.phone && (
+                                <span className="flex items-center gap-1.5 text-slate-600">
+                                    <Phone className="w-3.5 h-3.5 text-slate-400" />
+                                    <span>{buyer.phone}</span>
+                                </span>
+                            )}
+                            {buyer?.address && (
+                                <span className="flex items-center gap-1.5 text-slate-600">
+                                    <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                                    <span>{buyer.address}</span>
+                                </span>
+                            )}
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 shrink-0">
                         <Link href={`/sales/${id}/edit`}>
                             <Button
                                 variant="outline"
                                 className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-emerald-700 rounded-xl flex items-center gap-1.5 text-sm font-semibold"
                             >
                                 <Edit className="w-4 h-4" />
-                                Edit Sale
+                                Editar Venta
                             </Button>
                         </Link>
                     </div>

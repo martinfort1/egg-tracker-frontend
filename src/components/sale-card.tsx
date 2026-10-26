@@ -51,15 +51,15 @@ export default function SaleCard({ sale, refresh }: any) {
             <div className="space-y-3">
                 <div className="flex justify-between items-start gap-2">
                     <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 mb-1">
+                        <h2 className="text-lg font-bold text-slate-900 truncate group-hover:text-emerald-700 transition-colors">
+                            {sale.buyer?.name ?? "Cliente"}
+                        </h2>
+                        <div className="flex items-center gap-1.5 mt-0.5">
                             <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
                             <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
                                 {sale.saleNumber ? `Venta N° ${sale.saleNumber}` : "Venta"}
                             </span>
                         </div>
-                        <h2 className="text-lg font-bold text-slate-900 truncate group-hover:text-emerald-700 transition-colors">
-                            {sale.buyer?.name ?? "Customer"}
-                        </h2>
                     </div>
 
                     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border shrink-0 ${badgeClass}`}>

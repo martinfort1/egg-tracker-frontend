@@ -22,6 +22,8 @@ import {
     CheckCircle2,
     Clock,
     AlertCircle,
+    User,
+    X,
 } from "lucide-react";
 import Link from "next/link";
 import PaymentModal from "@/components/payment-modal";
@@ -34,6 +36,7 @@ export default function SalesPage() {
     const [startDate, setStartDate] = useState<string>("");
     const [endDate, setEndDate] = useState<string>("");
     const [showOutstandingOnly, setShowOutstandingOnly] = useState(false);
+    const [selectedBuyerId, setSelectedBuyerId] = useState<string>("all");
     const [viewMode, setViewMode] = useState<"ledger" | "cards">("ledger");
     const [searchTerm, setSearchTerm] = useState("");
 
@@ -42,6 +45,24 @@ export default function SalesPage() {
         startDate || undefined,
         endDate || undefined
     );
+
+    // Unique list of buyers from sales
+    const buyers = useMemo(() => {
+        const map = new Map<string, string>();
+        sales.forEach((s: any) => {
+            if (s.buyer?.id && s.buyer?.name) {
+                map.set(s.buyer.id, s.buyer.name);
+            }
+        });
+        return Array.from(map.entries())
+            .map(([id, name]) => ({ id, name }))
+            .sort((a, b) => a.name.localeCompare(b.name));
+    }, [sales]);
+
+    const selectedBuyer = useMemo(() => {
+        if (selectedBuyerId === "all") return null;
+        return buyers.find((b) => b.id === selectedBuyerId) || null;
+    }, [buyers, selectedBuyerId]);
 
     const handleDeleteSale = async (id: string) => {
         if (!confirm("¿Estás seguro de que deseas eliminar esta venta?")) return;
@@ -54,9 +75,13 @@ export default function SalesPage() {
         }
     };
 
-    // Filter sales by outstanding debt and search term
+    // Filter sales by outstanding debt, buyer and search term
     const visibleSales = useMemo(() => {
         let list = sales;
+
+        if (selectedBuyerId !== "all") {
+            list = list.filter((s: any) => s.buyer?.id === selectedBuyerId);
+        }
 
         if (showOutstandingOnly) {
             list = list.filter((s: any) => s.status !== "PAID" && (s.remainingAmount > 0));
@@ -72,7 +97,7 @@ export default function SalesPage() {
         }
 
         return list;
-    }, [sales, showOutstandingOnly, searchTerm]);
+    }, [sales, selectedBuyerId, showOutstandingOnly, searchTerm]);
 
     // Financial summaries for the filtered period
     const totalInvoiced = useMemo(() => {
@@ -152,6 +177,47 @@ export default function SalesPage() {
                     </Link>
                 </div>
             </div>
+
+            {/* Selected Buyer Header Banner */}
+            {!isLoading && selectedBuyer && (
+                <div className="bg-white rounded-2xl border border-emerald-200/90 p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold shrink-0">
+                            <User className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                    Resumen del Comprador
+                                </span>
+                            </div>
+                            <h2 className="text-xl font-bold text-slate-900 mt-0.5">
+                                {selectedBuyer.name}
+                            </h2>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-end sm:self-auto">
+                        <Link href={`/buyers/${selectedBuyer.id}`}>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 px-3 text-xs font-semibold border-emerald-200 text-emerald-800 hover:bg-emerald-50 rounded-lg cursor-pointer"
+                            >
+                                Ver Estado de Cuenta Completo →
+                            </Button>
+                        </Link>
+                        <button
+                            type="button"
+                            onClick={() => setSelectedBuyerId("all")}
+                            className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer"
+                            title="Quitar filtro de comprador"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Financial Summary Cards for current selection */}
             {!isLoading && (
@@ -236,16 +302,35 @@ export default function SalesPage() {
 
             {/* View Mode Controls & Search */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-1">
-                {/* Search Bar */}
-                <div className="relative flex-1 max-w-sm">
-                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                        type="text"
-                        placeholder="Buscar por cliente o N° de venta..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-9 pr-3 h-10 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                    />
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-1 max-w-xl">
+                    {/* Search Bar */}
+                    <div className="relative flex-1">
+                        <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                            type="text"
+                            placeholder="Buscar por cliente o N° de venta..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-9 pr-3 h-10 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                        />
+                    </div>
+
+                    {/* Buyer Selector Dropdown */}
+                    {buyers.length > 0 && (
+                        <select
+                            value={selectedBuyerId}
+                            onChange={(e) => setSelectedBuyerId(e.target.value)}
+                            className="h-10 px-3 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer max-w-[210px] truncate"
+                            title="Filtrar ventas por comprador"
+                        >
+                            <option value="all">Todos los Compradores ({buyers.length})</option>
+                            {buyers.map((b) => (
+                                <option key={b.id} value={b.id}>
+                                    {b.name}
+                                </option>
+                            ))}
+                        </select>
+                    )}
                 </div>
 
                 {/* View Switcher: Ledger Table vs Cards */}
