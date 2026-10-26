@@ -1,30 +1,80 @@
-"use client"
+"use client";
+
+import { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
 import { MetricCard } from "@/components/metric-card";
 import { SalesChart } from "@/components/sales-chart";
 import TimeFilter from "@/components/time-filter";
 import { useDashboard } from "@/hooks/useDashboard";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import { useEffect, useState } from "react";
 import TopBuyers from "@/components/top-buyers";
 import LoadSpin from "@/components/load-spin";
 import { formatCurrency } from "@/lib/utils";
 import { MetricCardValue } from "@/components/metric-card-value";
-import Footer from "@/components/footer";
 import { useFeedBags } from "@/hooks/useFeedBags";
-
+import OrderRow from "@/components/order-row";
+import { Button } from "@/components/ui/button";
+import { api } from "@/lib/api";
+import {
+    ClipboardList,
+    Clock,
+    Plus,
+    CheckCircle2,
+    ArrowUpRight,
+} from "lucide-react";
 
 export default function DashboardPage() {
-    const [period, setPeriod] = useState<string>("30d")
+    const [period, setPeriod] = useState<string>("30d");
     const { data, isLoading, error } = useDashboard(period);
     const { analytics } = useAnalytics(period);
     const { feedBags } = useFeedBags();
-    
+
+    const [orders, setOrders] = useState<any[]>([]);
+    const [ordersLoading, setOrdersLoading] = useState(true);
+
+    const fetchOrders = async () => {
+        try {
+            setOrdersLoading(true);
+            const res = await api.get("/orders");
+            setOrders(res.data || []);
+        } catch (e) {
+            console.error("Error fetching orders in dashboard:", e);
+        } finally {
+            setOrdersLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchOrders();
+    }, []);
+
+    // Filter only PENDING orders, ordered by delivery date ascending (nearest first)
+    const pendingOrders = useMemo(() => {
+        return orders
+            .filter((item) => {
+                const order = item.order || item;
+                return order.status === "PENDING";
+            })
+            .sort((a, b) => {
+                const orderA = a.order || a;
+                const orderB = b.order || b;
+                return new Date(orderA.date).getTime() - new Date(orderB.date).getTime();
+            });
+    }, [orders]);
+
+    const totalPendingAmount = useMemo(() => {
+        return pendingOrders.reduce((sum, item) => {
+            const order = item.order || item;
+            return sum + (Number(order.totalAmount) || 0);
+        }, 0);
+    }, [pendingOrders]);
+
     if (isLoading) {
-        return <LoadSpin />
+        return <LoadSpin />;
     }
 
     if (error) {
-        return <div>Error: {error.message}</div>
+        return <div>Error: {error.message}</div>;
     }
 
     const { summary, monthly, topBuyers, expenses } = data || {};
@@ -35,19 +85,105 @@ export default function DashboardPage() {
                 Dashboard
             </h1>
 
-           <TimeFilter period={period} setPeriod={setPeriod} />
-           <h2 className="text-xl font-['Playfair_Display'] font-semibold text-shadow-lg">Sales Overview</h2>
+            {/* Pending Orders Section at the Top */}
+            <div className="bg-white rounded-2xl border border-indigo-100 shadow-sm overflow-hidden">
+                <div className="p-5 sm:p-6 bg-gradient-to-r from-indigo-50/70 via-indigo-50/30 to-white border-b border-indigo-100/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-100/70 border border-indigo-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                                <Clock className="w-3 h-3 text-indigo-600" />
+                                Entregas Programadas
+                            </span>
+                            <span className="text-xs text-slate-400">Atención de Pedidos</span>
+                        </div>
+                        <h2 className="text-xl sm:text-2xl font-['Playfair_Display'] font-bold text-slate-900 flex items-center gap-2">
+                            <ClipboardList className="w-6 h-6 text-indigo-600" />
+                            <span>Órdenes Pendientes</span>
+                            <span className="text-xs bg-amber-100 text-amber-800 font-bold px-2.5 py-1 rounded-full border border-amber-200">
+                                {pendingOrders.length} {pendingOrders.length === 1 ? "pendiente" : "pendientes"}
+                            </span>
+                        </h2>
+                        <p className="text-xs text-slate-500 mt-1">
+                            Pedidos activos listos para preparar, entregar o convertir en venta
+                        </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3">
+                        {pendingOrders.length > 0 && (
+                            <div className="hidden sm:flex flex-col items-end pr-2">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                    Valor Proyectado
+                                </span>
+                                <span className="text-base font-black text-emerald-700">
+                                    {formatCurrency(totalPendingAmount)}
+                                </span>
+                            </div>
+                        )}
+                        <Link href="/orders">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 rounded-xl font-semibold text-xs h-9 cursor-pointer"
+                            >
+                                Ver Todas las Órdenes →
+                            </Button>
+                        </Link>
+                        <Link href="/orders/new">
+                            <Button
+                                size="sm"
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold text-xs h-9 px-3.5 flex items-center gap-1.5 cursor-pointer shadow-sm transition active:scale-95"
+                            >
+                                <Plus className="w-3.5 h-3.5" />
+                                Nueva Orden
+                            </Button>
+                        </Link>
+                    </div>
+                </div>
+
+                {ordersLoading ? (
+                    <div className="p-8 text-center">
+                        <LoadSpin />
+                    </div>
+                ) : pendingOrders.length === 0 ? (
+                    <div className="p-8 text-center">
+                        <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto mb-2" />
+                        <p className="text-sm font-bold text-slate-800">
+                            No hay órdenes pendientes de entrega
+                        </p>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                            Todas las órdenes registradas han sido completadas o no hay entregas programadas.
+                        </p>
+                    </div>
+                ) : (
+                    <div className="divide-y divide-slate-100">
+                        {pendingOrders.map((item, index) => (
+                            <OrderRow
+                                key={(item.order || item).id || index}
+                                item={item}
+                                onRefresh={fetchOrders}
+                            />
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            <TimeFilter period={period} setPeriod={setPeriod} />
+
+            <h2 className="text-xl font-['Playfair_Display'] font-semibold text-shadow-lg">
+                Sales Overview
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 <MetricCardValue title="Amount of sales:" value={summary?.totalSales || 0} isCurrency={false} unit=" sales"/>
                 <MetricCard title="Sold eggs for:" value={summary?.totalRevenues || 0} />
                 <MetricCard title="You have been paid:" value={summary?.totalPaid || 0} />
                 <MetricCard title="You are owed:" value={summary?.totalDebts || 0} />
             </div>
-                <div className="bg-gray-200 w-full h-1px p-1 rounded-lg sm:display-none"></div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+            <div className="bg-gray-200 w-full h-1px p-1 rounded-lg sm:display-none"></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 <MetricCardValue title="Feed bags orders in debt:" value={feedBags?.unpaidCount || 0} isCurrency={false} />
                 <MetricCardValue title="Feed bags debt:" value={feedBags?.totalOwed || 0} isCurrency={true} />
-                </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/90 hover:shadow-md transition-shadow">
@@ -102,7 +238,7 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            <SalesChart data={ analytics } period={period} />
+            <SalesChart data={analytics} period={period} />
 
             <h2 className="text-xl font-['Playfair_Display'] font-semibold text-shadow-lg">Monthly Revenue</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
