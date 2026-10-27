@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { Button } from "./ui/button";
+import { Calendar, Filter } from "lucide-react";
 
 type TimeFilterProps = {
     period: string;
@@ -18,11 +18,11 @@ export default function TimeFilter({
     showOutstandingToggle = false,
 }: TimeFilterProps) {
     const options = [
-        { label: "7 days", value: "7d"},
-        { label: "30 days", value: "30d"},
-        { label: "90 days", value: "90d"},
-        { label: "1 year", value: "1y"},
-        { label: "All data", value: "all"},
+        { label: "7 days", value: "7d" },
+        { label: "30 days", value: "30d" },
+        { label: "90 days", value: "90d" },
+        { label: "1 year", value: "1y" },
+        { label: "All data", value: "all" },
     ];
 
     const handleOutstandingToggle = () => {
@@ -32,35 +32,66 @@ export default function TimeFilter({
     };
 
     return (
-        <div className="flex flex-col items-center gap-2 bg-linear-to-b from-slate-800 to-slate-600 text-white p-4 rounded-xl">
-            <h4 className="text-sm font-medium self-center">Choose a time period:</h4>
-            <div className="flex flex-wrap justify-center gap-1 md:gap-2">
-                {options.map((option) => (
-                    <Button
-                        key={option.value}
-                        onClick={() => setPeriod(option.value)}
-                        className={`px-2 py-1 md:px-3 text-sm md:text-base rounded-full border transition
-                        ${period === option.value ? "bg-linear-to-r from-yellow-400 to-orange-500 text-white scale-110" : "bg-slate-800/95 hover:bg-gray-700 cursor-pointer"}
-                        `}
-                    >
-                        {option.label}
-                    </Button>
-                ))}
+        <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-linear-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white shadow-sm shadow-indigo-500/20 shrink-0">
+                    <Calendar className="w-5 h-5" />
+                </div>
+                <div>
+                    <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+                            Time Period Filter
+                        </h3>
+                        <span className="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                            Dashboard
+                        </span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                        Filter metrics, margins, and financial reports
+                    </p>
+                </div>
             </div>
 
-            {showOutstandingToggle && setShowOutstandingOnly && (
-                <Button
-                    type="button"
-                    onClick={handleOutstandingToggle}
-                    className={`px-3 py-1.5 text-sm rounded-full border transition ${
-                        showOutstandingOnly
-                            ? "bg-rose-500/90 text-white border-rose-400"
-                            : "bg-slate-800/95 hover:bg-gray-700 cursor-pointer border-slate-600"
-                    }`}
-                >
-                    {showOutstandingOnly ? "Showing unpaid / partial only" : "Show unpaid / partial only"}
-                </Button>
-            )}
+            <div className="flex flex-wrap items-center gap-2.5">
+                <div className="inline-flex p-1 bg-slate-100/90 rounded-xl border border-slate-200/70 shadow-inner">
+                    {options.map((option) => {
+                        const active = period === option.value;
+                        return (
+                            <button
+                                key={option.value}
+                                type="button"
+                                onClick={() => setPeriod(option.value)}
+                                className={`px-3 sm:px-3.5 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-200 cursor-pointer ${
+                                    active
+                                        ? "bg-white text-indigo-600 shadow-sm border border-slate-200/80 font-bold scale-[1.02]"
+                                        : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+                                }`}
+                            >
+                                {option.label}
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {showOutstandingToggle && setShowOutstandingOnly && (
+                    <button
+                        type="button"
+                        onClick={handleOutstandingToggle}
+                        className={`px-3.5 py-1.5 text-xs sm:text-sm font-semibold rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 shadow-xs ${
+                            showOutstandingOnly
+                                ? "bg-rose-50 text-rose-700 border-rose-300 font-bold"
+                                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                        }`}
+                    >
+                        <span
+                            className={`w-2 h-2 rounded-full ${
+                                showOutstandingOnly ? "bg-rose-500 animate-pulse" : "bg-slate-300"
+                            }`}
+                        />
+                        {showOutstandingOnly ? "Showing unpaid only" : "Show unpaid only"}
+                    </button>
+                )}
+            </div>
         </div>
     );
 }

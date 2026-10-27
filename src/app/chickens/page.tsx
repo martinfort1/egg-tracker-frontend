@@ -147,13 +147,24 @@ export default function ChickensPage() {
                     <LayingPercentageChart percentage={laying} />
                 </div>
                 
-                <div className="bg-white p-6 rounded-xl shadow flex flex-col h-full">
-                    <div className="flex flex-col items-center text-center gap-2 bg-linear-to-b from-slate-800 to-slate-700 text-white rounded-lg p-4 mb-4">
-                        <div className="flex">
-                            <Diff className="text-yellow-500 mt-2"/>
-                            <Bird className="text-yellow-500 mt-2"/>
+                <div className="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200/90 hover:shadow-md transition-shadow flex flex-col h-full">
+                    <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-amber-400 to-yellow-500 flex items-center justify-center text-white shadow-sm shadow-amber-500/20 shrink-0">
+                                <Bird className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+                                    Quick Actions
+                                </h2>
+                                <p className="text-xs text-slate-500">
+                                    Register flock events and purchases
+                                </p>
+                            </div>
                         </div>
-                        <h2 className="font-semibold mb-4">Quick Actions</h2>
+                        <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-50 text-amber-700 border border-amber-100">
+                            Actions
+                        </span>
                     </div>
                     <div className="space-y-3 flex-1 flex flex-col justify-center gap-y-5">
                         {chickens.length > 0 && (
