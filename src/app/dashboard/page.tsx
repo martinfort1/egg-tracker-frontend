@@ -9,7 +9,7 @@ import { useDashboard } from "@/hooks/useDashboard";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import TopBuyers from "@/components/top-buyers";
 import LoadSpin from "@/components/load-spin";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, isOrderVisible } from "@/lib/utils";
 import { MetricCardValue } from "@/components/metric-card-value";
 import { useFeedBags } from "@/hooks/useFeedBags";
 import OrderRow from "@/components/order-row";
@@ -48,12 +48,13 @@ export default function DashboardPage() {
         fetchOrders();
     }, []);
 
-    // Filter only PENDING orders, ordered by delivery date ascending (nearest first)
+    // Filter only PENDING orders that are visible (fixed-day orders only from the day before delivery)
     const pendingOrders = useMemo(() => {
         return orders
             .filter((item) => {
                 const order = item.order || item;
-                return order.status === "PENDING";
+                if (order.status !== "PENDING") return false;
+                return isOrderVisible(order);
             })
             .sort((a, b) => {
                 const orderA = a.order || a;

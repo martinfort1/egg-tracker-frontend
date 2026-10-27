@@ -4,12 +4,12 @@ import OrderRow from "@/components/order-row";
 import LoadSpin from "@/components/load-spin";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
-import { ClipboardList, Plus, Search, Calendar, PackageCheck, Clock } from "lucide-react";
+import { ClipboardList, Plus, Search, Calendar, PackageCheck, Clock, Repeat, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import DateRangeFilter, { DateFilterPreset } from "@/components/date-range-filter";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, isOrderVisible } from "@/lib/utils";
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState<any[]>([]);
@@ -18,6 +18,7 @@ export default function OrdersPage() {
     const [startDate, setStartDate] = useState<string>("");
     const [endDate, setEndDate] = useState<string>("");
     const [searchTerm, setSearchTerm] = useState("");
+    const [showAllFutureRecurring, setShowAllFutureRecurring] = useState(false);
 
     const fetchOrders = async (sDate = startDate, eDate = endDate) => {
         try {
@@ -39,15 +40,33 @@ export default function OrdersPage() {
         fetchOrders(startDate, endDate);
     }, [startDate, endDate]);
 
-    const filteredOrders = useMemo(() => {
-        if (!searchTerm.trim()) return orders;
-        const query = searchTerm.toLowerCase().trim();
+    // Count of fixed-day orders hidden until the day before delivery
+    const hiddenFutureCount = useMemo(() => {
         return orders.filter((item) => {
             const order = item.order || item;
-            const buyerName = order.buyer?.name?.toLowerCase() || "";
-            return buyerName.includes(query);
-        });
-    }, [orders, searchTerm]);
+            return order.status === "PENDING" && !isOrderVisible(order);
+        }).length;
+    }, [orders]);
+
+    const filteredOrders = useMemo(() => {
+        let list = orders;
+
+        // Hide fixed-day orders before the day before delivery
+        if (!showAllFutureRecurring) {
+            list = list.filter((item) => isOrderVisible(item));
+        }
+
+        if (searchTerm.trim()) {
+            const query = searchTerm.toLowerCase().trim();
+            list = list.filter((item) => {
+                const order = item.order || item;
+                const buyerName = order.buyer?.name?.toLowerCase() || "";
+                return buyerName.includes(query);
+            });
+        }
+
+        return list;
+    }, [orders, showAllFutureRecurring, searchTerm]);
 
     const [upcomingOrders, pastOrders] = useMemo(() => {
         const sorted = [...filteredOrders].sort(
@@ -97,12 +116,37 @@ export default function OrdersPage() {
                         Revisa órdenes pendientes, programa entregas futuras o consulta el historial de pedidos pasados.
                     </p>
                 </div>
-                <Link href="/orders/new">
-                    <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-4 py-2 font-medium shadow-sm transition active:scale-95 flex items-center gap-2 cursor-pointer w-full sm:w-auto">
-                        <Plus className="w-4 h-4 mr-1" />
-                        Nueva Orden
-                    </Button>
-                </Link>
+                <div className="flex flex-wrap items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={() => setShowAllFutureRecurring(!showAllFutureRecurring)}
+                        className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition active:scale-95 cursor-pointer shadow-2xs ${
+                            showAllFutureRecurring
+                                ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                                : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                        }`}
+                        title="Alternar visibilidad de órdenes fijas futuras"
+                    >
+                        {showAllFutureRecurring ? (
+                            <>
+                                <Eye className="w-3.5 h-3.5" />
+                                <span>Ocultar Fijas Lejanas</span>
+                            </>
+                        ) : (
+                            <>
+                                <EyeOff className="w-3.5 h-3.5 text-indigo-600" />
+                                <span>Mostrar Fijas Futuras {hiddenFutureCount > 0 ? `(${hiddenFutureCount})` : ""}</span>
+                            </>
+                        )}
+                    </button>
+
+                    <Link href="/orders/new">
+                        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-4 py-2 font-medium shadow-sm transition active:scale-95 flex items-center gap-2 cursor-pointer w-full sm:w-auto">
+                            <Plus className="w-4 h-4 mr-1" />
+                            Nueva Orden
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
             {/* Summary Metrics */}
@@ -183,6 +227,52 @@ export default function OrdersPage() {
                         />
                     </div>
                 </div>
+
+                {/* Future Fixed Orders Notice & Direct Action Banner */}
+                {!showAllFutureRecurring && hiddenFutureCount > 0 && (
+                    <div className="bg-indigo-50/70 border border-indigo-200/90 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+                        <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
+                                <Calendar className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <p className="text-xs font-bold text-indigo-950">
+                                    Hay {hiddenFutureCount} {hiddenFutureCount === 1 ? "orden fija futura programada" : "órdenes fijas futuras programadas"}
+                                </p>
+                                <p className="text-[11px] text-slate-500">
+                                    Por defecto aparecen desde el día anterior a su fecha de entrega para no saturar tu lista de trabajo.
+                                </p>
+                            </div>
+                        </div>
+                        <Button
+                            type="button"
+                            onClick={() => setShowAllFutureRecurring(true)}
+                            size="sm"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold px-3.5 h-8.5 shrink-0 flex items-center gap-1.5 cursor-pointer shadow-sm transition active:scale-95"
+                        >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>Hacerlas Visibles Ahora</span>
+                        </Button>
+                    </div>
+                )}
+
+                {showAllFutureRecurring && hiddenFutureCount > 0 && (
+                    <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-3 px-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-amber-900 shadow-2xs">
+                        <div className="flex items-center gap-2">
+                            <Eye className="w-4 h-4 text-amber-600 shrink-0" />
+                            <span>
+                                Mostrando <strong>todas</strong> las órdenes futuras programadas en el listado.
+                            </span>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setShowAllFutureRecurring(false)}
+                            className="text-xs font-bold text-amber-800 hover:text-amber-950 underline cursor-pointer shrink-0"
+                        >
+                            Volver a ocultar fijas lejanas
+                        </button>
+                    </div>
+                )}
             </div>
 
             {isLoading ? (
@@ -207,12 +297,29 @@ export default function OrdersPage() {
                                         Próximas Entregas (Activas)
                                     </p>
                                     <p className="text-slate-600 text-sm">
-                                        Órdenes programadas para hoy o fechas futuras.
+                                        Órdenes programadas para entrega activa.
                                     </p>
                                 </div>
-                                <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
-                                    {upcomingOrders.length} activas
-                                </span>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    {hiddenFutureCount > 0 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowAllFutureRecurring(!showAllFutureRecurring)}
+                                            className="text-xs text-indigo-700 hover:text-indigo-900 font-semibold bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-3 py-1 rounded-xl transition cursor-pointer flex items-center gap-1.5"
+                                            title="Las órdenes por día fijo se muestran desde 1 día antes al día de entrega"
+                                        >
+                                            <Repeat className="w-3.5 h-3.5" />
+                                            <span>
+                                                {showAllFutureRecurring
+                                                    ? "Ocultar fijas lejanas"
+                                                    : `${hiddenFutureCount} fija futura oculta (visible desde el día anterior)`}
+                                            </span>
+                                        </button>
+                                    )}
+                                    <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                                        {upcomingOrders.length} activas
+                                    </span>
+                                </div>
                             </div>
                             <div className="rounded-2xl border border-gray-200 overflow-hidden shadow-sm bg-white">
                                 {upcomingOrders.map((item, index) => (
