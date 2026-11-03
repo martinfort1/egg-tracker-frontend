@@ -17,6 +17,7 @@ import {
     Clock,
     CheckCircle2,
     XCircle,
+    ArrowUpRight,
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -102,10 +103,29 @@ export default function OrderPage() {
                     Back to Orders
                 </button>
 
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                    <span className="w-2 h-2 rounded-full bg-indigo-500" />
-                    Order #{order.id}
-                </span>
+                <div className="flex items-center gap-2">
+                    {buyer?.name && (
+                        buyer.id ? (
+                            <Link
+                                href={`/buyers/${buyer.id}`}
+                                className="text-xs font-bold text-slate-700 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-800 hover:border-indigo-200 px-3 py-1 rounded-full border border-slate-200 flex items-center gap-1.5 transition-colors"
+                                title={`Ver perfil de ${buyer.name}`}
+                            >
+                                <User className="w-3.5 h-3.5 text-slate-500" />
+                                <span>{buyer.name}</span>
+                            </Link>
+                        ) : (
+                            <span className="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full border border-slate-200 flex items-center gap-1.5">
+                                <User className="w-3.5 h-3.5 text-slate-500" />
+                                <span>{buyer.name}</span>
+                            </span>
+                        )
+                    )}
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                        <span className="w-2 h-2 rounded-full bg-indigo-500" />
+                        Order #{order.id}
+                    </span>
+                </div>
             </div>
 
             {/* Header Card */}
@@ -114,16 +134,31 @@ export default function OrderPage() {
 
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-1">
                     <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-semibold text-slate-900">
-                                Order Details
-                            </h1>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            {buyer?.id ? (
+                                <Link
+                                    href={`/buyers/${buyer.id}`}
+                                    className="group/name flex items-center gap-2 hover:opacity-95 transition-opacity"
+                                    title={`Ir al perfil y datos de ${buyer.name}`}
+                                >
+                                    <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-semibold text-slate-900 group-hover/name:text-indigo-600 group-hover/name:underline flex items-center gap-2 transition-colors">
+                                        <User className="w-6 h-6 text-indigo-600 shrink-0" />
+                                        <span>{buyer?.name || "Order Details"}</span>
+                                        <ArrowUpRight className="w-5 h-5 text-indigo-600 opacity-60 group-hover/name:opacity-100 group-hover/name:translate-x-0.5 group-hover/name:-translate-y-0.5 transition-all" />
+                                    </h1>
+                                </Link>
+                            ) : (
+                                <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-semibold text-slate-900 flex items-center gap-2">
+                                    <User className="w-6 h-6 text-indigo-600 shrink-0" />
+                                    <span>{buyer?.name || "Order Details"}</span>
+                                </h1>
+                            )}
                             <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${statusBadge.className}`}>
                                 <StatusIcon className="w-3.5 h-3.5" />
                                 {order.status}
                             </span>
                         </div>
-                        <p className="text-sm text-slate-500 flex items-center gap-1.5">
+                        <p className="text-sm text-slate-500 flex items-center gap-1.5 pt-0.5">
                             <Calendar className="w-4 h-4 text-indigo-600" />
                             Delivery scheduled for {formatUtcDate(order.date)}
                         </p>
@@ -272,9 +307,20 @@ export default function OrderPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-1">
                         <span className="text-xs text-slate-400 font-medium">Customer Name</span>
-                        <p className="text-base font-bold text-slate-900">
-                            {buyer?.name || "Customer not specified"}
-                        </p>
+                        {buyer?.id ? (
+                            <Link
+                                href={`/buyers/${buyer.id}`}
+                                className="text-base font-bold text-slate-900 hover:text-indigo-600 hover:underline inline-flex items-center gap-1 group/bname"
+                                title={`Ver perfil de ${buyer.name}`}
+                            >
+                                <span>{buyer?.name || "Customer not specified"}</span>
+                                <ArrowUpRight className="w-4 h-4 text-indigo-600 opacity-0 group-hover/bname:opacity-100 transition-opacity" />
+                            </Link>
+                        ) : (
+                            <p className="text-base font-bold text-slate-900">
+                                {buyer?.name || "Customer not specified"}
+                            </p>
+                        )}
                     </div>
 
                     <div className="space-y-1">

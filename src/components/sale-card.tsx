@@ -5,7 +5,7 @@ import Link from "next/link";
 import PaymentModal from "./payment-modal";
 import { motion } from "framer-motion";
 import { formatCurrency, formatUtcDate } from "@/lib/utils";
-import { Calendar, CheckCircle2, AlertCircle, Clock } from "lucide-react";
+import { Calendar, CheckCircle2, AlertCircle, Clock, ArrowUpRight } from "lucide-react";
 
 export default function SaleCard({ sale, refresh }: any) {
     const handleDelete = async () => {
@@ -51,9 +51,22 @@ export default function SaleCard({ sale, refresh }: any) {
             <div className="space-y-3">
                 <div className="flex justify-between items-start gap-2">
                     <div className="min-w-0">
-                        <h2 className="text-lg font-bold text-slate-900 truncate group-hover:text-emerald-700 transition-colors">
-                            {sale.buyer?.name ?? "Cliente"}
-                        </h2>
+                        {sale.buyer?.id || sale.buyerId ? (
+                            <Link
+                                href={`/buyers/${sale.buyer?.id || sale.buyerId}`}
+                                className="group/buyer inline-block max-w-full"
+                                title={`Ver cliente ${sale.buyer?.name ?? ""}`}
+                            >
+                                <h2 className="text-lg font-bold text-slate-900 truncate group-hover/buyer:text-emerald-700 group-hover/buyer:underline transition-colors flex items-center gap-1.5">
+                                    <span className="truncate">{sale.buyer?.name ?? "Cliente"}</span>
+                                    <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover/buyer:opacity-100 text-emerald-600 transition-opacity shrink-0" />
+                                </h2>
+                            </Link>
+                        ) : (
+                            <h2 className="text-lg font-bold text-slate-900 truncate">
+                                {sale.buyer?.name ?? "Cliente"}
+                            </h2>
+                        )}
                         <div className="flex items-center gap-1.5 mt-0.5">
                             <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
                             <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">

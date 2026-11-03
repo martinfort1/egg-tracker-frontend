@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { PackageCheck, Trash2, Calendar, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { PackageCheck, Trash2, Calendar, CheckCircle2, Clock, XCircle, ArrowUpRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { api } from "@/lib/api";
@@ -78,26 +78,43 @@ export default function OrderRow({
 
     return (
         <div className="group bg-white px-5 py-4 flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6 hover:bg-slate-50/80 transition-colors">
-            <Link
-                href={`/orders/${order.id}`}
-                className="flex flex-1 min-w-0 items-center gap-4 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-            >
+            <div className="flex flex-1 min-w-0 flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <span className="font-bold text-slate-900 truncate group-hover:text-indigo-600 transition-colors text-base">
-                            {buyer?.name ?? "Unknown customer"}
-                        </span>
-                        <div className="flex items-center gap-1 text-xs text-slate-400 font-medium">
+                        {buyer?.id || order.buyerId ? (
+                            <Link
+                                href={`/buyers/${buyer?.id || order.buyerId}`}
+                                className="font-bold text-slate-900 truncate hover:text-indigo-600 hover:underline transition-colors text-base inline-flex items-center gap-1 group/buyer"
+                                title={`Ver perfil de ${buyer?.name ?? "Cliente"}`}
+                            >
+                                <span>{buyer?.name ?? "Unknown customer"}</span>
+                                <ArrowUpRight className="w-3.5 h-3.5 text-indigo-500 opacity-0 group-hover/buyer:opacity-100 transition-opacity" />
+                            </Link>
+                        ) : (
+                            <span className="font-bold text-slate-900 truncate text-base">
+                                {buyer?.name ?? "Unknown customer"}
+                            </span>
+                        )}
+                        <Link
+                            href={`/orders/${order.id}`}
+                            className="flex items-center gap-1 text-xs text-slate-400 font-medium hover:text-slate-600 transition-colors"
+                        >
                             <Calendar className="w-3 h-3 text-slate-400" />
                             <span>{formatUtcDate(order.date)}</span>
-                        </div>
+                        </Link>
                     </div>
-                    <p className="text-xs text-slate-600 truncate">
+                    <Link
+                        href={`/orders/${order.id}`}
+                        className="text-xs text-slate-600 truncate block hover:text-slate-900 transition-colors"
+                    >
                         {formatOrderSummary(order)}
-                    </p>
+                    </Link>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-3">
+                <Link
+                    href={`/orders/${order.id}`}
+                    className="flex shrink-0 items-center gap-3 cursor-pointer group/link"
+                >
                     <span
                         className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-xs font-semibold whitespace-nowrap ${statusBadge.className}`}
                     >
@@ -105,11 +122,11 @@ export default function OrderRow({
                         {order.status}
                     </span>
 
-                    <span className="font-extrabold text-slate-900 whitespace-nowrap text-right text-base">
+                    <span className="font-extrabold text-slate-900 whitespace-nowrap text-right text-base group-hover/link:text-indigo-600 transition-colors">
                         {formatCurrency(order.totalAmount)}
                     </span>
-                </div>
-            </Link>
+                </Link>
+            </div>
 
             <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                 {order.status === "PENDING" && (

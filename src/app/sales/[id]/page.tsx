@@ -20,6 +20,7 @@ import {
     Clock,
     ShoppingBag,
     Check,
+    ArrowUpRight,
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -175,10 +176,21 @@ Muchas gracias!`;
 
                 <div className="flex items-center gap-2">
                     {buyer?.name && (
-                        <span className="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full border border-slate-200 flex items-center gap-1.5">
-                            <User className="w-3.5 h-3.5 text-slate-500" />
-                            <span>{buyer.name}</span>
-                        </span>
+                        buyer.id ? (
+                            <Link
+                                href={`/buyers/${buyer.id}`}
+                                className="text-xs font-bold text-slate-700 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-200 px-3 py-1 rounded-full border border-slate-200 flex items-center gap-1.5 transition-colors"
+                                title={`Ver perfil de ${buyer.name}`}
+                            >
+                                <User className="w-3.5 h-3.5 text-slate-500" />
+                                <span>{buyer.name}</span>
+                            </Link>
+                        ) : (
+                            <span className="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full border border-slate-200 flex items-center gap-1.5">
+                                <User className="w-3.5 h-3.5 text-slate-500" />
+                                <span>{buyer.name}</span>
+                            </span>
+                        )
                     )}
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                         <span className="w-2 h-2 rounded-full bg-emerald-500" />
@@ -203,10 +215,24 @@ Muchas gracias!`;
 
                         {/* Buyer Name Prominently Displayed on Top */}
                         <div className="flex items-center gap-3 flex-wrap">
-                            <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-bold text-slate-900 flex items-center gap-2">
-                                <User className="w-7 h-7 text-emerald-600 shrink-0" />
-                                <span>{buyer?.name || "Cliente no especificado"}</span>
-                            </h1>
+                            {buyer?.id ? (
+                                <Link
+                                    href={`/buyers/${buyer.id}`}
+                                    className="group/name flex items-center gap-2 hover:opacity-95 transition-opacity"
+                                    title={`Ir al perfil y datos de ${buyer.name}`}
+                                >
+                                    <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-bold text-slate-900 group-hover/name:text-emerald-700 group-hover/name:underline flex items-center gap-2 transition-colors">
+                                        <User className="w-7 h-7 text-emerald-600 shrink-0" />
+                                        <span>{buyer?.name || "Cliente no especificado"}</span>
+                                        <ArrowUpRight className="w-5 h-5 text-emerald-600 opacity-60 group-hover/name:opacity-100 group-hover/name:translate-x-0.5 group-hover/name:-translate-y-0.5 transition-all" />
+                                    </h1>
+                                </Link>
+                            ) : (
+                                <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-bold text-slate-900 flex items-center gap-2">
+                                    <User className="w-7 h-7 text-emerald-600 shrink-0" />
+                                    <span>{buyer?.name || "Cliente no especificado"}</span>
+                                </h1>
+                            )}
                             <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${badgeClass}`}>
                                 <StatusIcon className="w-3.5 h-3.5" />
                                 {sale.status}
@@ -365,9 +391,20 @@ Muchas gracias!`;
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-1">
                         <span className="text-xs text-slate-400 font-medium">Customer Name</span>
-                        <p className="text-base font-bold text-slate-900">
-                            {buyer?.name || "Customer not specified"}
-                        </p>
+                        {buyer?.id ? (
+                            <Link
+                                href={`/buyers/${buyer.id}`}
+                                className="text-base font-bold text-slate-900 hover:text-emerald-700 hover:underline inline-flex items-center gap-1 group/bname"
+                                title={`Ver perfil de ${buyer.name}`}
+                            >
+                                <span>{buyer?.name || "Customer not specified"}</span>
+                                <ArrowUpRight className="w-4 h-4 text-emerald-600 opacity-0 group-hover/bname:opacity-100 transition-opacity" />
+                            </Link>
+                        ) : (
+                            <p className="text-base font-bold text-slate-900">
+                                {buyer?.name || "Customer not specified"}
+                            </p>
+                        )}
                     </div>
 
                     <div className="space-y-1">

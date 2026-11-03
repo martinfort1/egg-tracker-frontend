@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CheckCircle2, DollarSign, PackageCheck } from "lucide-react";
+import { CheckCircle2, DollarSign, PackageCheck, ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 
 export default function FulfillOrderModal({
     order,
@@ -67,9 +68,20 @@ export default function FulfillOrderModal({
                     {/* Buyer Information Box */}
                     <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs space-y-1">
                         <span className="text-slate-400 font-medium">Customer</span>
-                        <p className="text-sm font-bold text-slate-900">
-                            {order.buyer?.name || "Customer not specified"}
-                        </p>
+                        {order.buyer?.id ? (
+                            <Link
+                                href={`/buyers/${order.buyer.id}`}
+                                className="text-sm font-bold text-slate-900 hover:text-emerald-700 hover:underline flex items-center gap-1 group/b"
+                                title={`Ver perfil de ${order.buyer.name}`}
+                            >
+                                <span>{order.buyer.name}</span>
+                                <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600 opacity-60 group-hover/b:opacity-100 transition-opacity" />
+                            </Link>
+                        ) : (
+                            <p className="text-sm font-bold text-slate-900">
+                                {order.buyer?.name || "Customer not specified"}
+                            </p>
+                        )}
                     </div>
 
                     {/* Total Amount Banner */}

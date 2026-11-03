@@ -22,7 +22,9 @@ import {
     ArrowRight,
     FileText,
     CreditCard,
+    ArrowUpRight,
 } from "lucide-react";
+import Link from "next/link";
 import { formatCurrency, formatUtcDate } from "@/lib/utils";
 
 export default function PaymentModal({
@@ -194,7 +196,18 @@ export default function PaymentModal({
                         ) : isEggSale && sale?.buyer?.name ? (
                             <div className="bg-white p-2 rounded-lg border border-slate-200/70 text-xs flex justify-between items-center">
                                 <span className="text-slate-400 text-[10px] uppercase font-bold">Cliente</span>
-                                <span className="font-bold text-slate-900">{sale.buyer.name}</span>
+                                {sale.buyer.id ? (
+                                    <Link
+                                        href={`/buyers/${sale.buyer.id}`}
+                                        className="font-bold text-slate-900 hover:text-emerald-700 hover:underline flex items-center gap-1"
+                                        title={`Ver perfil de ${sale.buyer.name}`}
+                                    >
+                                        <span>{sale.buyer.name}</span>
+                                        <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
+                                    </Link>
+                                ) : (
+                                    <span className="font-bold text-slate-900">{sale.buyer.name}</span>
+                                )}
                             </div>
                         ) : null}
 
