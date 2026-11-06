@@ -15,7 +15,7 @@ export default function BuyersPage() {
     const fetchBuyers = async () => {
         try {
             setIsLoading(true);
-            const res = await api.get("/buyers");
+            const res = await api.get("/buyers?type=buyer");
             setBuyers(res.data);
         } catch (err) {
             console.error("Failed to fetch buyers:", err);

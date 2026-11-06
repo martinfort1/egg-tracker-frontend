@@ -35,11 +35,16 @@ export default function BuyerCard({ buyer, refresh }: any) {
             <div className="space-y-3">
                 <div className="flex justify-between items-start gap-3">
                     <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 mb-1">
+                        <div className="flex items-center gap-1.5 mb-1 flex-wrap">
                             <span className="w-2 h-2 rounded-full bg-indigo-500 shrink-0" />
                             <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-700">
-                                Customer
+                                Cliente
                             </span>
+                            {buyer.isEggSupplier && (
+                                <span className="text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.2 rounded-full">
+                                    Proveedor Huevos
+                                </span>
+                            )}
                         </div>
                         <h2 className="text-lg font-bold text-slate-900 truncate group-hover:text-indigo-700 transition-colors">
                             {buyer.name}

@@ -49,14 +49,18 @@ export default function PaymentModal({
     );
 
     // Identify transaction type
+    const isEggPurchase =
+        endpoint.includes("egg-purchases") ||
+        sale?.ExtraBuyPrice !== undefined;
+
     const isFeedBag =
         endpoint.includes("feed-bags") ||
         sale?.phase !== undefined ||
         sale?.price !== undefined;
 
-    const isEggSale = !isFeedBag && !isBulkPayment;
+    const isEggSale = !isFeedBag && !isEggPurchase && !isBulkPayment;
 
-    const orderNumberText = isFeedBag
+    const orderNumberText = (isFeedBag || isEggPurchase)
         ? (sale?.purchaseNumber ? `Compra N° ${sale.purchaseNumber}` : `Compra #${sale?.id?.slice(0, 8)}`)
         : isEggSale
         ? (sale?.saleNumber ? `Venta N° ${sale.saleNumber}` : `Venta #${sale?.id?.slice(0, 8)}`)
@@ -193,30 +197,32 @@ export default function PaymentModal({
                                     ))}
                                 </div>
                             </div>
-                        ) : isEggSale && sale?.buyer?.name ? (
+                        ) : (isEggSale || isEggPurchase) && (sale?.buyer || sale?.supplier) ? (
                             <div className="bg-white p-2 rounded-lg border border-slate-200/70 text-xs flex justify-between items-center">
-                                <span className="text-slate-400 text-[10px] uppercase font-bold">Cliente</span>
-                                {sale.buyer.id ? (
+                                <span className="text-slate-400 text-[10px] uppercase font-bold">
+                                    {isEggPurchase ? "Proveedor" : "Cliente"}
+                                </span>
+                                {(sale.supplier?.id || sale.buyer?.id) ? (
                                     <Link
-                                        href={`/buyers/${sale.buyer.id}`}
+                                        href={isEggPurchase ? `/egg-purchases/suppliers/${sale.supplier.id}` : `/buyers/${sale.buyer.id}`}
                                         className="font-bold text-slate-900 hover:text-emerald-700 hover:underline flex items-center gap-1"
-                                        title={`Ver perfil de ${sale.buyer.name}`}
+                                        title={`Ver perfil de ${sale.supplier?.name || sale.buyer?.name}`}
                                     >
-                                        <span>{sale.buyer.name}</span>
+                                        <span>{sale.supplier?.name || sale.buyer?.name}</span>
                                         <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
                                     </Link>
                                 ) : (
-                                    <span className="font-bold text-slate-900">{sale.buyer.name}</span>
+                                    <span className="font-bold text-slate-900">{sale.supplier?.name || sale.buyer?.name}</span>
                                 )}
                             </div>
                         ) : null}
 
                         {/* Financial Ledger Breakdown of the Order */}
                         <div className="pt-2 border-t border-slate-200/80 space-y-1.5 text-xs">
-                            {sale?.totalAmount !== undefined && (
+                            {(sale?.totalCost !== undefined || sale?.totalAmount !== undefined) && (
                                 <div className="flex justify-between items-center text-slate-600">
-                                    <span>Total Facturado de la Orden:</span>
-                                    <span className="font-bold text-slate-900">{formatCurrency(sale.totalAmount)}</span>
+                                    <span>{isEggPurchase ? "Costo Total de la Compra:" : "Total Facturado de la Orden:"}</span>
+                                    <span className="font-bold text-slate-900">{formatCurrency(sale.totalCost ?? sale.totalAmount)}</span>
                                 </div>
                             )}
                             {sale?.amountPaid !== undefined && (

@@ -55,6 +55,8 @@ export default function EditBuyerPage() {
                 setValue("phone", buyer.phone);
                 setValue("address", buyer.address);
                 setValue("notes", buyer.notes);
+                setValue("isBuyer", buyer.isBuyer !== undefined ? buyer.isBuyer : true);
+                setValue("isEggSupplier", buyer.isEggSupplier !== undefined ? buyer.isEggSupplier : false);
                 setLoading(false);
             } catch (error) {
                 toast.error("Failed to load buyer data");
@@ -182,6 +184,38 @@ export default function EditBuyerPage() {
                         {errors.notes && (
                             <p className="text-rose-600 text-xs font-medium">{String(errors.notes?.message)}</p>
                         )}
+                    </div>
+
+                    {/* Roles: Buyer vs Supplier */}
+                    <div className="space-y-2 pt-2 border-t border-slate-100">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                            Rol del Contacto (podés marcar uno o ambos):
+                        </label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <label className="p-3 rounded-xl border flex items-center gap-3 cursor-pointer transition-all bg-white border-slate-200 text-slate-700 hover:bg-slate-50">
+                                <input
+                                    type="checkbox"
+                                    {...register("isBuyer")}
+                                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                />
+                                <div className="text-xs">
+                                    <p className="font-bold text-slate-900">Cliente Comprador</p>
+                                    <p className="text-[11px] text-slate-500">Aparece en Ventas / Clientes</p>
+                                </div>
+                            </label>
+
+                            <label className="p-3 rounded-xl border flex items-center gap-3 cursor-pointer transition-all bg-white border-slate-200 text-slate-700 hover:bg-slate-50">
+                                <input
+                                    type="checkbox"
+                                    {...register("isEggSupplier")}
+                                    className="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 cursor-pointer"
+                                />
+                                <div className="text-xs">
+                                    <p className="font-bold text-slate-900">Proveedor de Huevos</p>
+                                    <p className="text-[11px] text-slate-500">Aparece en Compra de Huevos</p>
+                                </div>
+                            </label>
+                        </div>
                     </div>
 
                     <div className="flex gap-3 pt-4">

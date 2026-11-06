@@ -18,6 +18,7 @@ import {
     Bird,
     ClipboardList,
     LogOut,
+    ShoppingCart,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { logout } from "@/lib/auth";
@@ -27,6 +28,7 @@ const navItems = [
     { href: "/buyers", label: "Buyers", icon: Users },
     { href: "/orders", label: "Orders", icon: ClipboardList },
     { href: "/sales", label: "Sales", icon: BarChart3 },
+    { href: "/egg-purchases", label: "Compra de Huevos", icon: ShoppingCart },
     { href: "/employees", label: "Employees", icon: UserCheck },
     { href: "/feed-bags", label: "Feed Bags", icon: Package },
     { href: "/cartons", label: "Cartons", icon: Box },
