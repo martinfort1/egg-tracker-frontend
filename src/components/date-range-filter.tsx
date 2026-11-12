@@ -23,7 +23,7 @@ interface DateRangeFilterProps {
     showDebtOnly?: boolean;
     setShowDebtOnly?: (val: boolean | ((p: boolean) => boolean)) => void;
     debtLabel?: string;
-    accentColor?: "emerald" | "orange" | "amber" | "indigo";
+    accentColor?: "emerald" | "orange" | "amber" | "indigo" | "rose";
     totalCount?: number;
 }
 
@@ -105,6 +105,13 @@ export default function DateRangeFilter({
             focus: "focus:border-indigo-500 focus:ring-indigo-500/20",
             badge: "bg-indigo-50 text-indigo-800 border-indigo-200",
             icon: "text-indigo-600",
+        },
+        rose: {
+            activeBtn: "bg-rose-600 text-white border-rose-600 shadow-2xs",
+            border: "border-rose-200/90",
+            focus: "focus:border-rose-500 focus:ring-rose-500/20",
+            badge: "bg-rose-50 text-rose-800 border-rose-200",
+            icon: "text-rose-600",
         },
     }[accentColor];
 

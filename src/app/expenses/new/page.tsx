@@ -1,32 +1,61 @@
-"use client"
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PriceInput } from "@/components/ui/price-input";
 import { api } from "@/lib/api";
+import { formatCurrency } from "@/lib/utils";
+import {
+    ArrowLeft,
+    Calendar,
+    Tag,
+    ShoppingBag,
+    Hash,
+    DollarSign,
+    FileText,
+    Plus,
+    X,
+    Check,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export default function NewExpensePage() {
-    const router = useRouter();    
+    const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [categories, setCategories] = useState<any[]>([]);
     const [showNewCategory, setShowNewCategory] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
+    const [isCreatingCategory, setIsCreatingCategory] = useState(false);
 
-    const { register, handleSubmit, formState: { errors }, control } = useForm({
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        control,
+        watch,
+    } = useForm({
         defaultValues: {
-            date: new Date().toISOString().split('T')[0],
+            date: new Date().toISOString().split("T")[0],
             name: "",
-            quantity: 0,
+            quantity: 1,
             price: 0,
             description: "",
-            categoryId: ""
-        }
+            categoryId: "",
+        },
     });
+
+    const watchedQuantity = watch("quantity");
+    const watchedPrice = watch("price");
+
+    const totalCalculated = useMemo(() => {
+        const q = Number(watchedQuantity) || 0;
+        const p = Number(watchedPrice) || 0;
+        return q * p;
+    }, [watchedQuantity, watchedPrice]);
 
     useEffect(() => {
         fetchCategories();
@@ -35,170 +64,312 @@ export default function NewExpensePage() {
     const fetchCategories = async () => {
         try {
             const response = await api.get("/expenses/categories");
-            setCategories(response.data);
+            setCategories(response.data || []);
+            if (response.data?.length > 0 && !selectedCategory) {
+                setSelectedCategory(response.data[0].id);
+            }
         } catch (error) {
-            toast.error("Failed to fetch categories");
+            toast.error("Error al cargar categorías de gastos");
         }
     };
 
     const handleCreateCategory = async () => {
-        if (!newCategoryName.trim()) {
-            toast.error("Category name cannot be empty");
+        const trimmed = newCategoryName.trim();
+        if (!trimmed) {
+            toast.error("El nombre de la categoría no puede estar vacío");
             return;
         }
 
+        setIsCreatingCategory(true);
         try {
-            const response = await api.post("/expenses/categories", { name: newCategoryName });
+            const response = await api.post("/expenses/categories", { name: trimmed });
             setCategories([response.data, ...categories]);
             setSelectedCategory(response.data.id);
             setNewCategoryName("");
             setShowNewCategory(false);
-            toast.success("Category created successfully");
+            toast.success("Categoría creada exitosamente");
         } catch (error) {
-            toast.error("Failed to create category");
+            toast.error("Error al crear categoría");
+        } finally {
+            setIsCreatingCategory(false);
         }
     };
 
     const onSubmit = async (data: any) => {
         if (!selectedCategory) {
-            toast.error("Please select or create a category");
+            toast.error("Por favor seleccioná o creá una categoría");
             return;
         }
+
+        const qty = parseFloat(data.quantity);
+        if (isNaN(qty) || qty <= 0) {
+            toast.error("La cantidad debe ser mayor a 0");
+            return;
+        }
+
+        const prc = parseFloat(data.price);
+        if (isNaN(prc) || prc < 0) {
+            toast.error("El precio no puede ser negativo");
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             await api.post("/expenses", {
                 ...data,
                 categoryId: selectedCategory,
-                quantity: parseFloat(data.quantity),
-                price: parseFloat(data.price)
+                quantity: qty,
+                price: prc,
             });
-            toast.success("Expense created successfully");
+            toast.success("Gasto registrado exitosamente");
             router.push("/expenses");
         } catch (error) {
-            toast.error("Failed to create expense");
+            toast.error("Error al registrar gasto");
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-slate-900/50 via-slate-900/30 to-slate-900/50 p-4 md:p-6 flex items-center justify-center">
-            <div className="w-full max-w-md space-y-6 bg-linear-to-br from-slate-900/80 via-indigo-900/60 to-slate-900/90 border border-white/20 backdrop-blur-xl p-8 rounded-2xl shadow-2xl">
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Add Expense</h1>
-                    <p className="text-indigo-200">Register a new expense</p>
+        <div className="max-w-2xl mx-auto space-y-6">
+            {/* Header Navigation */}
+            <div className="flex items-center justify-between">
+                <button
+                    type="button"
+                    onClick={() => router.back()}
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Volver
+                </button>
+
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                    <span className="w-2 h-2 rounded-full bg-rose-500" />
+                    Egresos Operativos
+                </span>
+            </div>
+
+            {/* Main Card Form */}
+            <div className="relative bg-white rounded-2xl border border-rose-100/90 shadow-sm overflow-hidden p-6 sm:p-8 space-y-6">
+                {/* Top Section Accent Line (Rose / Red) */}
+                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-rose-500 via-red-500 to-rose-600" />
+
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-semibold text-slate-900">
+                        Registrar Gasto Operativo
+                    </h1>
+                    <p className="text-sm text-slate-500 mt-1">
+                        Registrá insumos, mantenimiento, servicios y compras operativas de la granja
+                    </p>
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Date</label>
-                        <Input
-                            type="date"
-                            {...register("date", { required: "Date is required" })}
-                            className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
-                        />
-                        {errors.date && <p className="text-red-300 text-xs">{String(errors.date?.message)}</p>}
-                    </div>
+                    {/* Date and Category Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Date */}
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                                <Calendar className="w-3.5 h-3.5 text-rose-600" />
+                                Fecha del Gasto
+                            </label>
+                            <Input
+                                type="date"
+                                {...register("date", { required: "La fecha es obligatoria" })}
+                                className="h-11 bg-slate-50/60 border border-slate-200 text-slate-900 rounded-xl px-3 text-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
+                            />
+                            {errors.date && (
+                                <p className="text-rose-600 text-xs font-medium">
+                                    {String(errors.date?.message)}
+                                </p>
+                            )}
+                        </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Category</label>
-                        <div className="space-y-2">
-                            <div className="flex gap-2">
-                                {!showNewCategory ? (
-                                    <>
-                                        <select
-                                            value={selectedCategory}
-                                            onChange={(e) => setSelectedCategory(e.target.value)}
-                                            className="flex-1 px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-slate-900 focus:border-indigo-400"
-                                        >
-                                            <option value="">Select a category...</option>
-                                            {categories.map((cat: any) => (
-                                                <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                            ))}
-                                        </select>
-                                        <Button
-                                            type="button"
-                                            onClick={() => setShowNewCategory(true)}
-                                            className="bg-indigo-600 hover:bg-indigo-700"
-                                        >
-                                            +
-                                        </Button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Input
-                                            placeholder="Category name"
-                                            value={newCategoryName}
-                                            onChange={(e) => setNewCategoryName(e.target.value)}
-                                            className="bg-white/20 border-white/30 text-white placeholder:text-gray-300"
-                                        />
-                                        <Button
-                                            type="button"
-                                            onClick={handleCreateCategory}
-                                            className="bg-green-600 hover:bg-green-700"
-                                        >
-                                            Create
-                                        </Button>
-                                    </>
+                        {/* Category */}
+                        <div className="space-y-1.5">
+                            <div className="flex items-center justify-between">
+                                <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                                    <Tag className="w-3.5 h-3.5 text-rose-600" />
+                                    Categoría
+                                </label>
+                                {!showNewCategory && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowNewCategory(true)}
+                                        className="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline inline-flex items-center gap-0.5 cursor-pointer"
+                                    >
+                                        <Plus className="w-3 h-3" />
+                                        Nueva Categoría
+                                    </button>
                                 )}
                             </div>
+
+                            {!showNewCategory ? (
+                                <select
+                                    value={selectedCategory}
+                                    onChange={(e) => setSelectedCategory(e.target.value)}
+                                    className="w-full h-11 px-3 bg-slate-50/60 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 cursor-pointer"
+                                >
+                                    <option value="">Seleccionar categoría...</option>
+                                    {categories.map((cat: any) => (
+                                        <option key={cat.id} value={cat.id}>
+                                            {cat.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            ) : (
+                                <div className="flex gap-1.5">
+                                    <Input
+                                        placeholder="Nombre de la categoría..."
+                                        value={newCategoryName}
+                                        onChange={(e) => setNewCategoryName(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter") {
+                                                e.preventDefault();
+                                                handleCreateCategory();
+                                            }
+                                        }}
+                                        className="h-11 bg-slate-50/60 border border-slate-200 text-slate-900 rounded-xl px-3 text-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 flex-1"
+                                        autoFocus
+                                    />
+                                    <Button
+                                        type="button"
+                                        onClick={handleCreateCategory}
+                                        disabled={isCreatingCategory}
+                                        className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl px-3 h-11 font-semibold text-xs transition active:scale-95 cursor-pointer"
+                                    >
+                                        <Check className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => {
+                                            setShowNewCategory(false);
+                                            setNewCategoryName("");
+                                        }}
+                                        className="border-slate-200 text-slate-600 hover:bg-slate-100 rounded-xl px-3 h-11 cursor-pointer"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Expense Name</label>
+                    {/* Expense Concept / Name */}
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                            <ShoppingBag className="w-3.5 h-3.5 text-rose-600" />
+                            Concepto / Nombre del Gasto
+                        </label>
                         <Input
-                            placeholder="e.g., Poison for rats"
-                            {...register("name", { required: "Expense name is required" })}
-                            className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
+                            placeholder="Ej: Veneno para roedores, Flete de maples, Reparación de jaulas..."
+                            {...register("name", { required: "El concepto del gasto es obligatorio" })}
+                            className="h-11 bg-slate-50/60 border border-slate-200 text-slate-900 rounded-xl px-3 text-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
                         />
-                        {errors.name && <p className="text-red-300 text-xs">{String(errors.name?.message)}</p>}
+                        {errors.name && (
+                            <p className="text-rose-600 text-xs font-medium">
+                                {String(errors.name?.message)}
+                            </p>
+                        )}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-2">
-                            <label className="text-sm font-semibold text-white">Quantity</label>
+                    {/* Quantity & Unit Price Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                                <Hash className="w-3.5 h-3.5 text-rose-600" />
+                                Cantidad
+                            </label>
                             <Input
                                 type="number"
-                                step="0.01"
-                                placeholder="0"
-                                {...register("quantity", { valueAsNumber: true, required: "Quantity is required" })}
-                                className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
+                                step="any"
+                                min="0"
+                                placeholder="1"
+                                {...register("quantity", {
+                                    valueAsNumber: true,
+                                    required: "La cantidad es obligatoria",
+                                })}
+                                className="h-11 bg-slate-50/60 border border-slate-200 text-slate-900 rounded-xl px-3 text-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
                             />
-                            {errors.quantity && <p className="text-red-300 text-xs">{String(errors.quantity?.message)}</p>}
+                            {errors.quantity && (
+                                <p className="text-rose-600 text-xs font-medium">
+                                    {String(errors.quantity?.message)}
+                                </p>
+                            )}
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-semibold text-white">Price per Unit</label>
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                                <DollarSign className="w-3.5 h-3.5 text-rose-600" />
+                                Precio Unitario
+                            </label>
                             <PriceInput
                                 placeholder="0.00"
                                 control={control}
                                 name="price"
-                                className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-indigo-400 focus:ring-indigo-400/20"
+                                className="h-11 bg-slate-50/60 border border-slate-200 text-slate-900 rounded-xl px-3 text-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
                             />
-                            {errors.price && <p className="text-red-300 text-xs">{String(errors.price?.message)}</p>}
+                            {errors.price && (
+                                <p className="text-rose-600 text-xs font-medium">
+                                    {String(errors.price?.message)}
+                                </p>
+                            )}
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-white">Description</label>
+                    {/* Live Calculation Preview Banner */}
+                    <div className="bg-rose-50/40 rounded-xl p-4 border border-rose-100/80 space-y-2">
+                        <div className="flex justify-between items-center text-xs text-slate-600">
+                            <span>Cálculo Total:</span>
+                            <span className="font-medium text-slate-700">
+                                {Number(watchedQuantity) || 0} u. × {formatCurrency(Number(watchedPrice) || 0)}
+                            </span>
+                        </div>
+                        <div className="pt-2 border-t border-rose-200/60 flex justify-between items-center">
+                            <span className="text-xs font-bold text-slate-800">
+                                Total a Registrar:
+                            </span>
+                            <span className="text-lg font-extrabold text-rose-600">
+                                -{formatCurrency(totalCalculated)}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Description */}
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                            <FileText className="w-3.5 h-3.5 text-rose-600" />
+                            Nota o Detalle Adicional (opcional)
+                        </label>
                         <textarea
-                            placeholder="Brief description (optional)"
+                            placeholder="Comentarios adicionales, proveedor o número de factura/recibo..."
                             {...register("description")}
-                            className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white placeholder:text-gray-300 focus:outline-none focus:border-indigo-400 resize-none"
+                            className="w-full p-3 bg-slate-50/60 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 resize-none"
                             rows={3}
                         />
                     </div>
 
-                    <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold hover:from-indigo-700 hover:to-purple-700 transition active:scale-95 rounded-xl cursor-pointer"
-                    >
-                        {isSubmitting ? 'Creating...' : 'Create Expense'}
-                    </Button>
+                    {/* Action Buttons */}
+                    <div className="flex gap-3 pt-3">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => router.back()}
+                            disabled={isSubmitting}
+                            className="flex-1 border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl h-12 font-semibold cursor-pointer"
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl h-12 shadow-sm transition active:scale-95 cursor-pointer disabled:opacity-50"
+                        >
+                            {isSubmitting ? "Registrando..." : "Registrar Gasto"}
+                        </Button>
+                    </div>
                 </form>
             </div>
         </div>
-    )
+    );
 }
