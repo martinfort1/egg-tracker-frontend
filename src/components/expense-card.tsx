@@ -3,9 +3,10 @@
 import { Button } from "./ui/button";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { formatCurrency, formatUtcDate } from "@/lib/utils";
-import { Calendar, Trash2, Tag, ShoppingBag } from "lucide-react";
+import { Calendar, Trash2, Tag, ShoppingBag, Edit } from "lucide-react";
 
 export default function ExpenseCard({ expense, refresh }: { expense: any; refresh?: () => void }) {
     const handleDelete = async () => {
@@ -84,6 +85,15 @@ export default function ExpenseCard({ expense, refresh }: { expense: any; refres
             </div>
 
             <div className="grid grid-cols-1 gap-2 pt-1">
+                <Link href={`/expenses/${expense.id}/edit`} className="w-full">
+                    <Button
+                        className="w-full bg-rose-600 hover:bg-rose-700 text-white shadow-sm transition active:scale-95 cursor-pointer rounded-lg font-medium text-xs h-9 flex items-center justify-center gap-1.5"
+                    >
+                        <Edit className="w-3.5 h-3.5" />
+                        Modificar Gasto
+                    </Button>
+                </Link>
+
                 <Button
                     onClick={handleDelete}
                     variant="outline"

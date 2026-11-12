@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
@@ -8,6 +8,18 @@ import { toast } from "sonner";
 import LoadSpin from "@/components/load-spin";
 import PaymentModal from "@/components/payment-modal";
 import { formatCurrency, formatUtcDate } from "@/lib/utils";
+import Link from "next/link";
+import {
+    ArrowLeft,
+    Calendar,
+    Box,
+    DollarSign,
+    CheckCircle2,
+    Clock,
+    AlertCircle,
+    Edit,
+    Trash2,
+} from "lucide-react";
 
 interface Carton {
     id: string;
@@ -39,7 +51,7 @@ export default function CartonDetailPage() {
             const response = await api.get(`/cartons/${cartonId}`);
             setCarton(response.data);
         } catch (error) {
-            toast.error("Failed to fetch carton");
+            toast.error("Error al cargar datos del cartón");
         } finally {
             setLoading(false);
         }
@@ -52,29 +64,38 @@ export default function CartonDetailPage() {
     }, [cartonId]);
 
     const handleDelete = async () => {
-        if (!confirm("Are you sure you want to delete this carton purchase?")) return;
+        if (!confirm("¿Estás seguro de que deseas eliminar esta compra de cartones?")) return;
 
         try {
             await api.delete(`/cartons/${cartonId}`);
-            toast.success("Carton purchase deleted successfully");
+            toast.success("Compra de cartones eliminada exitosamente");
             router.push("/cartons");
         } catch (error) {
-            toast.error("Failed to delete carton purchase");
+            toast.error("Error al eliminar compra de cartones");
         }
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'PAID': return 'bg-green-500/20 text-green-300 border-green-500/30';
-            case 'PARTIAL': return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
-            case 'UNPAID': return 'bg-red-500/20 text-red-300 border-red-500/30';
-            default: return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
-        }
+    const statusBadge: Record<string, { className: string; icon: any; label: string }> = {
+        PAID: {
+            className: "bg-emerald-50 text-emerald-700 border-emerald-200",
+            icon: CheckCircle2,
+            label: "Totalmente Pagado",
+        },
+        PARTIAL: {
+            className: "bg-amber-50 text-amber-700 border-amber-200",
+            icon: Clock,
+            label: "Pago Parcial",
+        },
+        UNPAID: {
+            className: "bg-rose-50 text-rose-700 border-rose-200",
+            icon: AlertCircle,
+            label: "Pendiente de Pago",
+        },
     };
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-linear-to-br from-slate-900/50 via-slate-900/30 to-slate-900/50 p-4 md:p-6 flex items-center justify-center">
+            <div className="py-20 flex justify-center">
                 <LoadSpin />
             </div>
         );
@@ -82,115 +103,199 @@ export default function CartonDetailPage() {
 
     if (!carton) {
         return (
-            <div className="min-h-screen bg-linear-to-br from-slate-900/50 via-slate-900/30 to-slate-900/50 p-4 md:p-6 flex items-center justify-center">
-                <div className="text-white">Carton purchase not found</div>
+            <div className="max-w-xl mx-auto py-20 text-center">
+                <p className="text-slate-500">Compra de cartones no encontrada</p>
+                <Button
+                    onClick={() => router.push("/cartons")}
+                    className="mt-4 bg-amber-600 hover:bg-amber-700 text-white rounded-xl"
+                >
+                    Volver a Cartones
+                </Button>
             </div>
         );
     }
 
-    const totalQuantity = (Number(carton.bigCartonsQuantity ?? 0) + Number(carton.smallCartonsQuantity ?? 0)) || Number(carton.quantity ?? 0);
-    const breakdown = [
-        Number(carton.bigCartonsQuantity ?? 0) > 0 ? `${carton.bigCartonsQuantity} big at ${formatCurrency(carton.bigCartonPrice)} each` : null,
-        Number(carton.smallCartonsQuantity ?? 0) > 0 ? `${carton.smallCartonsQuantity} small at ${formatCurrency(carton.smallCartonPrice)} each` : null,
-        Number(carton.bigCartonsQuantity ?? 0) + Number(carton.smallCartonsQuantity ?? 0) === 0 && Number(carton.quantity ?? 0) > 0 ? `${carton.quantity} cartons at ${formatCurrency(carton.price)} each` : null,
-    ].filter(Boolean).join(" • ");
+    const totalQuantity =
+        (Number(carton.bigCartonsQuantity ?? 0) + Number(carton.smallCartonsQuantity ?? 0)) ||
+        Number(carton.quantity ?? 0);
+
+    const badge = statusBadge[carton.status] || {
+        className: "bg-slate-100 text-slate-700 border-slate-200",
+        icon: Clock,
+        label: carton.status,
+    };
+    const StatusIcon = badge.icon;
+
+    const bigSubtotal = Number(carton.bigCartonsQuantity ?? 0) * Number(carton.bigCartonPrice ?? 0);
+    const smallSubtotal =
+        Number(carton.smallCartonsQuantity ?? 0) * Number(carton.smallCartonPrice ?? 0);
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-slate-900/50 via-slate-900/30 to-slate-900/50 p-4 md:p-6">
-            <div className="max-w-4xl mx-auto">
-                <div className="bg-linear-to-br from-slate-900/80 via-indigo-900/60 to-slate-900/90 border border-white/20 backdrop-blur-xl p-8 rounded-2xl shadow-2xl">
-                    <div className="flex items-center justify-between mb-8">
-                        <div>
-                            <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Carton Purchase Details</h1>
-                            <p className="text-indigo-200">{totalQuantity} cartons • {breakdown || "No carton sizes recorded"} • {formatUtcDate(carton.date)}</p>
+        <div className="max-w-4xl mx-auto space-y-6 pb-12">
+            {/* Header Navigation */}
+            <div className="flex items-center justify-between">
+                <button
+                    type="button"
+                    onClick={() => router.push("/cartons")}
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Volver al Listado
+                </button>
+
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                    <span className="w-2 h-2 rounded-full bg-amber-500" />
+                    Compra de Cartones
+                </span>
+            </div>
+
+            {/* Main Details Card */}
+            <div className="relative bg-white rounded-2xl border border-amber-100/90 shadow-sm overflow-hidden p-6 sm:p-8 space-y-6">
+                {/* Top Section Accent Line (Amber / Orange) */}
+                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500" />
+
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border ${badge.className}`}>
+                                <StatusIcon className="w-3.5 h-3.5" />
+                                {badge.label}
+                            </span>
+                            <span className="text-xs text-slate-400">
+                                {formatUtcDate(carton.date)}
+                            </span>
                         </div>
-                        <div className="flex gap-3">
-                            {carton.status !== 'PAID' && (
-                                <PaymentModal
-                                    sale={carton}
-                                    endpoint="cartons"
-                                    onSuccess={fetchCarton}
-                                >
-                                    Add Payment
-                                </PaymentModal>
-                            )}
-                            <Button
-                                onClick={() => router.push(`/cartons/${carton.id}/edit`)}
-                                className="bg-linear-to-r from-blue-600 to-cyan-600 text-white font-bold hover:from-blue-700 hover:to-cyan-700 transition active:scale-95 rounded-xl cursor-pointer"
+                        <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-semibold text-slate-900">
+                            Detalle de Compra de Cartones
+                        </h1>
+                        <p className="text-sm text-slate-500 mt-1">
+                            Total de {totalQuantity} cartones adquiridos
+                        </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                        {carton.status !== "PAID" && (
+                            <PaymentModal
+                                sale={carton}
+                                endpoint="cartons"
+                                onSuccess={fetchCarton}
                             >
-                                Edit
+                                <Button className="bg-amber-500 hover:bg-amber-600 text-white rounded-xl px-4 py-2 text-xs font-semibold shadow-sm transition active:scale-95 cursor-pointer">
+                                    <DollarSign className="w-3.5 h-3.5 mr-1" />
+                                    Registrar Pago
+                                </Button>
+                            </PaymentModal>
+                        )}
+                        <Link href={`/cartons/${carton.id}/edit`}>
+                            <Button className="bg-amber-600 hover:bg-amber-700 text-white rounded-xl px-4 py-2 text-xs font-semibold shadow-sm transition active:scale-95 cursor-pointer flex items-center gap-1.5">
+                                <Edit className="w-3.5 h-3.5" />
+                                Modificar
                             </Button>
-                            <Button
-                                onClick={handleDelete}
-                                className="bg-linear-to-r from-red-600 to-pink-600 text-white font-bold hover:from-red-700 hover:to-pink-700 transition active:scale-95 rounded-xl cursor-pointer"
-                            >
-                                Delete
-                            </Button>
+                        </Link>
+                        <Button
+                            onClick={handleDelete}
+                            variant="outline"
+                            className="border-slate-200 text-slate-500 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 rounded-xl px-4 py-2 text-xs font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1.5"
+                        >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Eliminar
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Financial Summary 3-Card Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="bg-amber-50/50 rounded-2xl border border-amber-200/60 p-4">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800">
+                            Costo Total
+                        </span>
+                        <p className="text-2xl font-black text-slate-900 mt-1">
+                            {formatCurrency(carton.totalAmount)}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                            {totalQuantity} unidades totales
+                        </p>
+                    </div>
+
+                    <div className="bg-emerald-50/50 rounded-2xl border border-emerald-200/60 p-4">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">
+                            Monto Pagado
+                        </span>
+                        <p className="text-2xl font-black text-emerald-700 mt-1">
+                            {formatCurrency(carton.amountPaid)}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                            Abonado hasta la fecha
+                        </p>
+                    </div>
+
+                    <div className="bg-rose-50/40 rounded-2xl border border-rose-200/60 p-4">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-rose-800">
+                            Saldo Pendiente
+                        </span>
+                        <p className={`text-2xl font-black mt-1 ${carton.remainingAmount === 0 ? "text-emerald-700" : "text-rose-600"}`}>
+                            {carton.remainingAmount === 0 ? "Saldado" : formatCurrency(carton.remainingAmount)}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                            Deuda actual de la compra
+                        </p>
+                    </div>
+                </div>
+
+                {/* Cartons Breakdown Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Grandes */}
+                    <div className="rounded-2xl border border-amber-200/80 bg-white p-5 space-y-3 shadow-2xs">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Box className="w-4 h-4 text-amber-600" />
+                                <h3 className="font-bold text-slate-900 text-sm">
+                                    Cartones Grandes
+                                </h3>
+                            </div>
+                            <span className="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                                {carton.bigCartonsQuantity ?? 0} u.
+                            </span>
+                        </div>
+
+                        <div className="space-y-1.5 text-xs text-slate-600 pt-2 border-t border-slate-100">
+                            <div className="flex justify-between">
+                                <span>Precio Unitario:</span>
+                                <span className="font-semibold text-slate-800">
+                                    {formatCurrency(carton.bigCartonPrice)}
+                                </span>
+                            </div>
+                            <div className="flex justify-between text-sm pt-1 border-t border-slate-100 font-bold text-slate-900">
+                                <span>Subtotal Grandes:</span>
+                                <span>{formatCurrency(bigSubtotal)}</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-6">
-                            <div className="bg-white/10 border border-white/20 p-6 rounded-xl">
-                                <h3 className="text-lg font-bold text-white mb-4">Purchase Information</h3>
-                                <div className="space-y-3">
-                                    <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Purchase Date</label>
-                                        <p className="text-white font-medium">{formatUtcDate(carton.date)}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Total Cartons</label>
-                                        <p className="text-white font-medium">{totalQuantity} cartons</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Carton Breakdown</label>
-                                        <p className="text-white font-medium">{breakdown || "No carton sizes recorded"}</p>
-                                    </div>
-                                </div>
+                    {/* Chicos */}
+                    <div className="rounded-2xl border border-orange-200/80 bg-white p-5 space-y-3 shadow-2xs">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Box className="w-4 h-4 text-orange-600" />
+                                <h3 className="font-bold text-slate-900 text-sm">
+                                    Cartones Chicos
+                                </h3>
                             </div>
-
-                            <div className="bg-white/10 border border-white/20 p-6 rounded-xl">
-                                <h3 className="text-lg font-bold text-white mb-4">Payment Information</h3>
-                                <div className="space-y-3">
-                                    <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Total Amount</label>
-                                        <p className="text-white font-medium">{formatCurrency(carton.totalAmount)}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Amount Paid</label>
-                                        <p className="text-green-300 font-medium">{formatCurrency(carton.amountPaid)}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Remaining Amount</label>
-                                        <p className="text-orange-300 font-medium">{formatCurrency(carton.remainingAmount)}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Payment Status</label>
-                                        <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(carton.status)}`}>
-                                            {carton.status}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+                            <span className="text-xs font-bold text-orange-800 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">
+                                {carton.smallCartonsQuantity ?? 0} u.
+                            </span>
                         </div>
 
-                        <div className="space-y-6">
-                            <div className="bg-white/10 border border-white/20 p-6 rounded-xl">
-                                <h3 className="text-lg font-bold text-white mb-4">Timestamps</h3>
-                                <div className="space-y-3">
-                                    <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Created</label>
-                                        <p className="text-white font-medium">
-                                            {new Date(carton.createdAt).toLocaleDateString()}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-semibold text-indigo-200">Last Updated</label>
-                                        <p className="text-white font-medium">
-                                            {new Date(carton.updatedAt).toLocaleDateString()}
-                                        </p>
-                                    </div>
-                                </div>
+                        <div className="space-y-1.5 text-xs text-slate-600 pt-2 border-t border-slate-100">
+                            <div className="flex justify-between">
+                                <span>Precio Unitario:</span>
+                                <span className="font-semibold text-slate-800">
+                                    {formatCurrency(carton.smallCartonPrice)}
+                                </span>
+                            </div>
+                            <div className="flex justify-between text-sm pt-1 border-t border-slate-100 font-bold text-slate-900">
+                                <span>Subtotal Chicos:</span>
+                                <span>{formatCurrency(smallSubtotal)}</span>
                             </div>
                         </div>
                     </div>

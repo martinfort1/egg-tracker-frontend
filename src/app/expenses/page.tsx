@@ -16,6 +16,7 @@ import {
     LayoutGrid,
     Search,
     DollarSign,
+    Edit,
 } from "lucide-react";
 import { formatCurrency, formatUtcDate } from "@/lib/utils";
 import LoadSpin from "@/components/load-spin";
@@ -361,14 +362,23 @@ export default function ExpensesPage() {
                                             {expense.description || "—"}
                                         </td>
                                         <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                                            <button
-                                                type="button"
-                                                title="Eliminar Gasto"
-                                                onClick={() => handleDelete(expense.id)}
-                                                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition cursor-pointer"
-                                            >
-                                                <Trash2 className="w-3.5 h-3.5" />
-                                            </button>
+                                            <div className="flex items-center justify-end gap-1">
+                                                <Link
+                                                    href={`/expenses/${expense.id}/edit`}
+                                                    title="Modificar Gasto"
+                                                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition cursor-pointer"
+                                                >
+                                                    <Edit className="w-3.5 h-3.5" />
+                                                </Link>
+                                                <button
+                                                    type="button"
+                                                    title="Eliminar Gasto"
+                                                    onClick={() => handleDelete(expense.id)}
+                                                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition cursor-pointer"
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
