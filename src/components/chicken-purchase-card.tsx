@@ -11,9 +11,13 @@ import {
     Clock,
     AlertCircle,
     Truck,
+    Receipt,
+    History,
+    MessageSquare,
 } from "lucide-react";
 import { AddChickenDeathForm } from "@/components/add-chicken-death-form";
 import PaymentModal from "@/components/payment-modal";
+import PaymentHistoryModal from "@/components/payment-history-modal";
 import { formatCurrency, formatNumber, formatUtcDate } from "@/lib/utils";
 import { motion } from "framer-motion";
 
@@ -215,6 +219,87 @@ export function ChickenPurchaseCard({ chicken, onDelete, onRefresh }: ChickenCar
                         </span>
                     </div>
                 </div>
+
+                {/* Payments Breakdown / Information of Each Payment */}
+                <div className="space-y-2 pt-2 border-t border-slate-100">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700">
+                            <Receipt className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>
+                                Información de Pagos ({(chicken.payments?.length || (chicken.amountPaid > 0 ? 1 : 0))})
+                            </span>
+                        </div>
+                        <PaymentHistoryModal item={chicken} endpoint="chickens">
+                            <span className="text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer flex items-center gap-0.5">
+                                <History className="w-3 h-3" />
+                                Ver detalle
+                            </span>
+                        </PaymentHistoryModal>
+                    </div>
+
+                    <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                        {chicken.payments && chicken.payments.length > 0 ? (
+                            chicken.payments.map((p: any, idx: number) => {
+                                const chickensCovered =
+                                    price > 0 ? Math.round(Number(p.amount) / price) : 0;
+                                return (
+                                    <div
+                                        key={p.id || idx}
+                                        className="bg-emerald-50/40 border border-emerald-100 rounded-xl p-2.5 text-xs space-y-1"
+                                    >
+                                        <div className="flex justify-between items-center">
+                                            <div className="flex items-center gap-1.5 text-slate-600">
+                                                <span className="font-bold text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded text-[10px]">
+                                                    Pago #{chicken.payments.length - idx}
+                                                </span>
+                                                <span className="text-[11px] text-slate-400">
+                                                    {formatUtcDate(p.date)}
+                                                </span>
+                                            </div>
+                                            <span className="font-extrabold text-emerald-700">
+                                                +{formatCurrency(p.amount)}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex justify-between items-center text-[11px] text-slate-500">
+                                            {chickensCovered > 0 && (
+                                                <span className="text-emerald-800 font-medium">
+                                                    Equivale a ~{formatNumber(chickensCovered)} gallinas
+                                                </span>
+                                            )}
+                                            {p.note && (
+                                                <span
+                                                    className="italic text-slate-600 truncate max-w-[180px]"
+                                                    title={p.note}
+                                                >
+                                                    &ldquo;{p.note}&rdquo;
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        ) : chicken.amountPaid > 0 ? (
+                            <div className="bg-emerald-50/40 border border-emerald-100 rounded-xl p-2.5 text-xs flex justify-between items-center">
+                                <div className="flex items-center gap-1.5">
+                                    <span className="font-bold text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded text-[10px]">
+                                        Pago Inicial
+                                    </span>
+                                    <span className="text-[11px] text-slate-400">
+                                        {formatUtcDate(chicken.date)}
+                                    </span>
+                                </div>
+                                <span className="font-extrabold text-emerald-700">
+                                    +{formatCurrency(chicken.amountPaid)}
+                                </span>
+                            </div>
+                        ) : (
+                            <p className="text-xs text-slate-400 italic py-1">
+                                No se registran pagos para este lote aún.
+                            </p>
+                        )}
+                    </div>
+                </div>
             </div>
 
             {/* Action Buttons */}
@@ -231,6 +316,16 @@ export function ChickenPurchaseCard({ chicken, onDelete, onRefresh }: ChickenCar
                         </Button>
                     </PaymentModal>
                 )}
+
+                <PaymentHistoryModal item={chicken} endpoint="chickens">
+                    <Button
+                        variant="outline"
+                        className="w-full bg-emerald-50/60 hover:bg-emerald-100/70 text-emerald-800 border-emerald-200 transition active:scale-95 cursor-pointer rounded-xl font-bold text-xs h-9 flex items-center justify-center gap-1.5 shadow-2xs"
+                    >
+                        <History className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Ver Historial de Pagos ({chicken.payments?.length || (chicken.amountPaid > 0 ? 1 : 0)})</span>
+                    </Button>
+                </PaymentHistoryModal>
 
                 <div className="flex gap-2">
                     <div className="flex-1">

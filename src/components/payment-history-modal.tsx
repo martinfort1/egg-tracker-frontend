@@ -71,7 +71,7 @@ export default function PaymentHistoryModal({
     }, [open, item?.id]);
 
     const purchaseTitle = item?.purchaseNumber
-        ? `Compra N° ${item.purchaseNumber}`
+        ? (item?.pricePerChicken !== undefined ? `Lote N° ${item.purchaseNumber}` : `Compra N° ${item.purchaseNumber}`)
         : item?.saleNumber
         ? `Venta N° ${item.saleNumber}`
         : `Operación #${item?.id?.slice(0, 8)}`;
@@ -122,9 +122,11 @@ export default function PaymentHistoryModal({
                 {/* Operation Financial Summary */}
                 <div className="bg-slate-50/90 rounded-xl p-3.5 border border-slate-200/80 grid grid-cols-3 gap-2 text-xs">
                     <div>
-                        <span className="text-slate-400 font-medium block text-[10px] uppercase">Facturado</span>
+                        <span className="text-slate-400 font-medium block text-[10px] uppercase">
+                            {item?.pricePerChicken !== undefined ? "Costo del Lote" : "Facturado"}
+                        </span>
                         <span className="font-bold text-slate-900 text-sm">
-                            {formatCurrency(item?.totalAmount ?? 0)}
+                            {formatCurrency(item?.totalAmount ?? item?.totalCost ?? 0)}
                         </span>
                     </div>
                     <div>
