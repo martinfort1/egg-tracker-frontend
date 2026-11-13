@@ -49,19 +49,22 @@ export default function PaymentModal({
     );
 
     // Identify transaction type
+    const isChicken =
+        endpoint.includes("chickens") ||
+        sale?.pricePerChicken !== undefined;
+
     const isEggPurchase =
         endpoint.includes("egg-purchases") ||
         sale?.ExtraBuyPrice !== undefined;
 
     const isFeedBag =
         endpoint.includes("feed-bags") ||
-        sale?.phase !== undefined ||
-        sale?.price !== undefined;
+        sale?.phase !== undefined;
 
-    const isEggSale = !isFeedBag && !isEggPurchase && !isBulkPayment;
+    const isEggSale = !isFeedBag && !isEggPurchase && !isChicken && !isBulkPayment;
 
-    const orderNumberText = (isFeedBag || isEggPurchase)
-        ? (sale?.purchaseNumber ? `Compra N° ${sale.purchaseNumber}` : `Compra #${sale?.id?.slice(0, 8)}`)
+    const orderNumberText = (isFeedBag || isEggPurchase || isChicken)
+        ? (sale?.purchaseNumber ? `Lote / Compra N° ${sale.purchaseNumber}` : `Compra #${sale?.id?.slice(0, 8)}`)
         : isEggSale
         ? (sale?.saleNumber ? `Venta N° ${sale.saleNumber}` : `Venta #${sale?.id?.slice(0, 8)}`)
         : "Liquidación General";
@@ -171,7 +174,24 @@ export default function PaymentModal({
                         </div>
 
                         {/* Order specifics */}
-                        {isFeedBag ? (
+                        {isChicken ? (
+                            <div className="space-y-2">
+                                <div className="bg-white p-2.5 rounded-lg border border-slate-200/70 text-xs flex justify-between items-center">
+                                    <span className="text-slate-500 font-medium">Proveedor de Gallinas:</span>
+                                    <span className="font-bold text-slate-900">{sale.supplier || "No especificado"}</span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                    <div className="bg-white p-2 rounded-lg border border-slate-200/70">
+                                        <span className="text-slate-400 text-[10px] uppercase font-bold block">Gallinas del Lote</span>
+                                        <span className="font-bold text-slate-800">{sale.amount} gallinas</span>
+                                    </div>
+                                    <div className="bg-white p-2 rounded-lg border border-slate-200/70">
+                                        <span className="text-slate-400 text-[10px] uppercase font-bold block">Precio Unitario</span>
+                                        <span className="font-bold text-slate-800">{formatCurrency(sale.pricePerChicken)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : isFeedBag ? (
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
                                 <div className="bg-white p-2 rounded-lg border border-slate-200/70">
                                     <span className="text-slate-400 block text-[10px] uppercase font-bold">Concepto</span>

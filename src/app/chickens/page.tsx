@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { MetricCard } from "@/components/metric-card";
 import { MetricCardValue } from "@/components/metric-card-value";
@@ -9,13 +9,12 @@ import { LayingPercentageChart } from "@/components/laying-percentage-chart";
 import { LayingPercentageHistoryChart } from "@/components/laying-percentage-history-chart";
 import { ChickenPurchaseCard } from "@/components/chicken-purchase-card";
 import { api } from "@/lib/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { toast } from "sonner";
 import LoadSpin from "@/components/load-spin";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { formatUtcDate } from "@/lib/utils";
-import { Bird, Diff } from "lucide-react";
+import { formatCurrency, formatUtcDate } from "@/lib/utils";
+import { Bird, Plus, AlertTriangle, Layers, DollarSign } from "lucide-react";
 
 export default function ChickensPage() {
     const [chickens, setChickens] = useState<any[]>([]);
@@ -35,13 +34,17 @@ export default function ChickensPage() {
                 api.get("/chickens/laying-percentage-history"),
             ]);
 
-            setChickens(chickensRes.data);
-            setHistory(historyRes.data);
-            setLayingHistory(layingHistoryRes.data);
-            setLaying(layingHistoryRes.data.length ? layingHistoryRes.data[layingHistoryRes.data.length - 1].percentage : 0);
+            setChickens(chickensRes.data || []);
+            setHistory(historyRes.data || []);
+            setLayingHistory(layingHistoryRes.data || []);
+            setLaying(
+                layingHistoryRes.data?.length
+                    ? layingHistoryRes.data[layingHistoryRes.data.length - 1].percentage
+                    : 0
+            );
         } catch (err) {
             console.error("Failed to fetch data:", err);
-            toast.error("Failed to load data");
+            toast.error("Error al cargar datos de gallinas");
         } finally {
             setIsLoading(false);
         }
@@ -67,30 +70,32 @@ export default function ChickensPage() {
     };
 
     const handleDeleteChicken = async (id: string) => {
-        if (confirm("Are you sure you want to delete this chicken record?")) {
-            try {
-                await api.delete(`/chickens/${id}`);
-                toast.success("Chicken record deleted successfully!");
-                fetchData();
-            } catch (err) {
-                toast.error("Failed to delete chicken record");
-                console.error(err);
-            }
+        if (!confirm("¿Estás seguro de que deseas eliminar este lote de gallinas?")) return;
+
+        try {
+            await api.delete(`/chickens/${id}`);
+            toast.success("Lote de gallinas eliminado exitosamente");
+            fetchData();
+        } catch (err) {
+            toast.error("Error al eliminar lote de gallinas");
         }
     };
 
-    const handleDeleteDeath = async (deathId: string) => {
-        if (confirm("Are you sure you want to delete this death record?")) {
-            try {
-                // Assuming there's a delete endpoint for deaths
-                // For now, we'll just show a message
-                toast.info("Death record deletion not yet implemented");
-            } catch (err) {
-                toast.error("Failed to delete death record");
-                console.error(err);
-            }
-        }
-    };
+    const totalInvested = useMemo(() => {
+        return chickens.reduce((sum, c) => sum + (Number(c.totalCost) || 0), 0);
+    }, [chickens]);
+
+    const totalDebt = useMemo(() => {
+        return chickens.reduce(
+            (sum, c) =>
+                sum +
+                Number(
+                    c.remainingAmount ??
+                        Math.max(0, (c.totalCost || 0) - (c.amountPaid || 0))
+                ),
+            0
+        );
+    }, [chickens]);
 
     if (isLoading) {
         return <LoadSpin />;
@@ -103,37 +108,79 @@ export default function ChickensPage() {
     }));
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 max-w-6xl mx-auto pb-12">
+            {/* Header */}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-black text-center sm:text-left text-shadow-lg">
-                    Chickens Management
-                </h1>
-                <Link href="#" className="hidden">
-                    {/* Placeholder for consistency */}
-                </Link>
-            </div>
-
-            {/* Metric Cards Row 1 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <MetricCardValue title="Current Chickens" value={currentCount} isCurrency={false} unit=" birds" />
-                <div className="group relative bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 overflow-hidden flex flex-col justify-between">
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-yellow-500 to-emerald-500 opacity-90" />
-                    <div>
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Laying Percentage</p>
-                        <p className="text-2xl sm:text-3xl font-black text-slate-900 mt-2 tracking-tight group-hover:text-amber-600 transition-colors">
-                            {laying.toFixed(2)}%
-                        </p>
-                        {layingHistory.length > 0 && (
-                            <p className="text-xs text-slate-400 mt-2">
-                                As of {formatUtcDate(layingHistory[layingHistory.length - 1].date)}
-                            </p>
-                        )}
+                <div>
+                    <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
+                            Plantel de Gallinas
+                        </span>
+                        <span className="text-xs text-slate-400">Control de Lotes & Producción</span>
                     </div>
+                    <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-semibold text-slate-900">
+                        Control y Compra de Gallinas
+                    </h1>
+                    <p className="text-sm text-slate-500 mt-0.5">
+                        Registro de lotes de aves, proveedores, precios, estado de pagos y mortandad
+                    </p>
                 </div>
-                <MetricCard title="Total Flock Invested" value={chickens.reduce((sum, c) => sum + c.totalCost, 0)} />
+
+                <div className="flex items-center gap-2">
+                    <AddChickenForm onSuccess={fetchData} />
+                </div>
             </div>
 
-        
+            {/* Financial & Population Metric Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-sm">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                        Gallinas Vivas
+                    </p>
+                    <p className="text-xl sm:text-2xl font-bold text-slate-900">
+                        {currentCount} <span className="text-sm font-medium text-slate-400">aves</span>
+                    </p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                        Plantel actual en granja
+                    </p>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-sm">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                        % de Postura
+                    </p>
+                    <p className="text-xl sm:text-2xl font-bold text-amber-600">
+                        {laying.toFixed(2)}%
+                    </p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                        Eficiencia de producción
+                    </p>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-sm">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                        Inversión Total Lotes
+                    </p>
+                    <p className="text-xl sm:text-2xl font-bold text-slate-900">
+                        {formatCurrency(totalInvested)}
+                    </p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                        {chickens.length} {chickens.length === 1 ? "lote adquirido" : "lotes adquiridos"}
+                    </p>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-sm">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                        Saldo Adeudado
+                    </p>
+                    <p className={`text-xl sm:text-2xl font-bold ${totalDebt === 0 ? "text-emerald-700" : "text-rose-600"}`}>
+                        {totalDebt === 0 ? "Saldado" : formatCurrency(totalDebt)}
+                    </p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                        Pendiente en lotes
+                    </p>
+                </div>
+            </div>
 
             {/* Charts Row - Quantity and Laying Percentage Over Time */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -141,83 +188,104 @@ export default function ChickensPage() {
                 <LayingPercentageHistoryChart data={layingHistory} />
             </div>
 
-            {/* Current Laying Percentage Pie Chart */}
+            {/* Current Laying Percentage & Quick Actions */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="h-full">
                     <LayingPercentageChart percentage={laying} />
                 </div>
-                
-                <div className="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200/90 hover:shadow-md transition-shadow flex flex-col h-full">
-                    <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+
+                <div className="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200/90 flex flex-col justify-between h-full space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-amber-400 to-yellow-500 flex items-center justify-center text-white shadow-sm shadow-amber-500/20 shrink-0">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white shadow-sm shadow-amber-500/20 shrink-0">
                                 <Bird className="w-5 h-5" />
                             </div>
                             <div>
                                 <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-                                    Quick Actions
+                                    Acciones Rápidas
                                 </h2>
                                 <p className="text-xs text-slate-500">
-                                    Register flock events and purchases
+                                    Registrar compras de lotes y bajas del plantel
                                 </p>
                             </div>
                         </div>
-                        <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-50 text-amber-700 border border-amber-100">
-                            Actions
+                        <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                            Operaciones
                         </span>
                     </div>
-                    <div className="space-y-3 flex-1 flex flex-col justify-center gap-y-5">
+
+                    <div className="space-y-3 flex-1 flex flex-col justify-center">
+                        <div className="bg-amber-50/50 p-4 rounded-xl border border-amber-200/70 space-y-2">
+                            <p className="text-xs font-bold text-amber-900 uppercase tracking-wider">
+                                Comprar Aves
+                            </p>
+                            <p className="text-xs text-slate-600">
+                                Registrá un nuevo lote ingresando proveedor, cantidad, precio y condición de pago.
+                            </p>
+                            <AddChickenForm onSuccess={fetchData} />
+                        </div>
+
                         {chickens.length > 0 && (
-                            <div className="bg-red-50 p-4 rounded-xl border border-red-200">
-                                <p className="text-sm font-semibold text-red-800 mb-2">Register death event</p>
+                            <div className="bg-rose-50/50 p-4 rounded-xl border border-rose-200/70 space-y-2">
+                                <p className="text-xs font-bold text-rose-800 uppercase tracking-wider">
+                                    Registrar Bajas en un Lote
+                                </p>
                                 <select
                                     value={selectedChickenId || ""}
                                     onChange={(e) => setSelectedChickenId(e.target.value || null)}
-                                    className="w-full p-3 border border-red-300 rounded-lg bg-white"
+                                    className="w-full h-10 px-3 border border-rose-200 rounded-xl bg-white text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
                                 >
-                                    <option value="">Select a purchase</option>
+                                    <option value="">Seleccionar lote correspondiente...</option>
                                     {chickens.map((chicken) => (
                                         <option key={chicken.id} value={chicken.id}>
-                                            {formatUtcDate(chicken.date)} - {chicken.amount} chickens
+                                            {chicken.purchaseNumber ? `Lote #${chicken.purchaseNumber} - ` : ""}
+                                            {chicken.supplier ? `${chicken.supplier} - ` : ""}
+                                            {formatUtcDate(chicken.date)} ({chicken.amount} gallinas)
                                         </option>
                                     ))}
                                 </select>
                                 {selectedChickenId && (
-                                    <div className="mt-3">
-                                        <AddChickenDeathForm 
-                                            chickenId={selectedChickenId} 
-                                            onSuccess={fetchData} 
+                                    <div className="pt-1">
+                                        <AddChickenDeathForm
+                                            chickenId={selectedChickenId}
+                                            onSuccess={fetchData}
                                         />
                                     </div>
                                 )}
                             </div>
                         )}
-                        <div className="bg-slate-50 p-4 rounded-xl border border-blue-400">
-                            <p className="text-sm font-semibold text-gray-700 mb-2">Add new chickens</p>
-                            <AddChickenForm onSuccess={fetchData} />
-                        </div>
                     </div>
                 </div>
             </div>
 
             {/* Purchase History Cards */}
-            <div className="space-y-4">
+            <div className="space-y-4 pt-2">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-['Playfair_Display'] font-bold text-shadow-lg">Purchase History</h2>
+                    <div>
+                        <h2 className="text-xl sm:text-2xl font-['Playfair_Display'] font-semibold text-slate-900">
+                            Historial de Compras de Lotes
+                        </h2>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                            Control detallado de compras, saldo adeudado y gallinas restantes por pagar
+                        </p>
+                    </div>
                     {chickens.length > 0 && (
-                        <span className="text-sm text-gray-500">
-                            {chickens.length} purchase{chickens.length !== 1 ? 's' : ''}
+                        <span className="text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1 rounded-full">
+                            {chickens.length} {chickens.length === 1 ? "lote registrado" : "lotes registrados"}
                         </span>
                     )}
                 </div>
 
                 {chickens.length === 0 ? (
-                    <div className="bg-white p-12 rounded-xl shadow text-center">
-                        <p className="text-gray-500 text-lg">No chicken purchases yet.</p>
-                        <p className="text-gray-400">Add your first purchase to get started.</p>
+                    <div className="bg-white p-12 rounded-2xl border border-amber-100 shadow-sm text-center">
+                        <Bird className="w-14 h-14 text-amber-300 mx-auto mb-3" />
+                        <p className="text-slate-700 text-lg font-medium">No hay compras de gallinas registradas</p>
+                        <p className="text-slate-400 text-sm mt-1">
+                            Hacé clic en "Nueva Compra de Gallinas" para registrar tu primer lote.
+                        </p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {chickens.map((chicken) => (
                             <ChickenPurchaseCard
                                 key={chicken.id}
