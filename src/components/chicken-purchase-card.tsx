@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Trash2,
@@ -15,6 +16,7 @@ import {
     History,
     MessageSquare,
     Pencil,
+    RotateCcw,
 } from "lucide-react";
 import { AddChickenDeathForm } from "@/components/add-chicken-death-form";
 import { ModifyChickensAliveModal } from "@/components/modify-chickens-alive-modal";
@@ -22,6 +24,8 @@ import PaymentModal from "@/components/payment-modal";
 import PaymentHistoryModal from "@/components/payment-history-modal";
 import { formatCurrency, formatNumber, formatUtcDate } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 interface ChickenCardProps {
     chicken: any;
@@ -30,6 +34,30 @@ interface ChickenCardProps {
 }
 
 export function ChickenPurchaseCard({ chicken, onDelete, onRefresh }: ChickenCardProps) {
+    const [isUpdatingArrival, setIsUpdatingArrival] = useState(false);
+
+    const handleToggleArrival = async (targetStatus: boolean) => {
+        setIsUpdatingArrival(true);
+        try {
+            await api.patch(`/chickens/${chicken.id}/arrival`, {
+                hasArrived: targetStatus,
+            });
+            toast.success(
+                targetStatus
+                    ? "¡Lote recibido en granja! Las aves ya forman parte del plantel vivo y están disponibles para postura."
+                    : "Lote marcado como 'Por llegar'. Las aves no se computarán en granja."
+            );
+            onRefresh();
+        } catch (err) {
+            console.error("Error updating arrival status:", err);
+            toast.error("Error al actualizar estado de llegada del lote");
+        } finally {
+            setIsUpdatingArrival(false);
+        }
+    };
+
+    const hasArrived = chicken.hasArrived !== false;
+
     const totalDeaths = (chicken.deaths || []).reduce(
         (sum: number, d: any) => sum + (Number(d.amount) || 0),
         0
@@ -90,7 +118,7 @@ export function ChickenPurchaseCard({ chicken, onDelete, onRefresh }: ChickenCar
                 {/* Header: Lot Number & Supplier & Status Badge */}
                 <div className="flex justify-between items-start gap-2">
                     <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 mb-1">
+                        <div className="flex items-center gap-1.5 mb-1 flex-wrap">
                             <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
                             <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800">
                                 {chicken.purchaseNumber
@@ -101,6 +129,13 @@ export function ChickenPurchaseCard({ chicken, onDelete, onRefresh }: ChickenCar
                             <span className="text-xs text-slate-500 font-semibold">
                                 {formatNumber(chicken.amount)} gallinas
                             </span>
+
+                            {!hasArrived && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300">
+                                    <Truck className="w-3 h-3 text-amber-700" />
+                                    Por llegar {chicken.arrivalDate ? `(${formatUtcDate(chicken.arrivalDate)})` : ""}
+                                </span>
+                            )}
                         </div>
 
                         <h2 className="text-lg font-bold text-slate-900 truncate group-hover:text-amber-800 transition-colors flex items-center gap-1.5">
@@ -111,12 +146,23 @@ export function ChickenPurchaseCard({ chicken, onDelete, onRefresh }: ChickenCar
                         </h2>
                     </div>
 
-                    <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border shrink-0 ${badge.className}`}
-                    >
-                        <StatusIcon className="w-3.5 h-3.5" />
-                        {badge.label}
-                    </span>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                        <span
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border ${badge.className}`}
+                        >
+                            <StatusIcon className="w-3.5 h-3.5" />
+                            {badge.label}
+                        </span>
+                        {!hasArrived ? (
+                            <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">
+                                ⏳ Fuera de granja
+                            </span>
+                        ) : (
+                            <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                                ✓ En granja
+                            </span>
+                        )}
+                    </div>
                 </div>
 
                 {/* Date */}
@@ -193,41 +239,72 @@ export function ChickenPurchaseCard({ chicken, onDelete, onRefresh }: ChickenCar
                 </div>
 
                 {/* Flock Mortality & Vital Stats */}
-                <div className="grid grid-cols-3 gap-2 text-center text-xs pt-1">
-                    <ModifyChickensAliveModal chicken={chicken} onSuccess={onRefresh}>
-                        <div
-                            role="button"
-                            className="bg-amber-50/70 hover:bg-amber-100/90 border border-amber-200/80 rounded-xl p-2 cursor-pointer transition active:scale-95 group/vivas"
-                            title="Hacé clic para modificar la cantidad de gallinas vivas"
+                {!hasArrived ? (
+                    <div className="bg-amber-50/90 border border-amber-300 rounded-xl p-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shadow-2xs">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0 text-amber-800">
+                                <Truck className="w-4 h-4" />
+                            </div>
+                            <div className="min-w-0 text-left">
+                                <p className="font-bold text-amber-950">
+                                    Lote Programado: {formatNumber(chicken.amount)} aves por llegar
+                                </p>
+                                <p className="text-[11px] text-amber-800">
+                                    {chicken.arrivalDate
+                                        ? `Llegada estimada: ${formatUtcDate(chicken.arrivalDate)}`
+                                        : "Aún no han llegado a la granja"} · No computan en el plantel vivo ni en postura
+                                </p>
+                            </div>
+                        </div>
+
+                        <Button
+                            type="button"
+                            onClick={() => handleToggleArrival(true)}
+                            disabled={isUpdatingArrival}
+                            size="sm"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold h-8 px-3 shrink-0 flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition"
                         >
-                            <span className="text-[10px] font-bold uppercase text-amber-800 block flex items-center justify-center gap-1">
-                                <span>Vivas</span>
-                                <Pencil className="w-2.5 h-2.5 text-amber-600 opacity-60 group-hover/vivas:opacity-100 transition-opacity" />
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>{isUpdatingArrival ? "Guardando..." : "Marcar como Recibido"}</span>
+                        </Button>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-3 gap-2 text-center text-xs pt-1">
+                        <ModifyChickensAliveModal chicken={chicken} onSuccess={onRefresh}>
+                            <div
+                                role="button"
+                                className="bg-amber-50/70 hover:bg-amber-100/90 border border-amber-200/80 rounded-xl p-2 cursor-pointer transition active:scale-95 group/vivas"
+                                title="Hacé clic para modificar la cantidad de gallinas vivas"
+                            >
+                                <span className="text-[10px] font-bold uppercase text-amber-800 block flex items-center justify-center gap-1">
+                                    <span>Vivas</span>
+                                    <Pencil className="w-2.5 h-2.5 text-amber-600 opacity-60 group-hover/vivas:opacity-100 transition-opacity" />
+                                </span>
+                                <span className="font-extrabold text-amber-900 text-sm">
+                                    {formatNumber(remainingAlive)}
+                                </span>
+                            </div>
+                        </ModifyChickensAliveModal>
+
+                        <div className="bg-rose-50/60 border border-rose-200/60 rounded-xl p-2">
+                            <span className="text-[10px] font-bold uppercase text-rose-600 block">
+                                Bajas
                             </span>
-                            <span className="font-extrabold text-amber-900 text-sm">
-                                {formatNumber(remainingAlive)}
+                            <span className="font-bold text-rose-700 text-sm">
+                                {formatNumber(totalDeaths)}
                             </span>
                         </div>
-                    </ModifyChickensAliveModal>
 
-                    <div className="bg-rose-50/60 border border-rose-200/60 rounded-xl p-2">
-                        <span className="text-[10px] font-bold uppercase text-rose-600 block">
-                            Bajas
-                        </span>
-                        <span className="font-bold text-rose-700 text-sm">
-                            {formatNumber(totalDeaths)}
-                        </span>
+                        <div className="bg-emerald-50/60 border border-emerald-200/60 rounded-xl p-2">
+                            <span className="text-[10px] font-bold uppercase text-emerald-700 block">
+                                Superv.
+                            </span>
+                            <span className="font-bold text-emerald-800 text-sm">
+                                {survivalRate}%
+                            </span>
+                        </div>
                     </div>
-
-                    <div className="bg-emerald-50/60 border border-emerald-200/60 rounded-xl p-2">
-                        <span className="text-[10px] font-bold uppercase text-emerald-700 block">
-                            Superv.
-                        </span>
-                        <span className="font-bold text-emerald-800 text-sm">
-                            {survivalRate}%
-                        </span>
-                    </div>
-                </div>
+                )}
 
                 {/* Payments Breakdown / Information of Each Payment */}
                 <div className="space-y-2 pt-2 border-t border-slate-100">
@@ -347,9 +424,21 @@ export function ChickenPurchaseCard({ chicken, onDelete, onRefresh }: ChickenCar
                 </ModifyChickensAliveModal>
 
                 <div className="flex gap-2">
-                    <div className="flex-1">
-                        <AddChickenDeathForm chickenId={chicken.id} onSuccess={onRefresh} />
-                    </div>
+                    {hasArrived ? (
+                        <div className="flex-1">
+                            <AddChickenDeathForm chickenId={chicken.id} onSuccess={onRefresh} />
+                        </div>
+                    ) : (
+                        <Button
+                            type="button"
+                            onClick={() => handleToggleArrival(true)}
+                            disabled={isUpdatingArrival}
+                            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs h-9 flex items-center justify-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
+                        >
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Marcar como Recibido en Granja</span>
+                        </Button>
+                    )}
 
                     <Button
                         variant="outline"
@@ -360,6 +449,17 @@ export function ChickenPurchaseCard({ chicken, onDelete, onRefresh }: ChickenCar
                         <Trash2 className="w-3.5 h-3.5" />
                     </Button>
                 </div>
+
+                {hasArrived && (
+                    <button
+                        type="button"
+                        onClick={() => handleToggleArrival(false)}
+                        disabled={isUpdatingArrival}
+                        className="text-[11px] text-slate-400 hover:text-amber-800 text-center hover:underline cursor-pointer pt-0.5"
+                    >
+                        ¿No llegaron todavía? Cambiar a "Por llegar a la granja"
+                    </button>
+                )}
             </div>
         </motion.div>
     );

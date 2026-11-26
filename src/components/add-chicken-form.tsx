@@ -30,6 +30,8 @@ export function AddChickenForm({ onSuccess }: { onSuccess: () => void }) {
     const [open, setOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [fullyPaid, setFullyPaid] = useState(true);
+    const [hasArrived, setHasArrived] = useState(true);
+    const [arrivalDate, setArrivalDate] = useState("");
 
     const {
         register,
@@ -102,9 +104,15 @@ export function AddChickenForm({ onSuccess }: { onSuccess: () => void }) {
                 shippingCost,
                 totalCost: total,
                 amountPaid: paid,
+                hasArrived,
+                arrivalDate: !hasArrived && arrivalDate ? new Date(arrivalDate) : null,
             });
 
-            toast.success("Lote de gallinas registrado exitosamente");
+            toast.success(
+                hasArrived
+                    ? "Lote de gallinas registrado exitosamente"
+                    : "Lote registrado como 'Por llegar'. Se sumará al plantel cuando llegue a la granja."
+            );
             setOpen(false);
             reset({
                 date: new Date().toISOString().split("T")[0],
@@ -115,6 +123,8 @@ export function AddChickenForm({ onSuccess }: { onSuccess: () => void }) {
                 amountPaid: 0,
             });
             setFullyPaid(true);
+            setHasArrived(true);
+            setArrivalDate("");
             onSuccess();
         } catch (err) {
             toast.error("Error al registrar compra de gallinas");
@@ -178,6 +188,67 @@ export function AddChickenForm({ onSuccess }: { onSuccess: () => void }) {
                                 </p>
                             )}
                         </div>
+                    </div>
+
+                    {/* Estado de Llegada / Recepción en Granja */}
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2.5">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                                    <Truck className="w-3.5 h-3.5 text-amber-600" />
+                                    ¿Las gallinas ya llegaron a la granja?
+                                </p>
+                                <p className="text-[11px] text-slate-500">
+                                    Si todavía no llegaron (ej: entrega programada para febrero), no sumarán al conteo de vivas ni a postura hasta su llegada.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setHasArrived(true)}
+                                className={`flex items-center justify-center gap-2 p-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                                    hasArrived
+                                        ? "bg-emerald-50 border-emerald-400 text-emerald-800 shadow-2xs"
+                                        : "bg-white border-slate-200 text-slate-600 hover:bg-slate-100"
+                                }`}
+                            >
+                                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                                <span>Ya están en granja</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setHasArrived(false)}
+                                className={`flex items-center justify-center gap-2 p-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                                    !hasArrived
+                                        ? "bg-amber-50 border-amber-400 text-amber-800 shadow-2xs"
+                                        : "bg-white border-slate-200 text-slate-600 hover:bg-slate-100"
+                                }`}
+                            >
+                                <Truck className="w-4 h-4 text-amber-600" />
+                                <span>Por llegar / En camino</span>
+                            </button>
+                        </div>
+
+                        {!hasArrived && (
+                            <div className="pt-2 border-t border-slate-200/80 space-y-1.5">
+                                <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                                    <Calendar className="w-3.5 h-3.5 text-amber-600" />
+                                    Fecha estimada de llegada a la granja:
+                                </label>
+                                <Input
+                                    type="date"
+                                    value={arrivalDate}
+                                    onChange={(e) => setArrivalDate(e.target.value)}
+                                    className="h-10 bg-white border border-slate-200 text-slate-900 rounded-xl px-3 text-xs focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                                />
+                                <p className="text-[11px] text-amber-700 font-medium">
+                                    ⏳ Lote programado: Podrás marcarlo como "Recibido en granja" con 1 clic apenas lleguen las aves.
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Quantity & Unit Price Grid */}

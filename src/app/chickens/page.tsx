@@ -14,8 +14,8 @@ import { useEffect, useState, useMemo } from "react";
 import { toast } from "sonner";
 import LoadSpin from "@/components/load-spin";
 import { Button } from "@/components/ui/button";
-import { formatCurrency, formatUtcDate } from "@/lib/utils";
-import { Bird, Plus, AlertTriangle, Layers, DollarSign, Pencil, SlidersHorizontal } from "lucide-react";
+import { formatCurrency, formatUtcDate, formatNumber } from "@/lib/utils";
+import { Bird, Plus, AlertTriangle, Layers, DollarSign, Pencil, SlidersHorizontal, Truck, CheckCircle2 } from "lucide-react";
 
 export default function ChickensPage() {
     const [chickens, setChickens] = useState<any[]>([]);
@@ -25,6 +25,7 @@ export default function ChickensPage() {
     const [laying, setLaying] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedChickenId, setSelectedChickenId] = useState<string | null>(null);
+    const [filterTab, setFilterTab] = useState<"all" | "arrived" | "pending">("all");
 
     const fetchData = async () => {
         setIsLoading(true);
@@ -81,6 +82,24 @@ export default function ChickensPage() {
             toast.error("Error al eliminar lote de gallinas");
         }
     };
+
+    const arrivedChickens = useMemo(() => {
+        return chickens.filter((c) => c.hasArrived !== false);
+    }, [chickens]);
+
+    const pendingChickens = useMemo(() => {
+        return chickens.filter((c) => c.hasArrived === false);
+    }, [chickens]);
+
+    const pendingChickensCount = useMemo(() => {
+        return pendingChickens.reduce((sum, c) => sum + (Number(c.amount) || 0), 0);
+    }, [pendingChickens]);
+
+    const filteredChickens = useMemo(() => {
+        if (filterTab === "arrived") return arrivedChickens;
+        if (filterTab === "pending") return pendingChickens;
+        return chickens;
+    }, [chickens, filterTab, arrivedChickens, pendingChickens]);
 
     const totalInvested = useMemo(() => {
         return chickens.reduce((sum, c) => sum + (Number(c.totalCost) || 0), 0);
@@ -174,7 +193,14 @@ export default function ChickensPage() {
                         {currentCount} <span className="text-sm font-medium text-slate-400">aves</span>
                     </p>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                        Plantel actual en granja
+                        {pendingChickensCount > 0 ? (
+                            <span className="text-amber-700 font-semibold flex items-center gap-1">
+                                <Truck className="w-3 h-3 shrink-0" />
+                                + {formatNumber(pendingChickensCount)} aves por llegar ({pendingChickens.length} {pendingChickens.length === 1 ? "lote" : "lotes"})
+                            </span>
+                        ) : (
+                            "Plantel actual en granja"
+                        )}
                     </p>
                 </div>
 
@@ -308,33 +334,77 @@ export default function ChickensPage() {
 
             {/* Purchase History Cards */}
             <div className="space-y-4 pt-2">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
                         <h2 className="text-xl sm:text-2xl font-['Playfair_Display'] font-semibold text-slate-900">
                             Historial de Compras de Lotes
                         </h2>
                         <p className="text-xs text-slate-500 mt-0.5">
-                            Control detallado de compras, saldo adeudado y gallinas restantes por pagar
+                            Control de recepción en granja, saldo adeudado y gallinas restantes
                         </p>
                     </div>
+
                     {chickens.length > 0 && (
-                        <span className="text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1 rounded-full">
-                            {chickens.length} {chickens.length === 1 ? "lote registrado" : "lotes registrados"}
-                        </span>
+                        <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs self-start sm:self-auto">
+                            <button
+                                type="button"
+                                onClick={() => setFilterTab("all")}
+                                className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                                    filterTab === "all"
+                                        ? "bg-white text-slate-900 shadow-2xs"
+                                        : "text-slate-600 hover:text-slate-900"
+                                }`}
+                            >
+                                Todos ({chickens.length})
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setFilterTab("arrived")}
+                                className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                                    filterTab === "arrived"
+                                        ? "bg-emerald-600 text-white shadow-2xs"
+                                        : "text-slate-600 hover:text-slate-900"
+                                }`}
+                            >
+                                En Granja ({arrivedChickens.length})
+                            </button>
+                            {pendingChickens.length > 0 && (
+                                <button
+                                    type="button"
+                                    onClick={() => setFilterTab("pending")}
+                                    className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                                        filterTab === "pending"
+                                            ? "bg-amber-500 text-white shadow-2xs"
+                                            : "text-amber-800 hover:text-amber-950"
+                                    }`}
+                                >
+                                    <Truck className="w-3 h-3" />
+                                    <span>Por Llegar ({pendingChickens.length})</span>
+                                </button>
+                            )}
+                        </div>
                     )}
                 </div>
 
-                {chickens.length === 0 ? (
+                {filteredChickens.length === 0 ? (
                     <div className="bg-white p-12 rounded-2xl border border-amber-100 shadow-sm text-center">
                         <Bird className="w-14 h-14 text-amber-300 mx-auto mb-3" />
-                        <p className="text-slate-700 text-lg font-medium">No hay compras de gallinas registradas</p>
+                        <p className="text-slate-700 text-lg font-medium">
+                            {filterTab === "pending"
+                                ? "No hay lotes pendientes de llegada"
+                                : filterTab === "arrived"
+                                ? "No hay lotes en la granja actualmente"
+                                : "No hay compras de gallinas registradas"}
+                        </p>
                         <p className="text-slate-400 text-sm mt-1">
-                            Hacé clic en "Nueva Compra de Gallinas" para registrar tu primer lote.
+                            {filterTab === "all"
+                                ? "Hacé clic en 'Nueva Compra de Gallinas' para registrar tu primer lote."
+                                : "Cambiá el filtro para ver los demás lotes."}
                         </p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {chickens.map((chicken) => (
+                        {filteredChickens.map((chicken) => (
                             <ChickenPurchaseCard
                                 key={chicken.id}
                                 chicken={chicken}

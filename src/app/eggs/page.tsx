@@ -49,6 +49,10 @@ export default function EggLayingPage() {
     const [chickens, setChickens] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    const activeLots = useMemo(() => {
+        return chickens.filter((c) => c.hasArrived !== false);
+    }, [chickens]);
+
     // Modal state for editing a day's collection
     const [open, setOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -383,16 +387,16 @@ export default function EggLayingPage() {
                 <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-sm">
                     <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
                         <Bird className="w-3.5 h-3.5 text-amber-600" />
-                        Lotes Activos
+                        Lotes en Granja
                     </p>
                     <p className="text-xl sm:text-2xl font-black text-slate-900">
-                        {chickens.length}{" "}
+                        {activeLots.length}{" "}
                         <span className="text-xs font-medium text-slate-400">
-                            {chickens.length === 1 ? "lote registrado" : "lotes registrados"}
+                            {activeLots.length === 1 ? "lote activo" : "lotes activos"}
                         </span>
                     </p>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                        {chickens[0]?.supplier ? chickens[0].supplier : "Plantel avícola"}
+                        {activeLots[0]?.supplier ? activeLots[0].supplier : "Plantel productivo"}
                     </p>
                 </div>
             </div>
@@ -606,9 +610,11 @@ export default function EggLayingPage() {
                                 </span>
                             </label>
 
-                            {chickens.length === 0 ? (
+                            {activeLots.length === 0 ? (
                                 <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800">
-                                    No tenés lotes de gallinas creados aún. Podés cargar igual la recolección general.
+                                    {chickens.length > 0
+                                        ? "Los lotes registrados aún no llegaron a la granja ('Por llegar'). Podés cargar igual la postura general."
+                                        : "No tenés lotes de gallinas creados aún. Podés cargar igual la recolección general."}
                                 </div>
                             ) : (
                                 <select
@@ -617,11 +623,11 @@ export default function EggLayingPage() {
                                     className="w-full h-11 px-3 border border-slate-200 rounded-xl bg-slate-50/60 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
                                 >
                                     <option value="">Seleccionar lote (opcional / general)...</option>
-                                    {chickens.map((lot) => (
+                                    {activeLots.map((lot) => (
                                         <option key={lot.id} value={lot.id}>
                                             {lot.purchaseNumber ? `Lote N° ${lot.purchaseNumber} - ` : ""}
                                             {lot.supplier ? `${lot.supplier} - ` : ""}
-                                            {formatNumber(lot.amount)} aves iniciales
+                                            {formatNumber(lot.amount)} aves en granja
                                         </option>
                                     ))}
                                 </select>

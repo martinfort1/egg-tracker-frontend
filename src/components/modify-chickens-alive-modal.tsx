@@ -9,7 +9,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Bird, Pencil, AlertCircle, CheckCircle2, History, SlidersHorizontal, Info } from "lucide-react";
+import { Bird, Pencil, AlertCircle, CheckCircle2, History, SlidersHorizontal, Info, Truck, Calendar } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
@@ -67,6 +67,8 @@ export function ModifyChickensAliveModal({
         amount: activeChicken?.amount || 0,
         supplier: activeChicken?.supplier || "",
         pricePerChicken: activeChicken?.pricePerChicken || 0,
+        hasArrived: activeChicken?.hasArrived !== false,
+        arrivalDate: activeChicken?.arrivalDate ? String(activeChicken.arrivalDate).split("T")[0] : "",
     });
 
     useEffect(() => {
@@ -76,6 +78,8 @@ export function ModifyChickensAliveModal({
                 amount: activeChicken.amount || 0,
                 supplier: activeChicken.supplier || "",
                 pricePerChicken: activeChicken.pricePerChicken || 0,
+                hasArrived: activeChicken.hasArrived !== false,
+                arrivalDate: activeChicken.arrivalDate ? String(activeChicken.arrivalDate).split("T")[0] : "",
             });
         }
     }, [activeChicken, initialAlive, open]);
@@ -125,6 +129,8 @@ export function ModifyChickensAliveModal({
                     amount: Number(lotData.amount),
                     supplier: lotData.supplier?.trim() || undefined,
                     pricePerChicken: Number(lotData.pricePerChicken) || 0,
+                    hasArrived: lotData.hasArrived,
+                    arrivalDate: !lotData.hasArrived && lotData.arrivalDate ? new Date(lotData.arrivalDate) : null,
                 });
 
                 toast.success("Lote de gallinas modificado exitosamente");
@@ -228,6 +234,20 @@ export function ModifyChickensAliveModal({
 
                     {mode === "alive" ? (
                         <>
+                            {activeChicken.hasArrived === false && (
+                                <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 flex items-start gap-2.5 text-xs text-amber-900">
+                                    <Truck className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                                    <div className="space-y-1">
+                                        <p className="font-bold">
+                                            Lote pendiente de recepción ("Por llegar")
+                                        </p>
+                                        <p className="text-[11px] text-amber-800 leading-relaxed">
+                                            Estas {formatNumber(activeChicken.amount)} aves aún no están en la granja y no forman parte del plantel vivo actual ni de la postura. Si ya llegaron, cambialo a <strong>"En la Granja"</strong> en la pestaña <em>Editar Lote</em> o desde la tarjeta principal.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Current Stats Box */}
                             <div className="bg-amber-50/50 border border-amber-200/70 rounded-xl p-3.5 space-y-2 text-xs">
                                 <div className="flex justify-between items-center text-slate-600">
@@ -394,6 +414,53 @@ export function ModifyChickensAliveModal({
                                     }
                                     className="h-10 bg-slate-50/60 border border-slate-200 text-slate-900 rounded-xl px-3 text-xs"
                                 />
+                            </div>
+
+                            {/* Estado de Llegada */}
+                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+                                <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                                    <Truck className="w-3.5 h-3.5 text-amber-600" />
+                                    Recepción en Granja
+                                </label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setLotData({ ...lotData, hasArrived: true })}
+                                        className={`p-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                                            lotData.hasArrived
+                                                ? "bg-emerald-50 border-emerald-400 text-emerald-800 shadow-2xs"
+                                                : "bg-white border-slate-200 text-slate-600"
+                                        }`}
+                                    >
+                                        En la Granja
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setLotData({ ...lotData, hasArrived: false })}
+                                        className={`p-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                                            !lotData.hasArrived
+                                                ? "bg-amber-50 border-amber-400 text-amber-800 shadow-2xs"
+                                                : "bg-white border-slate-200 text-slate-600"
+                                        }`}
+                                    >
+                                        Por Llegar / En camino
+                                    </button>
+                                </div>
+                                {!lotData.hasArrived && (
+                                    <div className="pt-2 border-t border-slate-200 space-y-1">
+                                        <label className="text-[11px] font-semibold text-slate-600">
+                                            Fecha estimada de llegada:
+                                        </label>
+                                        <Input
+                                            type="date"
+                                            value={lotData.arrivalDate}
+                                            onChange={(e) =>
+                                                setLotData({ ...lotData, arrivalDate: e.target.value })
+                                            }
+                                            className="h-9 bg-white border border-slate-200 text-slate-900 rounded-xl px-2.5 text-xs"
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
