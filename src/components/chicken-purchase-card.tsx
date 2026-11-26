@@ -14,8 +14,10 @@ import {
     Receipt,
     History,
     MessageSquare,
+    Pencil,
 } from "lucide-react";
 import { AddChickenDeathForm } from "@/components/add-chicken-death-form";
+import { ModifyChickensAliveModal } from "@/components/modify-chickens-alive-modal";
 import PaymentModal from "@/components/payment-modal";
 import PaymentHistoryModal from "@/components/payment-history-modal";
 import { formatCurrency, formatNumber, formatUtcDate } from "@/lib/utils";
@@ -192,14 +194,21 @@ export function ChickenPurchaseCard({ chicken, onDelete, onRefresh }: ChickenCar
 
                 {/* Flock Mortality & Vital Stats */}
                 <div className="grid grid-cols-3 gap-2 text-center text-xs pt-1">
-                    <div className="bg-slate-50 border border-slate-200/70 rounded-xl p-2">
-                        <span className="text-[10px] font-bold uppercase text-slate-400 block">
-                            Vivas
-                        </span>
-                        <span className="font-bold text-slate-800 text-sm">
-                            {formatNumber(remainingAlive)}
-                        </span>
-                    </div>
+                    <ModifyChickensAliveModal chicken={chicken} onSuccess={onRefresh}>
+                        <div
+                            role="button"
+                            className="bg-amber-50/70 hover:bg-amber-100/90 border border-amber-200/80 rounded-xl p-2 cursor-pointer transition active:scale-95 group/vivas"
+                            title="Hacé clic para modificar la cantidad de gallinas vivas"
+                        >
+                            <span className="text-[10px] font-bold uppercase text-amber-800 block flex items-center justify-center gap-1">
+                                <span>Vivas</span>
+                                <Pencil className="w-2.5 h-2.5 text-amber-600 opacity-60 group-hover/vivas:opacity-100 transition-opacity" />
+                            </span>
+                            <span className="font-extrabold text-amber-900 text-sm">
+                                {formatNumber(remainingAlive)}
+                            </span>
+                        </div>
+                    </ModifyChickensAliveModal>
 
                     <div className="bg-rose-50/60 border border-rose-200/60 rounded-xl p-2">
                         <span className="text-[10px] font-bold uppercase text-rose-600 block">
@@ -326,6 +335,16 @@ export function ChickenPurchaseCard({ chicken, onDelete, onRefresh }: ChickenCar
                         <span>Ver Historial de Pagos ({chicken.payments?.length || (chicken.amountPaid > 0 ? 1 : 0)})</span>
                     </Button>
                 </PaymentHistoryModal>
+
+                <ModifyChickensAliveModal chicken={chicken} onSuccess={onRefresh}>
+                    <Button
+                        variant="outline"
+                        className="w-full bg-amber-50/70 hover:bg-amber-100/80 text-amber-900 border-amber-200 transition active:scale-95 cursor-pointer rounded-xl font-bold text-xs h-9 flex items-center justify-center gap-1.5 shadow-2xs"
+                    >
+                        <Pencil className="w-3.5 h-3.5 text-amber-600" />
+                        <span>Modificar Gallinas Vivas</span>
+                    </Button>
+                </ModifyChickensAliveModal>
 
                 <div className="flex gap-2">
                     <div className="flex-1">

@@ -1,31 +1,86 @@
-"use client"
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { InboxIcon, Layers } from "lucide-react";
-import { formatUtcDate } from "@/lib/utils";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import {
+    Calendar as CalendarIcon,
+    ChevronLeft,
+    ChevronRight,
+    Layers,
+    Egg,
+    Bird,
+    CheckCircle2,
+    Trash2,
+    Plus,
+    Info,
+    Sparkles,
+    TrendingUp,
+} from "lucide-react";
+import { formatNumber } from "@/lib/utils";
 import LoadSpin from "@/components/load-spin";
+
+interface EggRecord {
+    id: string;
+    date: string;
+    boxes: number;
+    cartons: number;
+    chickenId?: string | null;
+    chicken?: {
+        id: string;
+        purchaseNumber?: number | null;
+        supplier?: string | null;
+        amount: number;
+    } | null;
+}
+
 export default function EggLayingPage() {
     const [currentMonth, setCurrentMonth] = useState(new Date());
-    const [days, setDays] = useState<any[]>([]);
-    const [eggData, setEggData] = useState<{ [key: string]: { boxes: number, cartons: number } }>({});
-    const [editingDate, setEditingDate] = useState<string | null>(null);
-    const [tempBoxes, setTempBoxes] = useState(0);
-    const [tempCartons, setTempCartons] = useState(0);
-    const [open, setOpen] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [days, setDays] = useState<(Date | null)[]>([]);
+    const [eggRecords, setEggRecords] = useState<EggRecord[]>([]);
+    const [chickens, setChickens] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        generateCalendarDays();
-        fetchEggData();
-    }, [currentMonth]);
+    // Modal state for editing a day's collection
+    const [open, setOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [selectedChickenId, setSelectedChickenId] = useState<string>("");
+    const [boxesInput, setBoxesInput] = useState<number | "">(0);
+    const [cartonsInput, setCartonsInput] = useState<number | "">(0);
+    const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
 
-    const generateCalendarDays = () => {
+    // Format local date to YYYY-MM-DD
+    const formatDateKey = (d: Date): string => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    };
+
+    // Load chicken lots once
+    useEffect(() => {
+        const fetchChickens = async () => {
+            try {
+                const res = await api.get("/chickens");
+                setChickens(res.data || []);
+            } catch (err) {
+                console.error("Error fetching chicken lots:", err);
+            }
+        };
+        fetchChickens();
+    }, []);
+
+    // Generate calendar days for current month
+    useEffect(() => {
         const year = currentMonth.getFullYear();
         const month = currentMonth.getMonth();
         const firstDay = new Date(year, month, 1);
@@ -33,256 +88,664 @@ export default function EggLayingPage() {
         const daysInMonth = lastDay.getDate();
         const startingDayOfWeek = firstDay.getDay();
 
-        const calendarDays = [];
+        const calDays: (Date | null)[] = [];
         for (let i = 0; i < startingDayOfWeek; i++) {
-            calendarDays.push(null);
+            calDays.push(null);
         }
         for (let i = 1; i <= daysInMonth; i++) {
-            calendarDays.push(new Date(year, month, i));
+            calDays.push(new Date(year, month, i));
         }
 
-        setDays(calendarDays);
-    };
+        setDays(calDays);
+    }, [currentMonth]);
 
+    // Fetch month egg collection data
     const fetchEggData = async () => {
         try {
             setIsLoading(true);
-            const response = await api.get(`/egg-laying/by-month/${currentMonth.getFullYear()}/${currentMonth.getMonth() + 1}`);
-            const dataMap: { [key: string]: { boxes: number, cartons: number } } = {};
-            response.data.forEach((item: any) => {
-                const date = item.date;
-                dataMap[date] = { boxes: item.boxes, cartons: item.cartons };
-            });
-            setEggData(dataMap);
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth() + 1;
+            const res = await api.get(`/egg-laying/by-month/${year}/${month}`);
+            setEggRecords(res.data || []);
         } catch (error) {
-            toast.error("Failed to fetch egg data");
+            console.error("Failed to fetch egg data:", error);
+            toast.error("Error al cargar datos de postura");
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleSaveEgg = async () => {
-        if (!editingDate) return;
+    useEffect(() => {
+        fetchEggData();
+    }, [currentMonth]);
+
+    // Group records by date string: { "2026-11-25": [records...] }
+    const recordsByDate = useMemo(() => {
+        const map: { [key: string]: EggRecord[] } = {};
+        for (const record of eggRecords) {
+            if (!map[record.date]) {
+                map[record.date] = [];
+            }
+            map[record.date].push(record);
+        }
+        return map;
+    }, [eggRecords]);
+
+    // Monthly Totals
+    const monthlySummary = useMemo(() => {
+        let totalBoxes = 0;
+        let totalCartons = 0;
+
+        for (const r of eggRecords) {
+            totalBoxes += Number(r.boxes) || 0;
+            totalCartons += Number(r.cartons) || 0;
+        }
+
+        // 12 bandejas = 1 cajón
+        const totalEquivalentBoxes = totalBoxes + totalCartons / 12;
+        const totalEggs = totalBoxes * 360 + totalCartons * 30;
+        const daysWithRecords = Object.keys(recordsByDate).length;
+        const avgBoxesPerDay =
+            daysWithRecords > 0 ? totalEquivalentBoxes / daysWithRecords : 0;
+
+        return {
+            totalBoxes,
+            totalCartons,
+            totalEquivalentBoxes,
+            totalEggs,
+            daysWithRecords,
+            avgBoxesPerDay,
+        };
+    }, [eggRecords, recordsByDate]);
+
+    // Open edit dialog for a specific day
+    const handleDayClick = (date: Date) => {
+        const dateKey = formatDateKey(date);
+        setSelectedDate(date);
+
+        const existingList = recordsByDate[dateKey] || [];
+        if (existingList.length > 0) {
+            const first = existingList[0];
+            setEditingRecordId(first.id);
+            setBoxesInput(first.boxes);
+            setCartonsInput(first.cartons);
+            setSelectedChickenId(first.chickenId || "");
+        } else {
+            setEditingRecordId(null);
+            setBoxesInput(0);
+            setCartonsInput(0);
+            // Default to first chicken lot if available
+            setSelectedChickenId(chickens.length > 0 ? chickens[0].id : "");
+        }
+
+        setOpen(true);
+    };
+
+    // Calculate real-time stats in the dialog
+    const modalBoxes = boxesInput === "" ? 0 : Number(boxesInput);
+    const modalCartons = cartonsInput === "" ? 0 : Number(cartonsInput);
+    // 12 bandejas = 1 cajón
+    const modalTotalBoxes = modalBoxes + modalCartons / 12;
+    const modalTotalEggs = modalBoxes * 360 + modalCartons * 30;
+
+    // Find selected chicken lot details
+    const selectedChickenLot = useMemo(() => {
+        return chickens.find((c) => c.id === selectedChickenId) || null;
+    }, [chickens, selectedChickenId]);
+
+    const estimatedLayingRate = useMemo(() => {
+        if (!selectedChickenLot) return null;
+        const deaths = (selectedChickenLot.deaths || []).reduce(
+            (sum: number, d: any) => sum + (Number(d.amount) || 0),
+            0
+        );
+        const alive = Math.max(0, (selectedChickenLot.amount || 0) - deaths);
+        if (alive <= 0 || modalTotalEggs <= 0) return 0;
+        return Math.min(100, (modalTotalEggs / alive) * 100);
+    }, [selectedChickenLot, modalTotalEggs]);
+
+    // Save record
+    const handleSave = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedDate) return;
+
+        if (modalBoxes < 0 || modalCartons < 0) {
+            toast.error("Las cantidades no pueden ser negativas");
+            return;
+        }
+
         setIsSubmitting(true);
         try {
+            const dateStr = formatDateKey(selectedDate);
             await api.post("/egg-laying", {
-                date: editingDate,
-                boxes: tempBoxes,
-                cartons: tempCartons
+                date: dateStr,
+                boxes: modalBoxes,
+                cartons: modalCartons,
+                chickenId: selectedChickenId || undefined,
             });
-            toast.success("Egg data saved");
+
+            toast.success("Recolección de huevos guardada exitosamente");
             setOpen(false);
             fetchEggData();
-        } catch (error) {
-            toast.error("Failed to save egg data");
+        } catch (error: any) {
+            console.error("Error saving egg laying:", error);
+            toast.error(
+                error?.response?.data?.message || "Error al guardar recolección"
+            );
         } finally {
             setIsSubmitting(false);
         }
     };
-    
-    const formatDate = (date: Date) =>  date.toLocaleDateString('en-CA');        
-    
-    const openEditDialog = (date: Date) => {
-        const dateStr = formatDate(date);
-        const existing = eggData[formatDate(date)];
-        setEditingDate(dateStr);
-        setTempBoxes(existing?.boxes || 0);
-        setTempCartons(existing?.cartons || 0);
-        setOpen(true);
-    };
 
-    
-    const handleDelete = async (date: string) => {
-        if (!confirm("Delete this entry?")) return;
+    // Delete record
+    const handleDelete = async () => {
+        if (!editingRecordId) return;
+        if (!confirm("¿Deseás eliminar el registro de recolección de este día?")) {
+            return;
+        }
 
+        setIsSubmitting(true);
         try {
-            // Find the ID by fetching and matching the date
-            const data = await api.get(`/egg-laying`);
-            const item = data.data.find((e: any) => e.date === date);
-            if (item) {
-                await api.delete(`/egg-laying/${item.id}`);
-                toast.success("Entry deleted");
-                fetchEggData();
-            } else {
-                toast.error("Entry not found");
-            }
+            await api.delete(`/egg-laying/${editingRecordId}`);
+            toast.success("Registro eliminado");
+            setOpen(false);
+            fetchEggData();
         } catch (error) {
-            toast.error("Failed to delete entry");
+            console.error("Error deleting egg laying:", error);
+            toast.error("Error al eliminar registro");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
+    // Month Navigation
     const prevMonth = () => {
-        setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
+        setCurrentMonth(
+            new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1)
+        );
     };
 
     const nextMonth = () => {
-        setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
+        setCurrentMonth(
+            new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1)
+        );
+    };
+
+    const goToToday = () => {
+        setCurrentMonth(new Date());
     };
 
     const isToday = (date: Date) => {
-    const today = new Date();
-    
+        const today = new Date();
+        return (
+            date.getDate() === today.getDate() &&
+            date.getMonth() === today.getMonth() &&
+            date.getFullYear() === today.getFullYear()
+        );
+    };
+
+    const monthNames = [
+        "Enero",
+        "Febrero",
+        "Marzo",
+        "Abril",
+        "Mayo",
+        "Junio",
+        "Julio",
+        "Agosto",
+        "Septiembre",
+        "Octubre",
+        "Noviembre",
+        "Diciembre",
+    ];
+
+    const weekDays = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+
     return (
-        date.getDate() === today.getDate() &&
-        date.getMonth() === today.getMonth() &&
-        date.getFullYear() === today.getFullYear()
-    );
-};
-const monthName = currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-
-return (
-        <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div className="space-y-6 max-w-6xl mx-auto pb-12">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
+                    <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                            <Egg className="w-3 h-3 text-amber-600" />
+                            Control de Postura
+                        </span>
+                        <span className="text-xs text-slate-400">
+                            1 Cajón = 12 Bandejas (360 huevos)
+                        </span>
+                    </div>
                     <h1 className="text-2xl sm:text-3xl font-['Playfair_Display'] font-semibold text-slate-900">
-                        Egg Laying Calendar
+                        Calendario Diario de Postura
                     </h1>
-                    <p className="text-sm text-slate-500 mt-1">
-                        Track daily egg collection, boxes and cartons gathered from your flock
+                    <p className="text-xs text-slate-500 mt-0.5">
+                        Registrá día a día cajones y bandejas recolectados y vinculalos al lote correspondiente
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <Button
+                        onClick={() => handleDayClick(new Date())}
+                        className="bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs h-10 px-4 flex items-center gap-1.5 shadow-sm transition active:scale-95 cursor-pointer"
+                    >
+                        <Plus className="w-4 h-4" />
+                        <span>Cargar Postura de Hoy</span>
+                    </Button>
+                </div>
+            </div>
+
+            {/* Monthly Financial / Productivity Metric Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white rounded-2xl border border-amber-200/90 p-4 shadow-sm relative overflow-hidden">
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-orange-500" />
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                        <Layers className="w-3.5 h-3.5 text-amber-600" />
+                        Total en Cajones
+                    </p>
+                    <p className="text-xl sm:text-2xl font-black text-slate-900">
+                        {monthlySummary.totalEquivalentBoxes.toFixed(2)}{" "}
+                        <span className="text-sm font-bold text-amber-600">cajones</span>
+                    </p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                        {formatNumber(monthlySummary.totalBoxes)} caj. enteros +{" "}
+                        {formatNumber(monthlySummary.totalCartons)} bandejas
+                    </p>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-sm">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                        <Egg className="w-3.5 h-3.5 text-amber-600" />
+                        Total de Huevos
+                    </p>
+                    <p className="text-xl sm:text-2xl font-black text-slate-900">
+                        {formatNumber(monthlySummary.totalEggs)}{" "}
+                        <span className="text-xs font-medium text-slate-400">unidades</span>
+                    </p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                        Equivalente a {(monthlySummary.totalEggs / 30).toFixed(0)} bandejas
+                    </p>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-sm">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                        <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
+                        Promedio Diario
+                    </p>
+                    <p className="text-xl sm:text-2xl font-black text-emerald-700">
+                        {monthlySummary.avgBoxesPerDay.toFixed(2)}{" "}
+                        <span className="text-xs font-medium text-slate-400">cajones / día</span>
+                    </p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                        En {monthlySummary.daysWithRecords} días con recolección
+                    </p>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-sm">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                        <Bird className="w-3.5 h-3.5 text-amber-600" />
+                        Lotes Activos
+                    </p>
+                    <p className="text-xl sm:text-2xl font-black text-slate-900">
+                        {chickens.length}{" "}
+                        <span className="text-xs font-medium text-slate-400">
+                            {chickens.length === 1 ? "lote registrado" : "lotes registrados"}
+                        </span>
+                    </p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                        {chickens[0]?.supplier ? chickens[0].supplier : "Plantel avícola"}
                     </p>
                 </div>
             </div>
 
-            {/* Month Navigation & Calendar */}
-            {isLoading ? (
-                <LoadSpin />
-            ) : (
-            <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-sm">
-                <div className="flex justify-between items-center mb-6">
-                    <Button
-                        onClick={prevMonth}
-                        variant="outline"
-                        className="text-slate-700 hover:bg-slate-100 rounded-lg text-xs font-semibold px-3 py-1.5 transition cursor-pointer"
-                    >
-                        ← Previous
-                    </Button>
-                    <h2 className="text-xl font-bold text-slate-900">{monthName}</h2>
-                    <Button
-                        onClick={nextMonth}
-                        variant="outline"
-                        className="text-slate-700 hover:bg-slate-100 rounded-lg text-xs font-semibold px-3 py-1.5 transition cursor-pointer"
-                    >
-                        Next →
-                    </Button>
+            {/* Calendar Card */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-sm space-y-5">
+                {/* Month Navigator Bar */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                        <h2 className="text-xl sm:text-2xl font-['Playfair_Display'] font-bold text-slate-900 capitalize">
+                            {monthNames[currentMonth.getMonth()]}{" "}
+                            <span className="font-sans text-amber-600 font-bold">
+                                {currentMonth.getFullYear()}
+                            </span>
+                        </h2>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={goToToday}
+                            className="h-8 px-2.5 text-xs font-semibold text-slate-600 border-slate-200 hover:bg-slate-50 rounded-lg cursor-pointer"
+                        >
+                            Mes Actual
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={prevMonth}
+                            className="h-8 w-8 p-0 text-slate-600 border-slate-200 hover:bg-slate-50 rounded-lg cursor-pointer"
+                            title="Mes anterior"
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={nextMonth}
+                            className="h-8 w-8 p-0 text-slate-600 border-slate-200 hover:bg-slate-50 rounded-lg cursor-pointer"
+                            title="Mes siguiente"
+                        >
+                            <ChevronRight className="w-4 h-4" />
+                        </Button>
+                    </div>
                 </div>
 
-                {/* Calendar Grid */}
-                <div className="grid grid-cols-7 gap-2">
-                    {/* Week days header */}
-                    {weekDays.map(day => (
-                        <div key={day} className="text-center text-xs font-bold text-slate-400 uppercase tracking-wider py-2">
-                            {day}
+                {isLoading ? (
+                    <div className="py-16 text-center">
+                        <LoadSpin />
+                    </div>
+                ) : (
+                    <>
+                        {/* Weekday Labels */}
+                        <div className="grid grid-cols-7 gap-1 sm:gap-2 text-center text-xs font-bold uppercase tracking-wider text-slate-400">
+                            {weekDays.map((w, idx) => (
+                                <div
+                                    key={w}
+                                    className={`py-1.5 ${
+                                        idx === 0 || idx === 6 ? "text-amber-700/80" : ""
+                                    }`}
+                                >
+                                    {w}
+                                </div>
+                            ))}
                         </div>
-                    ))}
 
-                    {/* Calendar days */}
-                    {days.map((date, index) => {
-                        if (!date) {
-                            return <div key={`empty-${index}`} className="bg-slate-50/50 rounded-xl p-2 min-h-16"></div>;
-                        }
+                        {/* Calendar Grid */}
+                        <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+                            {days.map((date, index) => {
+                                if (!date) {
+                                    return (
+                                        <div
+                                            key={`empty-${index}`}
+                                            className="min-h-[90px] sm:min-h-[110px] rounded-xl bg-slate-50/40 border border-transparent"
+                                        />
+                                    );
+                                }
 
-                        const dateStr = formatDate(date);
-                        const hasData = eggData[dateStr];
-                        const today = isToday(date);
+                                const dateKey = formatDateKey(date);
+                                const records = recordsByDate[dateKey] || [];
+                                const hasData = records.length > 0;
 
-                        let bgClass = '';
-                        if (today) {
-                            bgClass = 'bg-amber-50 text-amber-900 border-2 border-amber-400 font-bold shadow-xs';
-                        } else if (hasData) {
-                            bgClass = 'bg-emerald-50 text-emerald-900 border border-emerald-200/90 hover:bg-emerald-100/70';
-                        } else {
-                            bgClass = 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/60';
-                        }
+                                // Sums for the day
+                                const dayBoxes = records.reduce(
+                                    (sum, r) => sum + (Number(r.boxes) || 0),
+                                    0
+                                );
+                                const dayCartons = records.reduce(
+                                    (sum, r) => sum + (Number(r.cartons) || 0),
+                                    0
+                                );
+                                const dayEquivalentBoxes = dayBoxes + dayCartons / 12;
+                                const isCurrentDay = isToday(date);
 
-                        return (
-                            <Dialog key={index} open={open && editingDate === formatDate(date)} onOpenChange={setOpen}>
-                                <DialogTrigger asChild>
+                                // First associated lot
+                                const lot = records[0]?.chicken;
+
+                                return (
                                     <button
-                                        onClick={() => openEditDialog(date)}
-                                        className={`p-2.5 rounded-xl text-sm font-medium transition cursor-pointer min-h-16 flex flex-col justify-between ${bgClass}`}
+                                        key={dateKey}
+                                        type="button"
+                                        onClick={() => handleDayClick(date)}
+                                        className={`group relative min-h-[90px] sm:min-h-[110px] p-2 sm:p-2.5 rounded-xl text-left transition-all duration-200 flex flex-col justify-between border cursor-pointer hover:shadow-md hover:-translate-y-0.5 ${
+                                            isCurrentDay
+                                                ? "bg-amber-50/70 border-amber-400 ring-2 ring-amber-400/30"
+                                                : hasData
+                                                ? "bg-white border-amber-200/90 shadow-2xs hover:border-amber-400"
+                                                : "bg-slate-50/60 border-slate-200/70 hover:bg-white hover:border-slate-300"
+                                        }`}
                                     >
-                                        <div className="flex justify-between items-center w-full">
-                                            <span className="font-bold text-xs">{date.getDate()}</span>
-                                            {today && <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>}
+                                        {/* Day number & indicators */}
+                                        <div className="flex items-center justify-between w-full">
+                                            <span
+                                                className={`text-xs font-bold rounded-md px-1.5 py-0.5 ${
+                                                    isCurrentDay
+                                                        ? "bg-amber-500 text-white shadow-2xs"
+                                                        : hasData
+                                                        ? "text-slate-900 bg-amber-100/70"
+                                                        : "text-slate-500 group-hover:text-slate-900"
+                                                }`}
+                                            >
+                                                {date.getDate()}
+                                            </span>
+
+                                            {hasData && (
+                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                                            )}
                                         </div>
+
+                                        {/* Day Data Display */}
                                         {hasData ? (
-                                            <div className="text-[11px] font-semibold mt-1 space-y-0.5 text-left">
-                                                <div className="flex items-center gap-1 text-emerald-800">
-                                                    <Layers className="w-3 h-3 text-emerald-600"/> {hasData.boxes}b
+                                            <div className="space-y-1 w-full pt-1">
+                                                {/* Main: Cajones en número grande / simple */}
+                                                <div className="bg-amber-50/80 border border-amber-200/60 rounded-lg px-1.5 py-1 text-center">
+                                                    <span className="text-xs sm:text-sm font-black text-amber-950 block leading-tight">
+                                                        {dayEquivalentBoxes % 1 === 0
+                                                            ? dayEquivalentBoxes
+                                                            : dayEquivalentBoxes.toFixed(2)}{" "}
+                                                        <span className="text-[10px] font-bold text-amber-700">
+                                                            caj.
+                                                        </span>
+                                                    </span>
+                                                    <span className="text-[9px] sm:text-[10px] font-semibold text-slate-500 block leading-tight">
+                                                        {dayBoxes}c · {dayCartons}b
+                                                    </span>
                                                 </div>
-                                                <div className="flex items-center gap-1 text-emerald-800">
-                                                    <InboxIcon className="w-3 h-3 text-emerald-600"/> {hasData.cartons}c
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <span className="text-[10px] text-slate-300 self-end mt-2">+</span>
-                                        )}
-                                    </button>
-                                </DialogTrigger>
 
-                                {editingDate === formatDate(date) && (
-                                    <DialogContent className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xl">
-                                        <DialogHeader>
-                                            <DialogTitle className="text-slate-900 font-bold text-lg">
-                                                Egg Collection - {formatUtcDate(dateStr)}
-                                            </DialogTitle>
-                                        </DialogHeader>
-
-                                        <div className="space-y-4 pt-2">
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-1.5">Egg Boxes</label>
-                                                <Input
-                                                    type="number"
-                                                    value={tempBoxes}
-                                                    onChange={(e) => setTempBoxes(Number(e.target.value))}
-                                                    className="bg-slate-50 border-slate-200 text-slate-900 rounded-lg"
-                                                    min="0"
-                                                />
-                                            </div>
-
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-1.5">Cartons</label>
-                                                <Input
-                                                    type="number"
-                                                    value={tempCartons}
-                                                    onChange={(e) => setTempCartons(Number(e.target.value))}
-                                                    className="bg-slate-50 border-slate-200 text-slate-900 rounded-lg"
-                                                    min="0"
-                                                />
-                                            </div>
-
-                                            <div className="flex gap-2 pt-2">
-                                                <Button
-                                                    disabled={isSubmitting}
-                                                    onClick={handleSaveEgg}
-                                                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg cursor-pointer"
-                                                >
-                                                    {isSubmitting ? 'Saving...' : 'Save Collection'}
-                                                </Button>
-                                                {hasData && (
-                                                    <Button
-                                                        onClick={() => {
-                                                             handleDelete(dateStr);
-                                                            setOpen(false);
-                                                        }}
-                                                        variant="outline"
-                                                        className="text-rose-600 hover:bg-rose-50 border-rose-200 rounded-lg cursor-pointer"
-                                                    >
-                                                        Delete
-                                                    </Button>
+                                                {/* Lot badge if assigned */}
+                                                {lot && (
+                                                    <div className="truncate text-[9px] font-bold text-slate-600 bg-slate-100 rounded px-1 py-0.5 text-center flex items-center justify-center gap-0.5">
+                                                        <Bird className="w-2.5 h-2.5 text-amber-600 shrink-0" />
+                                                        <span className="truncate">
+                                                            {lot.purchaseNumber
+                                                                ? `Lote #${lot.purchaseNumber}`
+                                                                : lot.supplier || "Lote"}
+                                                        </span>
+                                                    </div>
                                                 )}
                                             </div>
-                                        </div>
-                                    </DialogContent>
-                                )}
-                            </Dialog>
-                        );
-                    })}
-                </div>
+                                        ) : (
+                                            <div className="flex items-center justify-center py-2 text-slate-300 group-hover:text-amber-500 transition-colors">
+                                                <Plus className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            </div>
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </>
+                )}
             </div>
-            )}
+
+            {/* Modal for Day Collection Input */}
+            <Dialog open={open} onOpenChange={setOpen}>
+                <DialogContent className="bg-white border border-slate-200 rounded-2xl p-6 shadow-2xl text-slate-900 sm:max-w-md">
+                    <DialogHeader className="space-y-1 pb-3 border-b border-slate-100">
+                        <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
+                                Carga de Postura Diaria
+                            </span>
+                        </div>
+                        <DialogTitle className="text-xl font-['Playfair_Display'] font-semibold text-slate-900 flex items-center gap-2">
+                            <CalendarIcon className="w-5 h-5 text-amber-600" />
+                            <span>
+                                {selectedDate
+                                    ? selectedDate.toLocaleDateString("es-AR", {
+                                          weekday: "long",
+                                          day: "numeric",
+                                          month: "long",
+                                          year: "numeric",
+                                      })
+                                    : "Seleccionar Día"}
+                            </span>
+                        </DialogTitle>
+                        <p className="text-xs text-slate-500">
+                            Ingresá cuántos cajones y bandejas salieron este día (1 cajón = 12 bandejas)
+                        </p>
+                    </DialogHeader>
+
+                    <form onSubmit={handleSave} className="space-y-4 pt-2">
+                        {/* 1. Selector de Lote */}
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                                <span className="flex items-center gap-1.5">
+                                    <Bird className="w-3.5 h-3.5 text-amber-600" />
+                                    Lote de Gallinas Correspondiente
+                                </span>
+                                <span className="text-[11px] font-normal text-slate-400">
+                                    (Identificación de origen)
+                                </span>
+                            </label>
+
+                            {chickens.length === 0 ? (
+                                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800">
+                                    No tenés lotes de gallinas creados aún. Podés cargar igual la recolección general.
+                                </div>
+                            ) : (
+                                <select
+                                    value={selectedChickenId}
+                                    onChange={(e) => setSelectedChickenId(e.target.value)}
+                                    className="w-full h-11 px-3 border border-slate-200 rounded-xl bg-slate-50/60 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                                >
+                                    <option value="">Seleccionar lote (opcional / general)...</option>
+                                    {chickens.map((lot) => (
+                                        <option key={lot.id} value={lot.id}>
+                                            {lot.purchaseNumber ? `Lote N° ${lot.purchaseNumber} - ` : ""}
+                                            {lot.supplier ? `${lot.supplier} - ` : ""}
+                                            {formatNumber(lot.amount)} aves iniciales
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
+                        </div>
+
+                        {/* 2. Inputs de Cajones y Bandejas */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-800 flex items-center gap-1">
+                                    <Layers className="w-3.5 h-3.5 text-amber-600" />
+                                    Cajones Enteros
+                                </label>
+                                <Input
+                                    type="number"
+                                    min="0"
+                                    step="1"
+                                    value={boxesInput}
+                                    onChange={(e) =>
+                                        setBoxesInput(
+                                            e.target.value === "" ? "" : parseInt(e.target.value) || 0
+                                        )
+                                    }
+                                    placeholder="0"
+                                    className="h-12 bg-white border-2 border-amber-300 text-slate-900 font-black text-lg rounded-xl px-3 text-center focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                                    autoFocus
+                                />
+                                <span className="text-[10px] text-slate-400 block text-center">
+                                    = 12 bandejas c/u
+                                </span>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-800 flex items-center gap-1">
+                                    <Egg className="w-3.5 h-3.5 text-amber-600" />
+                                    Bandejas (Maples)
+                                </label>
+                                <Input
+                                    type="number"
+                                    min="0"
+                                    max="11"
+                                    step="1"
+                                    value={cartonsInput}
+                                    onChange={(e) =>
+                                        setCartonsInput(
+                                            e.target.value === "" ? "" : parseInt(e.target.value) || 0
+                                        )
+                                    }
+                                    placeholder="0"
+                                    className="h-12 bg-white border-2 border-amber-300 text-slate-900 font-black text-lg rounded-xl px-3 text-center focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                                />
+                                <span className="text-[10px] text-slate-400 block text-center">
+                                    = 30 huevos c/u
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* 3. Cálculo en vivo del día: Equivalencia en Cajones simples */}
+                        <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-3.5 space-y-2 text-xs">
+                            <div className="flex justify-between items-center">
+                                <span className="font-semibold text-slate-600">
+                                    Equivalente Total en Cajones:
+                                </span>
+                                <span className="text-base font-black text-amber-950">
+                                    {modalTotalBoxes.toFixed(2)}{" "}
+                                    <span className="text-xs font-bold text-amber-700">cajones</span>
+                                </span>
+                            </div>
+
+                            <div className="flex justify-between items-center text-[11px] text-slate-500 pt-1 border-t border-amber-200/60">
+                                <span>Total de Huevos Recolectados:</span>
+                                <span className="font-bold text-slate-800">
+                                    {formatNumber(modalTotalEggs)} huevos ({modalBoxes * 12 + modalCartons} bandejas)
+                                </span>
+                            </div>
+
+                            {estimatedLayingRate !== null && (
+                                <div className="flex justify-between items-center text-[11px] pt-1 border-t border-amber-200/60">
+                                    <span className="font-semibold text-slate-700">
+                                        % Postura Estimado del Lote:
+                                    </span>
+                                    <span className="font-black text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md">
+                                        {estimatedLayingRate.toFixed(1)}%
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="flex gap-2.5 pt-2">
+                            {editingRecordId && (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={handleDelete}
+                                    disabled={isSubmitting}
+                                    className="border-rose-200 text-rose-600 hover:bg-rose-50 rounded-xl h-11 px-3 cursor-pointer"
+                                    title="Eliminar recolección de este día"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            )}
+
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setOpen(false)}
+                                disabled={isSubmitting}
+                                className="flex-1 border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl h-11 font-semibold cursor-pointer"
+                            >
+                                Cancelar
+                            </Button>
+
+                            <Button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl h-11 shadow-sm transition active:scale-95 cursor-pointer disabled:opacity-50"
+                            >
+                                {isSubmitting ? "Guardando..." : "Guardar Recolección"}
+                            </Button>
+                        </div>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

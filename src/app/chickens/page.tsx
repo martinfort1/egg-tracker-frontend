@@ -4,6 +4,7 @@ import { MetricCard } from "@/components/metric-card";
 import { MetricCardValue } from "@/components/metric-card-value";
 import { AddChickenForm } from "@/components/add-chicken-form";
 import { AddChickenDeathForm } from "@/components/add-chicken-death-form";
+import { ModifyChickensAliveModal } from "@/components/modify-chickens-alive-modal";
 import { ChickenQuantityChart } from "@/components/chicken-quantity-chart";
 import { LayingPercentageChart } from "@/components/laying-percentage-chart";
 import { LayingPercentageHistoryChart } from "@/components/laying-percentage-history-chart";
@@ -14,7 +15,7 @@ import { toast } from "sonner";
 import LoadSpin from "@/components/load-spin";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatUtcDate } from "@/lib/utils";
-import { Bird, Plus, AlertTriangle, Layers, DollarSign } from "lucide-react";
+import { Bird, Plus, AlertTriangle, Layers, DollarSign, Pencil, SlidersHorizontal } from "lucide-react";
 
 export default function ChickensPage() {
     const [chickens, setChickens] = useState<any[]>([]);
@@ -127,16 +128,48 @@ export default function ChickensPage() {
                 </div>
 
                 <div className="flex items-center gap-2">
+                    {chickens.length > 0 && (
+                        <ModifyChickensAliveModal
+                            chickens={chickens}
+                            onSuccess={fetchData}
+                        >
+                            <Button
+                                variant="outline"
+                                className="border-amber-200 text-amber-900 bg-amber-50 hover:bg-amber-100 rounded-xl font-bold text-xs h-10 px-3.5 flex items-center gap-1.5 cursor-pointer shadow-2xs transition active:scale-95"
+                            >
+                                <Pencil className="w-3.5 h-3.5 text-amber-600" />
+                                <span>Modificar Gallinas Vivas</span>
+                            </Button>
+                        </ModifyChickensAliveModal>
+                    )}
                     <AddChickenForm onSuccess={fetchData} />
                 </div>
             </div>
 
             {/* Financial & Population Metric Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-sm">
-                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                        Gallinas Vivas
-                    </p>
+                <div className="relative group bg-white rounded-2xl border border-slate-200/90 p-4 shadow-sm hover:border-amber-300 transition-colors">
+                    <div className="flex justify-between items-start">
+                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                            Gallinas Vivas
+                        </p>
+                        {chickens.length > 0 && (
+                            <ModifyChickensAliveModal
+                                chickens={chickens}
+                                onSuccess={fetchData}
+                            >
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 px-2 text-[10px] font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border-amber-200 rounded-lg shadow-2xs flex items-center gap-1 cursor-pointer transition active:scale-95"
+                                    title="Modificar cantidad de gallinas vivas"
+                                >
+                                    <Pencil className="w-2.5 h-2.5 text-amber-600" />
+                                    <span>Modificar</span>
+                                </Button>
+                            </ModifyChickensAliveModal>
+                        )}
+                    </div>
                     <p className="text-xl sm:text-2xl font-bold text-slate-900">
                         {currentCount} <span className="text-sm font-medium text-slate-400">aves</span>
                     </p>
@@ -224,6 +257,21 @@ export default function ChickensPage() {
                             </p>
                             <AddChickenForm onSuccess={fetchData} />
                         </div>
+
+                        {chickens.length > 0 && (
+                            <div className="bg-amber-50/40 p-4 rounded-xl border border-amber-200/60 space-y-2">
+                                <p className="text-xs font-bold text-amber-900 uppercase tracking-wider">
+                                    Modificar Gallinas Vivas
+                                </p>
+                                <p className="text-xs text-slate-600">
+                                    Ajustá el número real de aves vivas en cualquier lote para mantener tu censo actualizado.
+                                </p>
+                                <ModifyChickensAliveModal
+                                    chickens={chickens}
+                                    onSuccess={fetchData}
+                                />
+                            </div>
+                        )}
 
                         {chickens.length > 0 && (
                             <div className="bg-rose-50/50 p-4 rounded-xl border border-rose-200/70 space-y-2">
